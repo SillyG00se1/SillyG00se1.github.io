@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VoiceOver Adventure</title>
+<style>
+html,body{margin:0;min-height:100%;background:#101018;color:#fff;font-family:Arial,sans-serif}
+*{box-sizing:border-box}#app{max-width:900px;margin:auto;padding:20px}
+h1{font-size:clamp(34px,6vw,58px);color:#ffe66d;text-align:center}
+.card{background:#1d1d27;border:3px solid #555;border-radius:18px;padding:22px;margin:18px 0}
+p{font-size:clamp(20px,3vw,28px);line-height:1.4}.center{text-align:center}
+.big{font-size:clamp(30px,5vw,48px);font-weight:bold;color:#39d98a}
+.command{font-size:clamp(30px,5vw,52px);font-weight:bold;color:#ffe66d}
+.obstacle{font-size:clamp(30px,5vw,50px);font-weight:bold;color:#ff9f43}
+button{font:700 22px Arial;padding:16px 22px;margin:7px;border-radius:14px;border:4px solid #777;background:#30303a;color:white}
+button:focus{outline:5px solid #9c4dcc;outline-offset:3px}
+#arena{height:55vh;min-height:400px;overflow-y:auto;border:4px solid #555;border-radius:18px}
+.zone{height:50vh;min-height:380px;display:flex;align-items:center;justify-content:center;text-align:center;padding:30px}
+.zone:nth-child(odd){background:#171725}.zone:nth-child(even){background:#20202d}
+.zoneInner{max-width:700px}.focusItem{min-width:260px;min-height:90px}
+.good{color:#39d98a}.status{font-size:22px;color:#c5c9d4}.score{font-size:32px;color:#39d98a;font-weight:bold}
+#log{max-height:150px;overflow:auto;background:#09090d;border-radius:10px;padding:10px;text-align:left;font-size:18px}
+.small{font-size:18px;color:#aaa}
+</style>
+</head>
+<body><div id="app"></div>
+<script>
+const levels=[
+{name:"LEFT AND RIGHT",a:["right","left","right","left","right","left","right","left"]},
+{name:"UP AND DOWN",a:["down","up","down","up","down","up","down","up"]},
+{name:"DOUBLE TAP",a:["double","double","double","double","double","double","double","double"]},
+{name:"MIX IT UP",a:["right","down","left","up","double","right","up","double","left","down"]}
+];
+let level=0,step=0,score=0,streak=0,locked=false,arena,lastFocus=-1,lastScroll=0,touchX=0,touchY=0;
+
+function speak(t){if("speechSynthesis"in window){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.rate=.92;speechSynthesis.speak(u)}}
+function name(a){return a==="right"?"SWIPE RIGHT":a==="left"?"SWIPE LEFT":a==="up"?"SWIPE UP":a==="down"?"SWIPE DOWN":"DOUBLE TAP"}
+function silly(a){return({right:"A rubber chicken is blocking the hallway!",left:"A giant pickle is blocking the hallway!",up:"A flying pancake is above you!",down:"A grumpy potato is below you!",double:"A treasure chest with googly eyes is waiting!"})[a]}
+
+function home(){
+ document.getElementById("app").innerHTML=
+ '<div class="center"><h1>🎉 VOICEOVER ADVENTURE 🎉</h1>'+
+ '<div class="card"><div class="big">THE SILLY CASTLE</div>'+
+ '<p>Practice <b>swipe right, swipe left, swipe up, swipe down,</b> and <b>double tap</b>.</p>'+
+ '<p>The student uses VoiceOver. The teacher can follow the adventure text on screen.</p>'+
+ '<button id="start">START ADVENTURE</button></div>'+
+ '<div class="card"><p class="small">The game detects focus movement and activation when the browser exposes those events. It also watches page movement for up/down practice. Teacher buttons are provided as a backup when VoiceOver keeps a gesture entirely inside VoiceOver.</p></div></div>';
+ document.getElementById("start").onclick=()=>startLevel(0);
+ speak("Welcome to VoiceOver Adventure. Press Start Adventure.");
+}
+
+function startLevel(n){
+ level=n;step=0;locked=false;render();
+}
+function render(){
+ let expected=levels[level].a[step];
+ document.getElementById("app").innerHTML=
+ '<h1>🎪 '+levels[level].name+' 🎪</h1>'+
+ '<div class="card center"><div class="status">Obstacle '+(step+1)+' of '+levels[level].a.length+'</div>'+
+ '<div class="obstacle">'+silly(expected)+'</div><p>Clear it by doing:</p>'+
+ '<div class="command">'+name(expected)+'</div><div id="feedback" class="status">VoiceOver is waiting...</div></div>'+
+ '<div id="arena" tabindex="0" aria-label="VoiceOver practice area">'+
+ '<div class="zone"><div class="zoneInner"><h2>🏰 Castle Entrance</h2><p>Your VoiceOver focus is your magic flashlight.</p><button class="focus" data-i="0">DOOR: DOUBLE TAP</button></div></div>'+
+ '<div class="zone"><div class="zoneInner"><h2>🦆 Duck Hallway</h2><p>Quack! Something ridiculous is in the way.</p><button class="focus" data-i="1">SILLY DUCK SIGN</button></div></div>'+
+ '<div class="zone"><div class="zoneInner"><h2>🍕 Pancake Room</h2><p>The pancake knows karate. Probably.</p><button class="focus" data-i="2">SUSPICIOUS PANCAKE</button></div></div></div>'+
+ '<div class="card center"><div class="score">Score: '+score+'</div>'+
+ '<p class="small">Teacher backup / demonstration:</p>'+
+ '<button class="teach" data-a="right">RIGHT</button><button class="teach" data-a="left">LEFT</button>'+
+ '<button class="teach" data-a="up">UP</button><button class="teach" data-a="down">DOWN</button><button class="teach" data-a="double">DOUBLE TAP</button>'+
+ '<div id="log"></div></div>';
+ arena=document.getElementById("arena");lastScroll=arena.scrollTop;lastFocus=-1;
+ document.querySelectorAll(".focus").forEach(b=>{
+   b.addEventListener("focus",focusMove);
+   b.addEventListener("click",()=>detected("double","Activation detected."));
+ });
+ document.querySelectorAll(".teach").forEach(b=>b.onclick=()=>detected(b.dataset.a,"Teacher demonstration."));
+ arena.addEventListener("scroll",scrollMove);
+ arena.addEventListener("touchstart",e=>{touchX=e.changedTouches[0].clientX;touchY=e.changedTouches[0].clientY},{passive:true});
+ arena.addEventListener("touchend",e=>{
+   let t=e.changedTouches[0],dx=t.clientX-touchX,dy=t.clientY-touchY;
+   if(Math.abs(dx)>35||Math.abs(dy)>35)detected(Math.abs(dx)>Math.abs(dy)?(dx>0?"right":"left"):(dy<0?"up":"down"),"Swipe detected.");
+ });
+ speak("Obstacle "+(step+1)+". "+silly(expected)+" Clear it by doing "+name(expected)+".");
+}
+function focusMove(e){
+ let i=+e.target.dataset.i;
+ if(lastFocus>=0&&i!==lastFocus)detected(i>lastFocus?"right":"left","VoiceOver focus moved.");
+ lastFocus=i;
+}
+function scrollMove(){
+ let d=arena.scrollTop-lastScroll;
+ if(Math.abs(d)>12&&!locked){lastScroll=arena.scrollTop;detected(d>0?"up":"down","Page movement detected.")}
+}
+function detected(a,why){
+ if(locked)return;
+ let expected=levels[level].a[step],f=document.getElementById("feedback");
+ if(a===expected){
+  locked=true;score+=100+streak*25;streak++;
+  f.textContent="🎉 CLEARED! "+why;f.className="good";
+  let l=document.getElementById("log");l.innerHTML="<div>✓ "+name(a)+" — correct!</div>"+l.innerHTML;
+  speak("Correct! "+name(a)+". The obstacle is cleared!");
+  setTimeout(()=>{step++;if(step>=levels[level].a.length)finishLevel();else render()},700);
+ }else{
+  streak=0;f.textContent="Oops! Try "+name(expected)+".";f.className="status";
+  let l=document.getElementById("log");l.innerHTML="<div>✗ Tried "+name(a)+" — expected "+name(expected)+"</div>"+l.innerHTML;
+  speak("Oops. Try "+name(expected)+".");
+  locked=true;setTimeout(()=>locked=false,600);
+ }
+}
+function finishLevel(){
+ document.getElementById("app").innerHTML='<div class="center"><h1>🎉 LEVEL CLEARED! 🎉</h1>'+
+ '<div class="card"><div class="big">THE CASTLE IS SAVED!</div><p>The rubber chicken has been promoted to castle manager.</p>'+
+ '<div class="score">Score: '+score+'</div><button id="next">'+(level<levels.length-1?"NEXT ADVENTURE":"FINISH")+'</button></div></div>';
+ document.getElementById("next").onclick=()=>level<levels.length-1?startLevel(level+1):results();
+ speak("Level cleared! The castle is saved.");
+}
+function results(){
+ document.getElementById("app").innerHTML='<div class="center"><h1>🏆 ADVENTURE COMPLETE 🏆</h1>'+
+ '<div class="card"><div class="big">YOU SURVIVED THE SILLY CASTLE!</div>'+
+ '<div class="score">Final Score: '+score+'</div><p>You practiced all five VoiceOver actions.</p>'+
+ '<button id="again">PLAY AGAIN</button><button id="home">HOME</button></div></div>';
+ document.getElementById("again").onclick=()=>{score=0;startLevel(0)};
+ document.getElementById("home").onclick=home;speak("Adventure complete! Final score "+score+".");
+}
+home();
+</script>
+</body></html>
