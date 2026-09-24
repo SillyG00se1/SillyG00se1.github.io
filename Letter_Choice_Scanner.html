@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>Letter Choice Scanner</title>
+<style>
+:root{--bg:#000;--fg:#fff;--key:#333;--purple:#8A4FD6;--green:#228B22;--red:#B22222;--yellow:#D4A017}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;min-height:100%;background:var(--bg);color:var(--fg);font-family:Arial,sans-serif}
+body{min-height:100vh;overflow-x:hidden}
+button,input{font:inherit}
+button{cursor:pointer}
+.screen{min-height:100vh;padding:28px 24px 34px;display:flex;flex-direction:column;align-items:center}
+h1{font-size:clamp(30px,4vw,48px);margin:5px 0 8px;text-align:center}
+h2{font-size:clamp(22px,3vw,32px);margin:8px 0 24px;text-align:center}
+p{font-size:20px;text-align:center}
+.hidden{display:none!important}
+.btn{background:#444;color:#fff;border:3px solid #777;border-radius:8px;padding:15px 24px;font-weight:bold;font-size:20px;min-height:58px}
+.btn:focus-visible,.letter:focus-visible,input:focus-visible{outline:5px solid #00e5ff;outline-offset:3px}
+.btn:hover{background:#555}
+.profile-grid{width:min(100%,900px);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:10px 0 28px}
+.profile-grid .btn{font-size:26px;min-height:75px}
+.controls{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.form{width:min(100%,800px);background:#111;border:2px solid #444;border-radius:12px;padding:24px}
+label{display:block;font-size:23px;font-weight:bold;margin:12px 0 8px}
+input[type=text],input[type=number]{width:100%;background:#333;color:#fff;border:2px solid #777;border-radius:7px;padding:13px;font-size:24px}
+.small{font-size:17px;color:#ccc}
+.target{background:#555;border:3px solid #777;border-radius:10px;font-size:64px;font-weight:bold;padding:12px 52px;margin:8px 0 12px;min-width:130px;text-align:center}
+.instructions{font-size:20px;margin:4px 0 10px}
+.keyboard{width:min(100%,1450px);display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;justify-content:center}
+.keyrow{display:flex;justify-content:center;gap:7px;min-height:105px}
+.slot{width:clamp(70px,9vw,150px);height:clamp(82px,9vw,120px);flex:0 0 auto}
+.letter{width:100%;height:100%;background:var(--key);color:#fff;border:4px solid #000;border-radius:6px;font-size:clamp(38px,5vw,70px);font-weight:bold;box-shadow:0 1px 0 #777 inset}
+.letter.scan{background:var(--purple);border-color:#fff}
+.letter.correct{background:var(--green)}
+.letter.wrong{background:var(--red)}
+.feedback{min-height:34px;font-size:24px;font-weight:bold;text-align:center;margin:6px 0}
+.stats{font-size:21px;font-weight:bold;text-align:center;margin:5px 0}
+.status{font-size:18px;color:#ccc;text-align:center;min-height:24px}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden}
+.confetti-piece{position:absolute;font-weight:bold;animation:fall .95s linear forwards}
+@keyframes fall{from{transform:translate3d(0,0,0) rotate(0deg);opacity:1}to{transform:translate3d(var(--dx),85vh,0) rotate(600deg);opacity:0}}
+@media(max-width:700px){
+ .screen{padding:18px 10px 24px}
+ .profile-grid{grid-template-columns:1fr}
+ .keyrow{gap:4px;min-height:74px}
+ .slot{width:clamp(48px,14vw,85px);height:clamp(60px,14vw,82px)}
+ .letter{font-size:clamp(28px,8vw,48px);border-width:3px}
+ .target{font-size:48px;padding:8px 32px}
+ .instructions{font-size:17px}
+ .stats{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="confetti"></div>
+
+<script>
+const ROWS=["abcdef","ghijkl","mnopqr","stuvwx","yz"];
+const LETTERS="abcdefghijklmnopqrstuvwxyz";
+const STORAGE="letterChoiceScannerWeb";
+const SCAN_MS=1800;
+const SWITCH_GUARD_MS=400;
+
+let students=[];
+let student="";
+let pool=[...LETTERS];
+let optionCount=3;
+let options=[];
+let positions={};
+let target="";
+let scanMode="letters";
+let scanIndex=0;
+let rowLetters=[];
+let scanTimer=null;
+let feedbackTimer=null;
+let lastSwitch=0;
+let correct=0;
+let tries=0;
+let questionTries=0;
+let streak=0;
+let scanning=false;
+let currentButtons={};
+
+const app=document.getElementById("app");
+const confetti=document.getElementById("confetti");
+
+function load(){
+  try{students=JSON.parse(localStorage.getItem(STORAGE)||"[]")}catch(e){students=[]}
+  if(!Array.isArray(students))students=[];
+}
+function save(){localStorage.setItem(STORAGE,JSON.stringify(students))}
+function clearTimers(){
+  if(scanTimer){clearTimeout(scanTimer);scanTimer=null}
+  if(feedbackTimer){clearTimeout(feedbackTimer);feedbackTimer=null}
+  scanning=false;
+}
+function el(tag,props={},children=[]){
+  const x=document.createElement(tag);
+  Object.entries(props).forEach(([k,v])=>{
+    if(k==="class")x.className=v;
+    else if(k==="text")x.textContent=v;
+    else if(k==="html")x.innerHTML=v;
+    else if(k.startsWith("on"))x.addEventListener(k.slice(2),v);
+    else x.setAttribute(k,v);
+  });
+  children.forEach(c=>x.appendChild(c));
+  return x;
+}
+function button(text,fn,extra=""){return el("button",{class:"btn "+extra,text,onclick:fn})}
+
+function home(){
+  clearTimers(); clearConfetti();
+  app.innerHTML="";
+  const s=el("div",{class:"screen"});
+  s.append(
+    el("h1",{text:"Letter Choice Scanner"}),
+    el("h2",{text:"Choose a student profile"})
+  );
+  const grid=el("div",{class:"profile-grid"});
+  if(!students.length)grid.append(el("p",{class:"small",text:"No student profiles yet. Add a student below."}));
+  students.forEach(n=>grid.append(button(n,()=>{student=n;setup()})));
+  s.append(grid);
+  const controls=el("div",{class:"controls"});
+  controls.append(button("ADD STUDENT",addStudent),button("DELETE STUDENT",deleteStudent));
+  s.append(controls);
+  app.append(s);
+}
+function addStudent(){
+  const n=prompt("Enter the student's name:");
+  if(!n||!n.trim())return;
+  const name=n.trim();
+  if(students.some(x=>x.toLowerCase()===name.toLowerCase())){alert(name+" is already listed.");return}
+  students.push(name);students.sort((a,b)=>a.localeCompare(b));save();home();
+}
+function deleteStudent(){
+  if(!students.length)return;
+  const list=students.map((n,i)=>(i+1)+". "+n).join("\n");
+  const n=parseInt(prompt("Enter the number of the student to delete:\n\n"+list),10);
+  if(!n||n<1||n>students.length)return;
+  if(confirm("Delete "+students[n-1]+" from the student menu?")){students.splice(n-1,1);save();home()}
+}
+function setup(){
+  clearTimers();clearConfetti();app.innerHTML="";
+  const s=el("div",{class:"screen"});
+  s.append(el("h1",{text:"Letter Choice Scanner — "+student}),
+           el("p",{text:"Choose how many letter choices the student will see."}));
+  const f=el("div",{class:"form"});
+  const lab=el("label",{text:"Number of letter choices"});
+  const count=el("input",{type:"number",min:"2",max:"26",value:String(optionCount),id:"count"});
+  const poolLab=el("label",{text:"Letters available for practice"});
+  const poolInput=el("input",{type:"text",value:pool.join("").toUpperCase(),id:"pool"});
+  const help=el("p",{class:"small",text:"1–6 choices scan one letter at a time. More than 6 choices scan alphabetic rows first, then the letters in the selected row."});
+  f.append(lab,count,poolLab,poolInput,help);
+  const c=el("div",{class:"controls"});
+  c.append(button("START",()=>start(Number(count.value),poolInput.value)),button("BACK",home));
+  f.append(c);s.append(f);app.append(s);
+}
+function start(n,poolText){
+  const cleaned=[...new Set((poolText||"").toLowerCase().split("").filter(c=>LETTERS.includes(c)))];
+  if(cleaned.length<2){alert("Enter at least two different letters.");return}
+  optionCount=Math.max(2,Math.min(26,Number.isFinite(n)?Math.round(n):3));
+  pool=cleaned;
+  correct=0;tries=0;questionTries=0;streak=0;
+  activity();
+  newQuestion();
+}
+function activity(){
+  clearTimers();clearConfetti();app.innerHTML="";
+  const s=el("div",{class:"screen"});
+  const header=el("h1",{id:"header",text:student+" • Target Letter"});
+  const targetEl=el("div",{class:"target",id:"target",role:"heading","aria-live":"polite"});
+  const inst=el("div",{class:"instructions",text:"Choose the target letter. SPACE selects the highlighted choice. DELETE goes back one scanning level. ESC returns home."});
+  const kb=el("div",{class:"keyboard",id:"keyboard"});
+  const feedback=el("div",{class:"feedback",id:"feedback","aria-live":"polite"});
+  const stats=el("div",{class:"stats",id:"stats"});
+  const status=el("div",{class:"status",id:"status","aria-live":"polite"});
+  const controls=el("div",{class:"controls"});
+  controls.append(button("NEW LETTER",newQuestion),button("BACK TO SETUP",setup),button("STUDENT MENU",home));
+  s.append(header,targetEl,inst,kb,feedback,stats,status,controls);
+  app.append(s);
+}
+function newQuestion(){
+  clearTimers();clearConfetti();
+  target=pool[Math.floor(Math.random()*pool.length)];
+  const others=pool.filter(x=>x!==target).sort(()=>Math.random()-0.5);
+  options=[target,...others.slice(0,Math.max(1,optionCount-1))];
+  options.sort((a,b)=>LETTERS.indexOf(a)-LETTERS.indexOf(b));
+  questionTries=0;
+  document.getElementById("target").textContent=target.toUpperCase();
+  buildKeyboard();
+  setFeedback("");
+  updateStats();
+  startScan();
+}
+function buildKeyboard(){
+  const kb=document.getElementById("keyboard");
+  kb.innerHTML="";currentButtons={};positions={};
+  const chosen=new Set(options);
+  ROWS.forEach((row,ri)=>{
+    const r=el("div",{class:"keyrow"});
+    [...row].forEach(ch=>{
+      const slot=el("div",{class:"slot"});
+      if(chosen.has(ch)){
+        const b=el("button",{class:"letter",text:ch.toUpperCase(), "aria-label":"Letter "+ch.toUpperCase(),onclick:()=>choose(ch)});
+        slot.append(b);currentButtons[ch]=b;positions[ch]=ri;
+      }
+      r.append(slot);
+    });
+    kb.append(r);
+  });
+}
+function setFeedback(t,color=""){
+  const x=document.getElementById("feedback");if(!x)return;
+  x.textContent=t;x.style.color=color||"";
+}
+function updateStats(){
+  const x=document.getElementById("stats");if(!x)return;
+  const accuracy=tries?Math.round(correct/tries*100):0;
+  x.textContent="Correct: "+correct+"    Tries: "+tries+"    Accuracy: "+accuracy+"%    Streak: "+streak;
+}
+function updateStatus(t){
+  const x=document.getElementById("status");if(x)x.textContent=t;
+}
+function clearHighlight(){
+  Object.values(currentButtons).forEach(b=>{b.classList.remove("scan","correct","wrong")});
+}
+function startScan(){
+  clearTimers();
+  scanning=true;scanIndex=0;
+  scanMode=options.length<=6?"letters":"rows";
+  updateStatus(scanMode==="letters"?"Scanning letters from left to right.":"Scanning alphabetic rows from top to bottom.");
+  scanStep();
+}
+function scanStep(){
+  if(!scanning)return;
+  clearHighlight();
+  if(scanMode==="letters"){
+    const ch=options[scanIndex%options.length];
+    currentButtons[ch]?.classList.add("scan");
+    scanIndex=(scanIndex+1)%options.length;
+    scanTimer=setTimeout(scanStep,SCAN_MS);
+  }else if(scanMode==="rows"){
+    const rows=[...new Set(options.map(x=>positions[x]))].sort((a,b)=>a-b);
+    const r=rows[scanIndex%rows.length];
+    options.forEach(x=>{if(positions[x]===r)currentButtons[x]?.classList.add("scan")});
+    scanIndex=(scanIndex+1)%rows.length;
+    scanTimer=setTimeout(scanStep,SCAN_MS);
+  }else{
+    const ch=rowLetters[scanIndex%rowLetters.length];
+    currentButtons[ch]?.classList.add("scan");
+    scanIndex=(scanIndex+1)%rowLetters.length;
+    scanTimer=setTimeout(scanStep,SCAN_MS);
+  }
+}
+function selectCurrent(){
+  if(!scanning)return;
+  const now=performance.now();
+  if(now-lastSwitch<SWITCH_GUARD_MS)return;
+  lastSwitch=now;
+  if(scanMode==="letters"){
+    const ch=options[(scanIndex-1+options.length)%options.length];choose(ch);
+  }else if(scanMode==="rows"){
+    const rows=[...new Set(options.map(x=>positions[x]))].sort((a,b)=>a-b);
+    const r=rows[(scanIndex-1+rows.length)%rows.length];
+    rowLetters=options.filter(x=>positions[x]===r).sort((a,b)=>ROWS[r].indexOf(a)-ROWS[r].indexOf(b));
+    clearTimers();scanMode="rowLetters";scanIndex=0;scanning=true;
+    updateStatus("Row selected. Scanning letters from left to right.");
+    scanStep();
+  }else{
+    const ch=rowLetters[(scanIndex-1+rowLetters.length)%rowLetters.length];choose(ch);
+  }
+}
+function choose(ch){
+  if(!options.includes(ch))return;
+  clearTimers();questionTries++;tries++;
+  const b=currentButtons[ch];
+  if(ch===target){
+    correct++;streak++;
+    setFeedback("CORRECT!","#228B22");b?.classList.add("correct");
+    updateStats();showConfetti();
+    feedbackTimer=setTimeout(newQuestion,900);
+  }else{
+    streak=0;
+    setFeedback(ch.toUpperCase()+" is not the target. Try again.","#fff");
+    b?.classList.add("wrong");
+    updateStats();
+    feedbackTimer=setTimeout(startScan,700);
+  }
+}
+function deleteLevel(){
+  if(!options.length)return;
+  clearTimers();
+  if(options.length<=6){
+    scanMode="letters";scanIndex=0;
+  }else if(scanMode==="rowLetters"){
+    scanMode="rows";scanIndex=0;rowLetters=[];
+  }else{
+    scanMode="rows";scanIndex=0;
+  }
+  startScan();
+}
+function showConfetti(){
+  clearConfetti();
+  const colors=["#FFD700","#FF69B4","#00E5FF","#7CFC00","#FF8C00","#B57BFF"];
+  for(let i=0;i<65;i++){
+    const p=document.createElement("span");
+    p.className="confetti-piece";
+    p.textContent=["●","■","◆","★"][Math.floor(Math.random()*4)];
+    p.style.left=(Math.random()*98)+"vw";
+    p.style.top=(-5-Math.random()*25)+"vh";
+    p.style.color=colors[Math.floor(Math.random()*colors.length)];
+    p.style.fontSize=(10+Math.random()*14)+"px";
+    p.style.setProperty("--dx",(Math.random()*160-80)+"px");
+    p.style.animationDelay=(Math.random()*.12)+"s";
+    confetti.append(p);
+  }
+  setTimeout(clearConfetti,1200);
+}
+function clearConfetti(){confetti.innerHTML=""}
+function csvEscape(v){return '"'+String(v??"").replaceAll('"','""')+'"'}
+function downloadData(){
+  const rows=JSON.parse(localStorage.getItem("letterChoiceResults")||"[]");
+  const header=["Date","Time","Student","Target Letter","Selected Letter","Number of Tries","Number of Choices","Session Accuracy Percent"];
+  const csv=[header,...rows.map(e=>[e.date,e.time,e.student,e.target,e.selected,e.tries,e.options,e.accuracy])].map(r=>r.map(csvEscape).join(",")).join("\r\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="letter_choice_results.csv";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function recordResult(ch){
+  const accuracy=tries?Math.round(correct/tries*100):0;
+  const data=JSON.parse(localStorage.getItem("letterChoiceResults")||"[]");
+  data.push({date:new Date().toLocaleDateString(),time:new Date().toLocaleTimeString(),student,target,selected:ch,tries:questionTries,options:options.length,accuracy});
+  localStorage.setItem("letterChoiceResults",JSON.stringify(data));
+}
+const originalChoose=choose;
+choose=function(ch){
+  const wasCorrect=ch===target;
+  originalChoose(ch);
+  if(wasCorrect)recordResult(ch);
+};
+
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){e.preventDefault();home();return}
+  if(e.key==="Delete"){e.preventDefault();deleteLevel();return}
+  if(e.code==="Space"){e.preventDefault();selectCurrent();return}
+  const ch=e.key.toLowerCase();
+  if(currentButtons[ch]){e.preventDefault();choose(ch)}
+});
+load();home();
+</script>
+</body>
+</html>
