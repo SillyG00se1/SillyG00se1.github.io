@@ -41,7 +41,7 @@ input[type=text],input[type=number]{width:100%;background:#333;color:#fff;border
 .stats{font-size:23px;font-weight:bold;text-align:center;margin:5px 0}
 .status{font-size:20px;color:#ccc;text-align:center;min-height:24px}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden}
-.confetti-piece{position:absolute;font-weight:bold;animation:fall .95s linear forwards}
+.confetti-piece{position:absolute;font-weight:bold;animation:fall 1.6s linear forwards}
 @keyframes fall{from{transform:translate3d(0,0,0) rotate(0deg);opacity:1}to{transform:translate3d(var(--dx),85vh,0) rotate(600deg);opacity:0}}
 @media(min-width:1200px){.screen{padding-top:14px;padding-bottom:14px}.keyboard{gap:5px}.keyrow{min-height:92px}.slot{width:125px;height:92px}.letter{font-size:56px}.target{font-size:68px;padding:8px 44px}.instructions{font-size:21px}.feedback{font-size:25px}.stats{font-size:22px}}\n@media(max-width:700px){
  .screen{padding:18px 10px 24px}
@@ -319,7 +319,7 @@ function showConfetti(){
     p.style.animationDelay=(Math.random()*.12)+"s";
     confetti.append(p);
   }
-  setTimeout(clearConfetti,1200);
+  setTimeout(clearConfetti,1800);
 }
 function clearConfetti(){confetti.innerHTML=""}
 function dataMenu(){
