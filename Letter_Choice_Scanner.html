@@ -13,12 +13,12 @@ html,body{margin:0;width:100%;min-height:100%;background:var(--bg);color:var(--f
 body{min-height:100vh;overflow-x:hidden}
 button,input{font:inherit}
 button{cursor:pointer}
-.screen{min-height:100vh;padding:28px 24px 34px;display:flex;flex-direction:column;align-items:center}
-h1{font-size:clamp(30px,4vw,48px);margin:5px 0 8px;text-align:center}
-h2{font-size:clamp(22px,3vw,32px);margin:8px 0 24px;text-align:center}
-p{font-size:20px;text-align:center}
+.screen{min-height:100vh;padding:22px 24px 24px;display:flex;flex-direction:column;align-items:center}
+h1{font-size:clamp(34px,4vw,52px);margin:5px 0 8px;text-align:center}
+h2{font-size:clamp(24px,3vw,34px);margin:8px 0 24px;text-align:center}
+p{font-size:22px;text-align:center}
 .hidden{display:none!important}
-.btn{background:#444;color:#fff;border:3px solid #777;border-radius:8px;padding:15px 24px;font-weight:bold;font-size:20px;min-height:58px}
+.btn{background:#444;color:#fff;border:3px solid #777;border-radius:8px;padding:15px 24px;font-weight:bold;font-size:22px;min-height:62px}
 .btn:focus-visible,.letter:focus-visible,input:focus-visible{outline:5px solid #00e5ff;outline-offset:3px}
 .btn:hover{background:#555}
 .profile-grid{width:min(100%,900px);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:10px 0 28px}
@@ -28,8 +28,8 @@ p{font-size:20px;text-align:center}
 label{display:block;font-size:23px;font-weight:bold;margin:12px 0 8px}
 input[type=text],input[type=number]{width:100%;background:#333;color:#fff;border:2px solid #777;border-radius:7px;padding:13px;font-size:24px}
 .small{font-size:17px;color:#ccc}
-.target{background:#555;border:3px solid #777;border-radius:10px;font-size:64px;font-weight:bold;padding:12px 52px;margin:8px 0 12px;min-width:130px;text-align:center}
-.instructions{font-size:20px;margin:4px 0 10px}
+.target{background:#555;border:3px solid #777;border-radius:10px;font-size:70px;font-weight:bold;padding:12px 52px;margin:8px 0 12px;min-width:130px;text-align:center}
+.instructions{font-size:23px;margin:4px 0 10px}
 .keyboard{width:min(100%,1450px);display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;justify-content:center}
 .keyrow{display:flex;justify-content:center;gap:7px;min-height:105px}
 .slot{width:clamp(70px,9vw,150px);height:clamp(82px,9vw,120px);flex:0 0 auto}
@@ -38,12 +38,12 @@ input[type=text],input[type=number]{width:100%;background:#333;color:#fff;border
 .letter.correct{background:var(--green)}
 .letter.wrong{background:var(--red)}
 .feedback{min-height:34px;font-size:24px;font-weight:bold;text-align:center;margin:6px 0}
-.stats{font-size:21px;font-weight:bold;text-align:center;margin:5px 0}
-.status{font-size:18px;color:#ccc;text-align:center;min-height:24px}
+.stats{font-size:23px;font-weight:bold;text-align:center;margin:5px 0}
+.status{font-size:20px;color:#ccc;text-align:center;min-height:24px}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden}
 .confetti-piece{position:absolute;font-weight:bold;animation:fall .95s linear forwards}
 @keyframes fall{from{transform:translate3d(0,0,0) rotate(0deg);opacity:1}to{transform:translate3d(var(--dx),85vh,0) rotate(600deg);opacity:0}}
-@media(max-width:700px){
+@media(min-width:1200px){.screen{padding-top:14px;padding-bottom:14px}.keyboard{gap:5px}.keyrow{min-height:92px}.slot{width:125px;height:92px}.letter{font-size:56px}.target{font-size:68px;padding:8px 44px}.instructions{font-size:21px}.feedback{font-size:25px}.stats{font-size:22px}}\n@media(max-width:700px){
  .screen{padding:18px 10px 24px}
  .profile-grid{grid-template-columns:1fr}
  .keyrow{gap:4px;min-height:74px}
@@ -63,7 +63,7 @@ input[type=text],input[type=number]{width:100%;background:#333;color:#fff;border
 const ROWS=["abcdef","ghijkl","mnopqr","stuvwx","yz"];
 const LETTERS="abcdefghijklmnopqrstuvwxyz";
 const STORAGE="letterChoiceScannerWeb";
-const SCAN_MS=1800;
+const SCAN_MS=2300;
 const SWITCH_GUARD_MS=400;
 
 let students=[];
@@ -126,7 +126,7 @@ function home(){
   students.forEach(n=>grid.append(button(n,()=>{student=n;setup()})));
   s.append(grid);
   const controls=el("div",{class:"controls"});
-  controls.append(button("ADD STUDENT",addStudent),button("DELETE STUDENT",deleteStudent));
+  controls.append(button("ADD STUDENT",addStudent),button("DELETE STUDENT",deleteStudent),button("DATA",dataMenu));
   s.append(controls);
   app.append(s);
 }
@@ -157,7 +157,7 @@ function setup(){
   const help=el("p",{class:"small",text:"1–6 choices scan one letter at a time. More than 6 choices scan alphabetic rows first, then the letters in the selected row."});
   f.append(lab,count,poolLab,poolInput,help);
   const c=el("div",{class:"controls"});
-  c.append(button("START",()=>start(Number(count.value),poolInput.value)),button("BACK",home));
+  c.append(button("START",()=>start(Number(count.value),poolInput.value)),button("DATA",dataMenu),button("BACK",home));
   f.append(c);s.append(f);app.append(s);
 }
 function start(n,poolText){
@@ -180,7 +180,7 @@ function activity(){
   const stats=el("div",{class:"stats",id:"stats"});
   const status=el("div",{class:"status",id:"status","aria-live":"polite"});
   const controls=el("div",{class:"controls"});
-  controls.append(button("NEW LETTER",newQuestion),button("BACK TO SETUP",setup),button("STUDENT MENU",home));
+  controls.append(button("NEW LETTER",newQuestion),button("DATA",dataMenu),button("BACK TO SETUP",setup),button("STUDENT MENU",home));
   s.append(header,targetEl,inst,kb,feedback,stats,status,controls);
   app.append(s);
 }
@@ -322,6 +322,42 @@ function showConfetti(){
   setTimeout(clearConfetti,1200);
 }
 function clearConfetti(){confetti.innerHTML=""}
+function dataMenu(){
+  clearTimers();clearConfetti();app.innerHTML="";
+  const s=el("div",{class:"screen"});
+  s.append(el("h1",{text:"Letter Choice Scanner — Data"}),el("p",{text:"Session results are stored in this browser on this device."}));
+  const box=el("div",{class:"form"});
+  const filter=el("select",{id:"dataFilter",style:"width:100%;background:#333;color:#fff;border:2px solid #777;border-radius:7px;padding:13px;font-size:22px"});
+  filter.append(el("option",{value:"ALL",text:"All Students"}));
+  students.forEach(n=>filter.append(el("option",{value:n,text:n})));
+  box.append(el("label",{text:"Show data for"}),filter);
+  const tableWrap=el("div",{style:"width:100%;max-height:55vh;overflow:auto;margin-top:18px;border:2px solid #555"});
+  const table=el("table",{id:"dataTable",style:"width:100%;border-collapse:collapse;font-size:18px"});
+  tableWrap.append(table);box.append(tableWrap);
+  const controls=el("div",{class:"controls"});
+  controls.append(button("DOWNLOAD CSV",downloadData),button("CLEAR ALL DATA",clearAllData),button("BACK",home));
+  box.append(controls);s.append(box);app.append(s);
+  filter.addEventListener("change",()=>renderDataTable(filter.value));renderDataTable("ALL");
+}
+function renderDataTable(filter){
+  const rows=JSON.parse(localStorage.getItem("letterChoiceResults")||"[]");
+  const data=filter==="ALL"?rows:rows.filter(r=>r.student===filter);
+  const table=document.getElementById("dataTable");if(!table)return;
+  const headers=["Date","Time","Student","Target","Selected","Tries","Choices","Accuracy"];
+  table.innerHTML="";
+  const tr=document.createElement("tr");
+  headers.forEach(h=>{const th=el("th",{text:h,style:"position:sticky;top:0;background:#222;color:#fff;border:1px solid #666;padding:10px;text-align:center"});tr.append(th)});table.append(tr);
+  if(!data.length){const r=el("tr");const td=el("td",{text:"No data recorded yet.",style:"padding:18px;text-align:center;border:1px solid #666"});td.colSpan=headers.length;r.append(td);table.append(r);return}
+  data.slice().reverse().forEach(e=>{
+    const r=el("tr");
+    [e.date,e.time,e.student,(e.target||"").toUpperCase(),(e.selected||"").toUpperCase(),e.tries,e.options,(e.accuracy??0)+"%"].forEach(v=>r.append(el("td",{text:String(v),style:"border:1px solid #666;padding:9px;text-align:center"})));
+    table.append(r);
+  });
+}
+function clearAllData(){
+  if(!confirm("Clear all Letter Choice Scanner results from this browser? This cannot be undone."))return;
+  localStorage.removeItem("letterChoiceResults");dataMenu();
+}
 function csvEscape(v){return '"'+String(v??"").replaceAll('"','""')+'"'}
 function downloadData(){
   const rows=JSON.parse(localStorage.getItem("letterChoiceResults")||"[]");
