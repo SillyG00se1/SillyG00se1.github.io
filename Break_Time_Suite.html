@@ -66,7 +66,7 @@ function activate(){
 }
 
 function launch(){fireworks.push({x:W*(.12+.76*Math.random()),y:H+20,target:H*(.18+.4*Math.random()),vy:-(420+Math.random()*150),parts:null,trail:[],color:["#ff1744","#ffd600","#00e5ff","#39ff14","#d500f9","#fff"][Math.floor(Math.random()*6)]})}
-function explode(f){f.parts=[];f.flash=1;for(let i=0;i<90;i++){let a=Math.random()*Math.PI*2,s=110+Math.random()*220;f.parts.push({x:f.x,y:f.y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:.7+Math.random()*.8,c:f.color,r:1.5+Math.random()*2.5})}}
+function explode(f){f.parts=[];f.flash=1;f.style=Math.random()<.22?["ring","heart","double","willow"][Math.floor(Math.random()*4)]:"normal";let count=f.style==="double"?65:90;for(let i=0;i<count;i++){let a=Math.random()*Math.PI*2,s=110+Math.random()*220,x=f.x,y=f.y;if(f.style==="ring"){s=185+Math.random()*55}else if(f.style==="willow"){a+=Math.sin(i*2.7)*.12;s=70+Math.random()*190}else if(f.style==="heart"){let t=a,shape=2-2*Math.sin(t)+Math.sin(t)*Math.sqrt(Math.abs(Math.cos(t)))/(Math.sin(t)+1.4);s=70+Math.abs(shape)*65}else if(f.style==="double"){let side=i%2===0?-1:1;x+=Math.cos(a)*18*side;y+=Math.sin(a)*18*side;s=85+Math.random()*170}f.parts.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:.7+Math.random()*.8,c:f.color,r:1.5+Math.random()*2.5})}}
 
 function update(dt){
  if(mode==="lava"){lava=Math.max(0,lava-dt*.08);lavaPhase+=dt*(1.2+lava*5);lavaBubbles.forEach(b=>{b.y-=b.v*dt;b.life-=dt});lavaBubbles=lavaBubbles.filter(b=>b.life>0&&b.y>H*.18)}
