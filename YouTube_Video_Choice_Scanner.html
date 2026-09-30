@@ -12,7 +12,7 @@ button,input{font:inherit}
 #home{align-items:center;justify-content:center;overflow:auto}
 h1{font-size:clamp(30px,4vw,54px);margin:0 0 22px;text-align:center}
 h2{font-size:clamp(24px,3vw,40px);margin:0 0 18px}
-.panel{width:min(1050px,94vw);background:white;border:2px solid #888;border-radius:16px;padding:24px;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.panel{width:min(1100px,94vw);background:white;border:2px solid #888;border-radius:16px;padding:24px;box-shadow:0 4px 14px rgba(0,0,0,.12)}
 .row{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:12px 0}
 label{font-size:22px;font-weight:bold}
 select,input[type=number],input[type=text]{border:2px solid #777;border-radius:8px;padding:10px 12px;background:white}
@@ -20,8 +20,13 @@ select,input[type=number]{font-size:22px}
 input[type=text]{width:100%;font-size:20px}
 .primary{background:#6f32a8;color:white;border:0;border-radius:10px;padding:14px 26px;font-weight:bold;cursor:pointer}
 .secondary{background:#ddd;color:#111;border:2px solid #777;border-radius:10px;padding:12px 20px;font-weight:bold;cursor:pointer}
+.danger{background:#f0d6d6;color:#8b0000;border:2px solid #a66;border-radius:10px;padding:10px 16px;font-weight:bold;cursor:pointer}
 .small{font-size:16px;color:#444}
-.linkgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:15px;max-height:48vh;overflow:auto}
+.savedPanel{border:2px solid #aaa;border-radius:12px;padding:14px;margin:14px 0;background:#fafafa}
+.savedControls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.savedControls input{flex:1;min-width:220px}
+.savedControls select{flex:2;min-width:240px}
+.linkgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:15px;max-height:34vh;overflow:auto}
 .linkrow{display:flex;gap:8px;align-items:center}
 .linkrow span{min-width:32px;font-size:20px;font-weight:bold}
 #setupButtons{display:flex;gap:12px;justify-content:flex-end;margin-top:16px}
@@ -41,14 +46,34 @@ input[type=text]{width:100%;font-size:20px}
 #playerWrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#111;border-radius:10px;overflow:hidden}
 #player{width:min(1200px,100%);height:min(675px,100%);border:0}
 #playerTitle{text-align:center;font-size:clamp(22px,2.5vw,34px);font-weight:bold;padding:6px}
-@media(max-width:800px){.linkgrid{grid-template-columns:1fr}.panel{padding:16px}}
+@media(max-width:800px){.linkgrid{grid-template-columns:1fr}.panel{padding:16px}.savedControls{align-items:stretch}.savedControls>*{width:100%}}
 </style>
 </head>
 <body>
 <section id="home" class="screen">
   <h1>YouTube Video Choice Scanner</h1>
   <div class="panel">
-    <h2>Set Up Your Video Choices</h2>
+    <h2>Teacher Setup</h2>
+
+    <div class="savedPanel">
+      <div class="row" style="margin-top:0">
+        <label for="savedSets">Saved video sets:</label>
+      </div>
+      <div class="savedControls">
+        <select id="savedSets">
+          <option value="">-- Choose a saved set --</option>
+        </select>
+        <button class="secondary" id="loadSet">Load Set</button>
+        <button class="danger" id="deleteSet">Delete Set</button>
+      </div>
+      <p class="small">Saved sets are stored in this browser, so they will still be available when you reopen this game on the same computer/browser.</p>
+    </div>
+
+    <div class="row">
+      <label for="setName">Name this set:</label>
+      <input id="setName" type="text" placeholder="Example: Morning Movement Videos">
+    </div>
+
     <div class="row">
       <label for="choiceCount">Number of video choices:</label>
       <select id="choiceCount">
@@ -56,6 +81,7 @@ input[type=text]{width:100%;font-size:20px}
         <option>7</option><option>8</option><option>9</option><option>10</option><option>12</option>
       </select>
     </div>
+
     <div class="row">
       <label for="scanTime">Scan time:</label>
       <select id="scanTime">
@@ -70,13 +96,17 @@ input[type=text]{width:100%;font-size:20px}
         <option value="5000">5.0 seconds</option>
       </select>
     </div>
+
     <p class="small">Paste YouTube video links below. The game will automatically use the video's YouTube thumbnail in each scanning box.</p>
     <div id="links" class="linkgrid"></div>
+
     <div class="row">
       <button class="secondary" id="youtubeSearch">Search YouTube in a new tab</button>
       <span class="small">Direct searching inside the game requires a YouTube Data API key; this version avoids requiring you to manage an API key.</span>
     </div>
+
     <div id="setupButtons">
+      <button class="secondary" id="saveSet">Save Video Set</button>
       <button class="primary" id="start">Start Video Scanner</button>
     </div>
   </div>
@@ -105,29 +135,78 @@ input[type=text]{width:100%;font-size:20px}
 
 <script>
 "use strict";
+const STORAGE_KEY="youtubeVideoChoiceScanner.savedSets";
 const home=document.getElementById("home"), activity=document.getElementById("activity"), playerScreen=document.getElementById("playerScreen");
 const choiceCount=document.getElementById("choiceCount"), scanTime=document.getElementById("scanTime"), links=document.getElementById("links");
 const choices=document.getElementById("choices"), scanLabel=document.getElementById("scanLabel"), positionLabel=document.getElementById("positionLabel");
 const player=document.getElementById("player"), playerTitle=document.getElementById("playerTitle");
+const savedSets=document.getElementById("savedSets"), setName=document.getElementById("setName");
 
 let videos=[], index=0, timer=null, scanMs=2300;
 
-function buildLinkInputs(){
+function getSavedSets(){
+  try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}")}catch(e){return {}}
+}
+function putSavedSets(data){
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data));return true}
+  catch(e){alert("The browser could not save this set.");return false}
+}
+function refreshSavedSets(selectName=""){
+  const data=getSavedSets();
+  savedSets.innerHTML='<option value="">-- Choose a saved set --</option>';
+  Object.keys(data).sort((a,b)=>a.localeCompare(b)).forEach(name=>{
+    const o=document.createElement("option");o.value=name;o.textContent=name;savedSets.appendChild(o);
+  });
+  if(selectName && data[selectName]) savedSets.value=selectName;
+}
+function buildLinkInputs(values=[]){
   const n=Number(choiceCount.value);
   links.innerHTML="";
   for(let i=0;i<n;i++){
     const row=document.createElement("div"); row.className="linkrow";
     const num=document.createElement("span"); num.textContent=(i+1)+".";
     const input=document.createElement("input"); input.type="text"; input.placeholder="Paste YouTube link here"; input.dataset.index=i;
-    input.id="video"+i;
+    input.id="video"+i; input.value=values[i]||"";
     row.append(num,input); links.appendChild(row);
   }
 }
-choiceCount.addEventListener("change",buildLinkInputs);
-buildLinkInputs();
+choiceCount.addEventListener("change",()=>buildLinkInputs());
 
 document.getElementById("youtubeSearch").onclick=()=>{
   window.open("https://www.youtube.com/results?search_query="+encodeURIComponent(""),"_blank","noopener");
+};
+
+document.getElementById("saveSet").onclick=()=>{
+  const name=setName.value.trim();
+  if(!name){alert("Please enter a name for this video set.");setName.focus();return}
+  const n=Number(choiceCount.value), urls=[];
+  for(let i=0;i<n;i++) urls.push(document.getElementById("video"+i).value.trim());
+  const bad=urls.findIndex(u=>!getVideoId(u));
+  if(bad>=0){alert("Please enter a valid YouTube video link for choice "+(bad+1)+" before saving.");document.getElementById("video"+bad).focus();return}
+  const data=getSavedSets();
+  const exists=!!data[name];
+  if(exists && !confirm('A saved set named "'+name+'" already exists. Replace it?')) return;
+  data[name]={name,choiceCount:n,scanMs:Number(scanTime.value),urls,savedAt:new Date().toISOString()};
+  if(putSavedSets(data)){refreshSavedSets(name);alert('Video set "'+name+'" saved.');}
+};
+
+document.getElementById("loadSet").onclick=()=>{
+  const name=savedSets.value;
+  if(!name)return;
+  const data=getSavedSets(), set=data[name];
+  if(!set)return;
+  choiceCount.value=String(set.choiceCount);
+  scanTime.value=String(set.scanMs);
+  setName.value=set.name;
+  buildLinkInputs(set.urls||[]);
+};
+
+document.getElementById("deleteSet").onclick=()=>{
+  const name=savedSets.value;
+  if(!name)return;
+  if(!confirm('Delete the saved set "'+name+'"?'))return;
+  const data=getSavedSets();delete data[name];
+  if(putSavedSets(data)){refreshSavedSets();setName.value="";}
 };
 
 function getVideoId(url){
@@ -163,8 +242,7 @@ function renderChoices(){
       img.onerror=()=>{img.remove(); const p=document.createElement("div");p.className="placeholder";p.textContent="Thumbnail unavailable";box.appendChild(p)};
       box.appendChild(img);
     }else{
-      const p=document.createElement("div");p.className="placeholder";p.textContent="No valid YouTube link";
-      box.appendChild(p);
+      const p=document.createElement("div");p.className="placeholder";p.textContent="No valid YouTube link";box.appendChild(p);
     }
     const title=document.createElement("div"); title.className="title"; title.textContent=v.title; box.appendChild(title);
     choices.appendChild(box);
@@ -176,8 +254,7 @@ function highlight(){
   positionLabel.textContent="Choice "+(index+1)+" of "+videos.length;
 }
 function startScan(){
-  clearInterval(timer);
-  highlight();
+  clearInterval(timer); highlight();
   timer=setInterval(()=>{index=(index+1)%videos.length;highlight()},scanMs);
 }
 function stopScan(){clearInterval(timer);timer=null}
@@ -204,7 +281,8 @@ function selectCurrent(){
   activity.style.display="none";playerScreen.style.display="flex";
 }
 function goHome(){
-  stopScan(); player.src=""; playerScreen.style.display="none";activity.style.display="none";home.style.display="flex";buildLinkInputs();
+  stopScan(); player.src=""; playerScreen.style.display="none";activity.style.display="none";home.style.display="flex";
+  refreshSavedSets(); buildLinkInputs();
 }
 document.getElementById("start").onclick=startGame;
 document.getElementById("homeBtn").onclick=goHome;
@@ -216,6 +294,7 @@ window.addEventListener("keydown",e=>{
     if(playerScreen.style.display!=="none"||activity.style.display!=="none"){e.preventDefault();goHome();}
   }
 });
+buildLinkInputs(); refreshSavedSets();
 </script>
 </body>
 </html>
