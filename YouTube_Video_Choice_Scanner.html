@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube Video Choice Scanner</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;color:#111}
+button,input{font:inherit}
+.screen{width:100vw;height:100vh;padding:18px;display:flex;flex-direction:column}
+#home{align-items:center;justify-content:center;overflow:auto}
+h1{font-size:clamp(30px,4vw,54px);margin:0 0 22px;text-align:center}
+h2{font-size:clamp(24px,3vw,40px);margin:0 0 18px}
+.panel{width:min(1050px,94vw);background:white;border:2px solid #888;border-radius:16px;padding:24px;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.row{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:12px 0}
+label{font-size:22px;font-weight:bold}
+select,input[type=number],input[type=text]{border:2px solid #777;border-radius:8px;padding:10px 12px;background:white}
+select,input[type=number]{font-size:22px}
+input[type=text]{width:100%;font-size:20px}
+.primary{background:#6f32a8;color:white;border:0;border-radius:10px;padding:14px 26px;font-weight:bold;cursor:pointer}
+.secondary{background:#ddd;color:#111;border:2px solid #777;border-radius:10px;padding:12px 20px;font-weight:bold;cursor:pointer}
+.small{font-size:16px;color:#444}
+.linkgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:15px;max-height:48vh;overflow:auto}
+.linkrow{display:flex;gap:8px;align-items:center}
+.linkrow span{min-width:32px;font-size:20px;font-weight:bold}
+#setupButtons{display:flex;gap:12px;justify-content:flex-end;margin-top:16px}
+#activity{padding:10px 14px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;height:58px;flex:0 0 auto}
+.topbar .stat{font-size:clamp(18px,2vw,28px);font-weight:bold}
+#scanArea{flex:1;min-height:0;display:grid;grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) 74px;gap:8px}
+#choices{display:grid;gap:8px;min-height:0;overflow:hidden}
+.choice{position:relative;min-width:0;min-height:0;border:5px solid #bdbdbd;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.choice.scanning{border-color:#8A4FD6;box-shadow:0 0 0 4px #8A4FD6 inset}
+.choice img{width:100%;height:100%;object-fit:cover;display:block}
+.choice .placeholder{padding:12px;text-align:center;font-size:clamp(18px,2vw,30px);font-weight:bold;overflow-wrap:anywhere}
+.choice .num{position:absolute;left:8px;top:8px;background:#fff;border:2px solid #555;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:20px;z-index:2}
+.choice .title{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.72);color:#fff;padding:7px;font-size:clamp(14px,1.5vw,22px);font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#instructions{text-align:center;font-size:clamp(18px,2vw,28px);font-weight:bold}
+#playerScreen{display:none;padding:12px}
+#playerWrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#111;border-radius:10px;overflow:hidden}
+#player{width:min(1200px,100%);height:min(675px,100%);border:0}
+#playerTitle{text-align:center;font-size:clamp(22px,2.5vw,34px);font-weight:bold;padding:6px}
+@media(max-width:800px){.linkgrid{grid-template-columns:1fr}.panel{padding:16px}}
+</style>
+</head>
+<body>
+<section id="home" class="screen">
+  <h1>YouTube Video Choice Scanner</h1>
+  <div class="panel">
+    <h2>Set Up Your Video Choices</h2>
+    <div class="row">
+      <label for="choiceCount">Number of video choices:</label>
+      <select id="choiceCount">
+        <option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option>
+        <option>7</option><option>8</option><option>9</option><option>10</option><option>12</option>
+      </select>
+    </div>
+    <div class="row">
+      <label for="scanTime">Scan time:</label>
+      <select id="scanTime">
+        <option value="800">0.8 seconds</option>
+        <option value="1200">1.2 seconds</option>
+        <option value="1600">1.6 seconds</option>
+        <option value="2000">2.0 seconds</option>
+        <option value="2300" selected>2.3 seconds</option>
+        <option value="2500">2.5 seconds</option>
+        <option value="3000">3.0 seconds</option>
+        <option value="4000">4.0 seconds</option>
+        <option value="5000">5.0 seconds</option>
+      </select>
+    </div>
+    <p class="small">Paste YouTube video links below. The game will automatically use the video's YouTube thumbnail in each scanning box.</p>
+    <div id="links" class="linkgrid"></div>
+    <div class="row">
+      <button class="secondary" id="youtubeSearch">Search YouTube in a new tab</button>
+      <span class="small">Direct searching inside the game requires a YouTube Data API key; this version avoids requiring you to manage an API key.</span>
+    </div>
+    <div id="setupButtons">
+      <button class="primary" id="start">Start Video Scanner</button>
+    </div>
+  </div>
+</section>
+
+<section id="activity" class="screen" style="display:none">
+  <div class="topbar">
+    <div class="stat" id="scanLabel">Scan: 2.3 sec</div>
+    <div class="stat" id="positionLabel">Choice 1</div>
+    <button class="secondary" id="homeBtn">Home</button>
+  </div>
+  <div id="scanArea">
+    <div id="choices"></div>
+    <div id="instructions">PURPLE = CURRENT CHOICE &nbsp; • &nbsp; SPACE = SELECT</div>
+  </div>
+</section>
+
+<section id="playerScreen" class="screen">
+  <div class="topbar">
+    <button class="secondary" id="playerBack">Back to Choices</button>
+    <div id="playerTitle"></div>
+    <div></div>
+  </div>
+  <div id="playerWrap"><iframe id="player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
+</section>
+
+<script>
+"use strict";
+const home=document.getElementById("home"), activity=document.getElementById("activity"), playerScreen=document.getElementById("playerScreen");
+const choiceCount=document.getElementById("choiceCount"), scanTime=document.getElementById("scanTime"), links=document.getElementById("links");
+const choices=document.getElementById("choices"), scanLabel=document.getElementById("scanLabel"), positionLabel=document.getElementById("positionLabel");
+const player=document.getElementById("player"), playerTitle=document.getElementById("playerTitle");
+
+let videos=[], index=0, timer=null, scanMs=2300;
+
+function buildLinkInputs(){
+  const n=Number(choiceCount.value);
+  links.innerHTML="";
+  for(let i=0;i<n;i++){
+    const row=document.createElement("div"); row.className="linkrow";
+    const num=document.createElement("span"); num.textContent=(i+1)+".";
+    const input=document.createElement("input"); input.type="text"; input.placeholder="Paste YouTube link here"; input.dataset.index=i;
+    input.id="video"+i;
+    row.append(num,input); links.appendChild(row);
+  }
+}
+choiceCount.addEventListener("change",buildLinkInputs);
+buildLinkInputs();
+
+document.getElementById("youtubeSearch").onclick=()=>{
+  window.open("https://www.youtube.com/results?search_query="+encodeURIComponent(""),"_blank","noopener");
+};
+
+function getVideoId(url){
+  try{
+    const u=new URL(url.trim());
+    if(u.hostname==="youtu.be") return u.pathname.slice(1).split("/")[0];
+    if(u.hostname.includes("youtube.com")){
+      if(u.searchParams.get("v")) return u.searchParams.get("v");
+      const parts=u.pathname.split("/").filter(Boolean);
+      const i=parts.indexOf("embed"); if(i>=0&&parts[i+1]) return parts[i+1];
+      const s=parts.indexOf("shorts"); if(s>=0&&parts[s+1]) return parts[s+1];
+      const l=parts.indexOf("live"); if(l>=0&&parts[l+1]) return parts[l+1];
+    }
+  }catch(e){}
+  return null;
+}
+function thumbnail(id){return "https://img.youtube.com/vi/"+id+"/hqdefault.jpg";}
+function makeVideo(url,i){
+  const id=getVideoId(url);
+  return {id,title:"Video choice "+(i+1),url:url.trim(),thumb:id?thumbnail(id):""};
+}
+function renderChoices(){
+  choices.innerHTML="";
+  const n=videos.length;
+  const cols=n<=3?n:(n<=6?3:4);
+  choices.style.gridTemplateColumns="repeat("+cols+",minmax(0,1fr))";
+  choices.style.gridTemplateRows="repeat("+Math.ceil(n/cols)+",minmax(0,1fr))";
+  videos.forEach((v,i)=>{
+    const box=document.createElement("div"); box.className="choice"; box.dataset.index=i;
+    const num=document.createElement("div"); num.className="num"; num.textContent=i+1; box.appendChild(num);
+    if(v.thumb){
+      const img=document.createElement("img"); img.src=v.thumb; img.alt="YouTube thumbnail for video choice "+(i+1);
+      img.onerror=()=>{img.remove(); const p=document.createElement("div");p.className="placeholder";p.textContent="Thumbnail unavailable";box.appendChild(p)};
+      box.appendChild(img);
+    }else{
+      const p=document.createElement("div");p.className="placeholder";p.textContent="No valid YouTube link";
+      box.appendChild(p);
+    }
+    const title=document.createElement("div"); title.className="title"; title.textContent=v.title; box.appendChild(title);
+    choices.appendChild(box);
+  });
+  highlight();
+}
+function highlight(){
+  [...choices.children].forEach((el,i)=>el.classList.toggle("scanning",i===index));
+  positionLabel.textContent="Choice "+(index+1)+" of "+videos.length;
+}
+function startScan(){
+  clearInterval(timer);
+  highlight();
+  timer=setInterval(()=>{index=(index+1)%videos.length;highlight()},scanMs);
+}
+function stopScan(){clearInterval(timer);timer=null}
+function startGame(){
+  videos=[];
+  for(let i=0;i<Number(choiceCount.value);i++){
+    const val=document.getElementById("video"+i).value.trim();
+    if(!val){alert("Please enter a YouTube link for choice "+(i+1)+".");return}
+    const v=makeVideo(val,i);
+    if(!v.id){alert("Choice "+(i+1)+" does not look like a valid YouTube video link.");return}
+    videos.push(v);
+  }
+  scanMs=Number(scanTime.value); index=0;
+  scanLabel.textContent="Scan: "+(scanMs/1000).toFixed(1)+" sec";
+  home.style.display="none";playerScreen.style.display="none";activity.style.display="flex";
+  renderChoices();startScan();
+}
+function selectCurrent(){
+  if(!videos.length)return;
+  stopScan();
+  const v=videos[index];
+  playerTitle.textContent=v.title;
+  player.src="https://www.youtube.com/embed/"+encodeURIComponent(v.id)+"?autoplay=1&rel=0";
+  activity.style.display="none";playerScreen.style.display="flex";
+}
+function goHome(){
+  stopScan(); player.src=""; playerScreen.style.display="none";activity.style.display="none";home.style.display="flex";buildLinkInputs();
+}
+document.getElementById("start").onclick=startGame;
+document.getElementById("homeBtn").onclick=goHome;
+document.getElementById("playerBack").onclick=()=>{player.src="";playerScreen.style.display="none";activity.style.display="flex";startScan()};
+window.addEventListener("keydown",e=>{
+  if(e.code==="Space"){
+    if(activity.style.display!=="none"){e.preventDefault();selectCurrent();}
+  }else if(e.code==="Escape"){
+    if(playerScreen.style.display!=="none"||activity.style.display!=="none"){e.preventDefault();goHome();}
+  }
+});
+</script>
+</body>
+</html>
