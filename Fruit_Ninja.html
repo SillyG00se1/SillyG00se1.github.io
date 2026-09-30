@@ -5,512 +5,215 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fruit Ninja Switch Edition</title>
 <style>
-  html, body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: #BDEBFF;
-  }
-  body {
-    font-family: Arial, Helvetica, sans-serif;
-    user-select: none;
-  }
-  #gameCanvas {
-    display: block;
-    width: 100vw;
-    height: 100vh;
-    background: #BDEBFF;
-  }
-  #loading {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #BDEBFF;
-    color: #000;
-    font-size: clamp(28px, 3vw, 48px);
-    font-weight: bold;
-    z-index: 5;
-  }
-  #assetStatus {
-    position: fixed;
-    left: 12px;
-    bottom: 8px;
-    font-size: 12px;
-    color: rgba(0,0,0,.35);
-    pointer-events: none;
-  }
+  html, body { margin:0; width:100%; height:100%; overflow:hidden; background:#BDEBFF; }
+  body { font-family:Arial,Helvetica,sans-serif; user-select:none; }
+  #gameCanvas { display:block; width:100vw; height:100vh; background:#BDEBFF; }
+  #loading { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:#BDEBFF; color:#000; font-size:clamp(28px,3vw,48px); font-weight:bold; z-index:5; }
+  #assetStatus { position:fixed; left:12px; bottom:8px; font-size:12px; color:rgba(0,0,0,.35); pointer-events:none; }
 </style>
 </head>
 <body>
 <canvas id="gameCanvas" tabindex="0" aria-label="Fruit Ninja Switch Edition"></canvas>
 <div id="loading">Loading Fruit Ninja...</div>
 <div id="assetStatus"></div>
-
 <script>
 "use strict";
 
-/*
-  Fruit Ninja Switch Edition
-  --------------------------------
-  Upload these files to the SAME "fruit" folder in the GitHub repository:
+/* Assets are in the GitHub repository's capital-F "Fruit" folder. */
+const FRUIT_SPEED=6, ROT_SPEED=3, SWITCH_LOCKOUT=500, FRUIT_SIZE=150, BOMB_SIZE=160;
 
-    fruit/1.png
-    fruit/2.png
-    fruit/3.png
-    fruit/4.png
-    fruit/5.png
-    fruit/6.png
-    fruit/bomb.png
+const canvas=document.getElementById("gameCanvas"), ctx=canvas.getContext("2d");
+const loading=document.getElementById("loading"), assetStatus=document.getElementById("assetStatus");
 
-    fruit/fruit_appear.mp3
-    fruit/bomb_appear.mp3
-    fruit/fruit_slice.mp3
-    fruit/bomb_explode.mp3
-
-  The game will still run if a sound is temporarily missing.
-*/
-
-const FRUIT_SPEED = 6;
-const ROT_SPEED = 3;
-const SWITCH_LOCKOUT = 500;
-const FRUIT_SIZE = 150;
-const BOMB_SIZE = 160;
-const PADDING = 60;
-
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-const loading = document.getElementById("loading");
-const assetStatus = document.getElementById("assetStatus");
-
-const IMAGE_PATHS = {
-  "1": "fruit/1.png",
-  "2": "fruit/2.png",
-  "3": "fruit/3.png",
-  "4": "fruit/4.png",
-  "5": "fruit/5.png",
-  "6": "fruit/6.png",
-  "bomb": "fruit/bomb.png"
+const IMAGE_PATHS={
+  "1":"Fruit/1.png","2":"Fruit/2.png","3":"Fruit/3.png",
+  "4":"Fruit/4.png","5":"Fruit/5.png","6":"Fruit/6.png","bomb":"Fruit/bomb.png"
+};
+const SOUND_PATHS={
+  fruit_appear:"Fruit/Fruit_appear.mp3",
+  bomb_appear:"Fruit/Bomb_appear.mp3",
+  fruit_slice:"Fruit/fruit_slice.mp3",
+  bomb_explode:"Fruit/bomb_explode.mp3"
 };
 
-const SOUND_PATHS = {
-  fruit_appear: "fruit/fruit_appear.mp3",
-  bomb_appear: "fruit/bomb_appear.mp3",
-  fruit_slice: "fruit/fruit_slice.mp3",
-  bomb_explode: "fruit/bomb_explode.mp3"
-};
+const images={}, sounds={};
+let imageFailures=0, audioUnlocked=false;
 
-const images = {};
-const sounds = {};
-let imagesLoaded = 0;
-let imageFailures = 0;
-let audioUnlocked = false;
-
-function loadImages() {
-  return Promise.all(Object.entries(IMAGE_PATHS).map(([key, src]) => new Promise(resolve => {
-    const img = new Image();
-    img.onload = () => {
-      images[key] = img;
-      imagesLoaded++;
-      resolve();
-    };
-    img.onerror = () => {
-      imageFailures++;
-      resolve();
-    };
-    img.src = src;
+function loadImages(){
+  return Promise.all(Object.entries(IMAGE_PATHS).map(([key,src])=>new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{images[key]=img;resolve();};
+    img.onerror=()=>{imageFailures++;resolve();};
+    img.src=src;
   })));
 }
-
-function prepareSounds() {
-  Object.entries(SOUND_PATHS).forEach(([key, src]) => {
-    const audio = new Audio();
-    audio.preload = "auto";
-    audio.src = src;
-    sounds[key] = audio;
+function prepareSounds(){
+  Object.entries(SOUND_PATHS).forEach(([key,src])=>{
+    const audio=new Audio(); audio.preload="auto"; audio.src=src; sounds[key]=audio;
   });
 }
-
-function unlockAudio() {
-  if (audioUnlocked) return;
-  audioUnlocked = true;
-  Object.values(sounds).forEach(audio => {
-    try {
-      audio.volume = 0;
-      const p = audio.play();
-      if (p && p.catch) p.catch(() => {});
-      setTimeout(() => {
-        try {
-          audio.pause();
-          audio.currentTime = 0;
-          audio.volume = 1;
-        } catch (_) {}
-      }, 20);
-    } catch (_) {}
+function unlockAudio(){
+  if(audioUnlocked)return;
+  audioUnlocked=true;
+  Object.values(sounds).forEach(audio=>{
+    try{
+      audio.volume=0;
+      const p=audio.play(); if(p&&p.catch)p.catch(()=>{});
+      setTimeout(()=>{try{audio.pause();audio.currentTime=0;audio.volume=1;}catch(_){}},20);
+    }catch(_){}
   });
 }
-
-function playSound(name) {
-  const source = sounds[name];
-  if (!source) return;
-  try {
-    const audio = source.cloneNode(true);
-    audio.volume = 1;
-    audio.play().catch(() => {});
-  } catch (_) {}
+function playSound(name){
+  const source=sounds[name]; if(!source)return;
+  try{const audio=source.cloneNode(true);audio.volume=1;audio.play().catch(()=>{});}catch(_){}
 }
 
-const state = {
-  fruit: null,
-  active: false,
-  danger: false,
-  key: null,
-  angle: 0,
-  score: 0,
-  lives: 3,
-  gameOver: false,
-  canRestart: false,
-  lastSwitch: 0,
-  nextSpawnAt: 0,
-  message: "PRESS SPACE",
-  messageUntil: 0,
-  particles: []
+const state={
+  fruit:null,active:false,danger:false,key:null,angle:0,score:0,lives:3,
+  gameOver:false,canRestart:false,lastSwitch:0,nextSpawnAt:0,
+  message:"PRESS SPACE",messageUntil:0,particles:[]
 };
 
-function resizeCanvas() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  canvas.width = Math.floor(window.innerWidth * dpr);
-  canvas.height = Math.floor(window.innerHeight * dpr);
-  canvas.style.width = window.innerWidth + "px";
-  canvas.style.height = window.innerHeight + "px";
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+function resizeCanvas(){
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  canvas.width=Math.floor(innerWidth*dpr); canvas.height=Math.floor(innerHeight*dpr);
+  canvas.style.width=innerWidth+"px"; canvas.style.height=innerHeight+"px";
+  ctx.setTransform(dpr,0,0,dpr,0,0);
 }
+const W=()=>innerWidth, H=()=>innerHeight;
 
-function W() { return window.innerWidth; }
-function H() { return window.innerHeight; }
-
-function setMessage(text, duration = 0) {
-  state.message = text;
-  state.messageUntil = duration ? performance.now() + duration : 0;
+function setMessage(text,duration=0){
+  state.message=text; state.messageUntil=duration?performance.now()+duration:0;
 }
+function drawBackground(){ctx.fillStyle="#BDEBFF";ctx.fillRect(0,0,W(),H());}
 
-function updateLives() {
-  // Drawing is handled every frame.
+function drawUI(now){
+  ctx.textBaseline="middle"; ctx.fillStyle="#000"; ctx.font="bold 42px Arial";
+  ctx.textAlign="left"; ctx.fillText("Score: "+state.score,220,60);
+  ctx.fillStyle="#d40000"; ctx.textAlign="right";
+  ctx.fillText("X ".repeat(state.lives).trim(),W()-220,60);
+  if(state.messageUntil&&now>state.messageUntil){state.message="PRESS SPACE";state.messageUntil=0;}
+  ctx.fillStyle="#000";ctx.font="bold 32px Arial";ctx.textAlign="center";
+  ctx.fillText(state.message,W()/2,60);
 }
-
-function drawBackground() {
-  ctx.fillStyle = "#BDEBFF";
-  ctx.fillRect(0, 0, W(), H());
-}
-
-function drawUI(now) {
-  ctx.textBaseline = "middle";
-
-  ctx.fillStyle = "#000";
-  ctx.font = "bold 42px Arial";
-  ctx.textAlign = "left";
-  ctx.fillText("Score: " + state.score, 220, 60);
-
-  ctx.fillStyle = "#d40000";
-  ctx.textAlign = "right";
-  ctx.fillText("X ".repeat(state.lives).trim(), W() - 220, 60);
-
-  if (state.messageUntil && now > state.messageUntil) {
-    state.message = "PRESS SPACE";
-    state.messageUntil = 0;
-  }
-
-  ctx.fillStyle = "#000";
-  ctx.font = "bold 32px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText(state.message, W() / 2, 60);
-}
-
-function safeImage(key) {
-  return images[key] || null;
-}
-
-function drawPlaceholder(key, x, y, size, angle) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate(angle * Math.PI / 180);
-  if (key === "bomb") {
-    ctx.fillStyle = "#111";
-    ctx.beginPath();
-    ctx.arc(0, 0, size * .38, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = "#333";
-    ctx.lineWidth = 8;
-    ctx.stroke();
-    ctx.fillStyle = "#ffcc00";
-    ctx.fillRect(size * .12, -size * .48, size * .12, size * .15);
-  } else {
-    const colors = {
-      "1":"#8B0000","2":"#ff0000","3":"#ffd400",
-      "4":"#ff7a00","5":"#00aa00","6":"#7CFC00"
-    };
-    ctx.fillStyle = colors[key] || "#ff00ff";
-    ctx.beginPath();
-    ctx.arc(0, 0, size * .40, 0, Math.PI * 2);
-    ctx.fill();
+function drawPlaceholder(key,x,y,size,angle){
+  ctx.save();ctx.translate(x,y);ctx.rotate(angle*Math.PI/180);
+  if(key==="bomb"){
+    ctx.fillStyle="#111";ctx.beginPath();ctx.arc(0,0,size*.38,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle="#333";ctx.lineWidth=8;ctx.stroke();
+    ctx.fillStyle="#ffcc00";ctx.fillRect(size*.12,-size*.48,size*.12,size*.15);
+  }else{
+    const colors={"1":"#8B0000","2":"#ff0000","3":"#ffd400","4":"#ff7a00","5":"#00aa00","6":"#7CFC00"};
+    ctx.fillStyle=colors[key]||"#ff00ff";ctx.beginPath();ctx.arc(0,0,size*.40,0,Math.PI*2);ctx.fill();
   }
   ctx.restore();
 }
-
-function drawFruit() {
-  const f = state.fruit;
-  if (!f) return;
-
-  const size = state.danger ? BOMB_SIZE : FRUIT_SIZE;
-  const img = safeImage(state.key);
-
-  ctx.save();
-  ctx.translate(f.x, f.y);
-  ctx.rotate(state.angle * Math.PI / 180);
-
-  if (img) {
-    const pad = PADDING;
-    const iw = img.naturalWidth || img.width;
-    const ih = img.naturalHeight || img.height;
-    const scale = Math.min(FRUIT_SIZE / iw, FRUIT_SIZE / ih);
-    const dw = iw * scale;
-    const dh = ih * scale;
-    ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
-  } else {
-    drawPlaceholder(state.key, 0, 0, size, 0);
-  }
+function drawFruit(){
+  const f=state.fruit;if(!f)return;
+  const size=state.danger?BOMB_SIZE:FRUIT_SIZE, img=images[state.key];
+  ctx.save();ctx.translate(f.x,f.y);ctx.rotate(state.angle*Math.PI/180);
+  if(img){
+    const iw=img.naturalWidth||img.width, ih=img.naturalHeight||img.height;
+    const scale=Math.min(FRUIT_SIZE/iw,FRUIT_SIZE/ih);
+    ctx.drawImage(img,-iw*scale/2,-ih*scale/2,iw*scale,ih*scale);
+  }else drawPlaceholder(state.key,0,0,size,0);
   ctx.restore();
 }
-
-function spawnFruit() {
-  if (state.gameOver || state.active) return;
-
-  state.fruit = {
-    x: Math.max(180, Math.min(W() - 180, Math.random() * (W() - 500) + 250)),
-    y: H() - 120
-  };
-
-  state.angle = 0;
-  state.danger = Math.random() < 0.20;
-  state.key = state.danger ? "bomb" : String(1 + Math.floor(Math.random() * 6));
-  state.active = true;
-
-  playSound(state.danger ? "bomb_appear" : "fruit_appear");
+function spawnFruit(){
+  if(state.gameOver||state.active)return;
+  state.fruit={x:Math.max(180,Math.min(W()-180,Math.random()*(W()-500)+250)),y:H()-120};
+  state.angle=0;state.danger=Math.random()<.20;
+  state.key=state.danger?"bomb":String(1+Math.floor(Math.random()*6));
+  state.active=true;playSound(state.danger?"bomb_appear":"fruit_appear");
 }
-
-function removeFruit() {
-  state.fruit = null;
-  state.active = false;
-}
-
-function addJuice(x, y, key) {
-  const colors = {
-    "1": ["#8B0000"],
-    "2": ["#ff0000"],
-    "3": ["#ffd400"],
-    "4": ["#ff7a00"],
-    "5": ["#ff0000", "#00aa00"],
-    "6": ["#7CFC00"],
-    "bomb": ["#000000", "#333333"]
-  };
-  const palette = colors[key] || ["#ffffff"];
-
-  for (let i = 0; i < 30; i++) {
-    const a = Math.random() * Math.PI * 2;
-    const speed = 2 + Math.random() * 8;
-    state.particles.push({
-      x, y,
-      vx: Math.cos(a) * speed,
-      vy: Math.sin(a) * speed,
-      life: 18,
-      color: palette[Math.floor(Math.random() * palette.length)]
-    });
+function removeFruit(){state.fruit=null;state.active=false;}
+function addJuice(x,y,key){
+  const colors={"1":["#8B0000"],"2":["#ff0000"],"3":["#ffd400"],"4":["#ff7a00"],
+    "5":["#ff0000","#00aa00"],"6":["#7CFC00"],"bomb":["#000","#333"]};
+  const palette=colors[key]||["#fff"];
+  for(let i=0;i<30;i++){
+    const a=Math.random()*Math.PI*2,s=2+Math.random()*8;
+    state.particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:18,
+      color:palette[Math.floor(Math.random()*palette.length)]});
   }
 }
-
-function updateParticles() {
-  for (let i = state.particles.length - 1; i >= 0; i--) {
-    const p = state.particles[i];
-    p.x += p.vx;
-    p.y += p.vy;
-    p.vy += 0.12;
-    p.life--;
-    if (p.life <= 0) state.particles.splice(i, 1);
+function updateParticles(){
+  for(let i=state.particles.length-1;i>=0;i--){
+    const p=state.particles[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.12;p.life--;
+    if(p.life<=0)state.particles.splice(i,1);
   }
 }
-
-function drawParticles() {
-  for (const p of state.particles) {
-    ctx.globalAlpha = Math.max(0, p.life / 18);
-    ctx.fillStyle = p.color;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 8, 0, Math.PI * 2);
-    ctx.fill();
+function drawParticles(){
+  for(const p of state.particles){
+    ctx.globalAlpha=Math.max(0,p.life/18);ctx.fillStyle=p.color;
+    ctx.beginPath();ctx.arc(p.x,p.y,8,0,Math.PI*2);ctx.fill();
   }
-  ctx.globalAlpha = 1;
+  ctx.globalAlpha=1;
 }
-
-function sliceFruit() {
-  if (state.gameOver || !state.active || !state.fruit) return;
-
-  const x = state.fruit.x;
-  const y = state.fruit.y;
-  const key = state.key;
-  const danger = state.danger;
-
-  removeFruit();
-  addJuice(x, y, key);
-
-  if (danger) {
-    playSound("bomb_explode");
-    state.gameOver = true;
-    state.canRestart = false;
-    setMessage("BOMB!");
-    setTimeout(() => {
-      state.canRestart = true;
-    }, 1000);
-  } else {
-    playSound("fruit_slice");
-    state.score++;
-    setMessage("SLICED!", 700);
-    state.nextSpawnAt = performance.now() + 700;
+function sliceFruit(){
+  if(state.gameOver||!state.active||!state.fruit)return;
+  const x=state.fruit.x,y=state.fruit.y,key=state.key,danger=state.danger;
+  removeFruit();addJuice(x,y,key);
+  if(danger){
+    playSound("bomb_explode");state.gameOver=true;state.canRestart=false;setMessage("BOMB!");
+    setTimeout(()=>{state.canRestart=true;},1000);
+  }else{
+    playSound("fruit_slice");state.score++;setMessage("SLICED!",700);
+    state.nextSpawnAt=performance.now()+700;
   }
 }
-
-function restartGame() {
-  state.fruit = null;
-  state.active = false;
-  state.danger = false;
-  state.key = null;
-  state.angle = 0;
-  state.score = 0;
-  state.lives = 3;
-  state.gameOver = false;
-  state.canRestart = false;
-  state.particles = [];
-  state.lastSwitch = performance.now();
-  setMessage("PRESS SPACE");
-  state.nextSpawnAt = performance.now() + 100;
+function restartGame(){
+  state.fruit=null;state.active=false;state.danger=false;state.key=null;state.angle=0;
+  state.score=0;state.lives=3;state.gameOver=false;state.canRestart=false;
+  state.particles=[];state.lastSwitch=performance.now();setMessage("PRESS SPACE");
+  state.nextSpawnAt=performance.now()+100;
 }
-
-function drawGameOver() {
-  if (!state.gameOver) return;
-
-  ctx.fillStyle = "rgba(0,0,0,.92)";
-  ctx.fillRect(0, 0, W(), H());
-
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-
-  ctx.fillStyle = "#ff0000";
-  ctx.font = "bold 72px Arial";
-  ctx.fillText("GAME OVER", W() / 2, H() / 2 - 100);
-
-  ctx.fillStyle = "#fff";
-  ctx.font = "bold 42px Arial";
-  ctx.fillText("FINAL SCORE: " + state.score, W() / 2, H() / 2);
-
-  if (state.canRestart) {
-    ctx.font = "bold 30px Arial";
-    ctx.fillText("PRESS SPACE TO PLAY AGAIN", W() / 2, H() / 2 + 85);
-  }
+function drawGameOver(){
+  if(!state.gameOver)return;
+  ctx.fillStyle="rgba(0,0,0,.92)";ctx.fillRect(0,0,W(),H());
+  ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.fillStyle="#ff0000";ctx.font="bold 72px Arial";ctx.fillText("GAME OVER",W()/2,H()/2-100);
+  ctx.fillStyle="#fff";ctx.font="bold 42px Arial";ctx.fillText("FINAL SCORE: "+state.score,W()/2,H()/2);
+  if(state.canRestart){ctx.font="bold 30px Arial";ctx.fillText("PRESS SPACE TO PLAY AGAIN",W()/2,H()/2+85);}
 }
-
-function update() {
-  const now = performance.now();
-
-  if (!state.gameOver && state.active && state.fruit) {
-    state.fruit.y -= FRUIT_SPEED;
-    state.angle = (state.angle + ROT_SPEED) % 360;
-
-    const size = state.danger ? BOMB_SIZE : FRUIT_SIZE;
-    if (state.fruit.y + size / 2 <= 0) {
-      const missedBomb = state.danger;
-      removeFruit();
-
-      if (missedBomb) {
-        setMessage("GOOD AVOID!", 600);
-        state.nextSpawnAt = now + 600;
-      } else {
-        state.lives--;
-        setMessage("MISSED!", 700);
-
-        if (state.lives <= 0) {
-          state.gameOver = true;
-          state.canRestart = true;
-        } else {
-          state.nextSpawnAt = now + 900;
-        }
+function update(){
+  const now=performance.now();
+  if(!state.gameOver&&state.active&&state.fruit){
+    state.fruit.y-=FRUIT_SPEED;state.angle=(state.angle+ROT_SPEED)%360;
+    const size=state.danger?BOMB_SIZE:FRUIT_SIZE;
+    if(state.fruit.y+size/2<=0){
+      const missedBomb=state.danger;removeFruit();
+      if(missedBomb){setMessage("GOOD AVOID!",600);state.nextSpawnAt=now+600;}
+      else{
+        state.lives--;setMessage("MISSED!",700);
+        if(state.lives<=0){state.gameOver=true;state.canRestart=true;}
+        else state.nextSpawnAt=now+900;
       }
     }
   }
-
-  if (!state.gameOver && !state.active && now >= state.nextSpawnAt) {
-    spawnFruit();
-  }
-
+  if(!state.gameOver&&!state.active&&now>=state.nextSpawnAt)spawnFruit();
   updateParticles();
 }
+function render(now){drawBackground();drawFruit();drawParticles();drawUI(now);drawGameOver();}
+function loop(now){update();render(now);requestAnimationFrame(loop);}
 
-function render(now) {
-  drawBackground();
-  drawFruit();
-  drawParticles();
-  drawUI(now);
-  drawGameOver();
-}
-
-function loop(now) {
-  update();
-  render(now);
-  requestAnimationFrame(loop);
-}
-
-function handleSpace(event) {
-  if (event.code !== "Space") return;
-  event.preventDefault();
-  event.stopPropagation();
-
-  unlockAudio();
-
-  const now = performance.now();
-  if (now - state.lastSwitch < SWITCH_LOCKOUT) return;
-  state.lastSwitch = now;
-
-  if (state.gameOver) {
-    if (state.canRestart) restartGame();
-    return;
-  }
-
+function handleSpace(event){
+  if(event.code!=="Space")return;
+  event.preventDefault();event.stopPropagation();unlockAudio();
+  const now=performance.now();
+  if(now-state.lastSwitch<SWITCH_LOCKOUT)return;
+  state.lastSwitch=now;
+  if(state.gameOver){if(state.canRestart)restartGame();return;}
   sliceFruit();
 }
+window.addEventListener("keydown",handleSpace,{passive:false});
+window.addEventListener("resize",resizeCanvas);
 
-window.addEventListener("keydown", handleSpace, { passive: false });
-
-window.addEventListener("blur", () => {
-  // Do not reset the game when the browser window loses focus.
-});
-
-window.addEventListener("resize", resizeCanvas);
-
-async function init() {
-  resizeCanvas();
-  prepareSounds();
-  await loadImages();
-
-  loading.style.display = "none";
-
-  if (imageFailures) {
-    assetStatus.textContent = imageFailures + " fruit image(s) not found yet.";
-  }
-
-  state.nextSpawnAt = performance.now() + 150;
-  canvas.focus();
-  requestAnimationFrame(loop);
+async function init(){
+  resizeCanvas();prepareSounds();await loadImages();loading.style.display="none";
+  if(imageFailures)assetStatus.textContent=imageFailures+" fruit image(s) not found yet.";
+  state.nextSpawnAt=performance.now()+150;canvas.focus();requestAnimationFrame(loop);
 }
-
 init();
 </script>
 </body>
