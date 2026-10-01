@@ -189,7 +189,7 @@ async function viewData(refresh=true){
 async function clearAllData(){
  const password=window.prompt("Enter the teacher password to clear ALL typing data:");
  if(password===null)return;
- if(password!=="TVI2026"){alert("Incorrect password. No data was deleted.");return}
+ if(password!=="MUSDvision"){alert("Incorrect password. No data was deleted.");return}
  if(!confirm("Delete ALL saved typing data for ALL students? This cannot be undone."))return;
  try{
    await supabaseRequest("typing_results?id=not.is.null",{method:"DELETE",headers:{Prefer:"return=minimal"}});
