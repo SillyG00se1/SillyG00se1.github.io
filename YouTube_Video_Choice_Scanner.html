@@ -92,6 +92,10 @@ input[type=text]{width:100%;font-size:20px}
 
 <script>
 "use strict";
+const SUPABASE_URL="https://bszanoiwepiqhvzbcvnz.supabase.co";
+const SUPABASE_KEY="sb_publishable_B6A3Pp4Tsa3oDKUn3Q7zBA_lM1who2g";
+async function supabaseRequest(path,options={}){const res=await fetch(SUPABASE_URL+"/rest/v1/"+path,{...options,headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY,"Content-Type":"application/json",Prefer:"return=minimal",...(options.headers||{})}});if(!res.ok)throw new Error(await res.text());const text=await res.text();return text?JSON.parse(text):[]}
+
 const STORAGE_KEY="youtubeVideoChoiceScanner.savedSets";
 const home=document.getElementById("home"),activity=document.getElementById("activity"),playerScreen=document.getElementById("playerScreen");
 const choiceCount=document.getElementById("choiceCount"),scanTime=document.getElementById("scanTime"),links=document.getElementById("links");
@@ -102,6 +106,9 @@ let videos=[],index=0,timer=null,scanMs=2300;
 
 function getSavedSets(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}")}catch(e){return {}}}
 function putSavedSets(data){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data));return true}catch(e){alert("The browser could not save this set.");return false}}
+async function loadSharedSets(){try{const rows=await supabaseRequest("youtube_video_sets?select=*&order=name");const data=getSavedSets();rows.forEach(r=>{data[r.name]={name:r.name,choiceCount:r.choice_count,scanMs:r.scan_ms,urls:Array.isArray(r.urls)?r.urls:[],savedAt:r.saved_at}});putSavedSets(data);refreshSavedSets()}catch(e){console.warn("Shared YouTube sets unavailable; using local browser storage.",e)}}
+async function saveSharedSet(set){try{await supabaseRequest("youtube_video_sets",{method:"POST",body:JSON.stringify({name:set.name,choice_count:set.choiceCount,scan_ms:set.scanMs,urls:set.urls,saved_at:set.savedAt})})}catch(e){try{await supabaseRequest("youtube_video_sets?name=eq."+encodeURIComponent(set.name),{method:"PATCH",body:JSON.stringify({choice_count:set.choiceCount,scan_ms:set.scanMs,urls:set.urls,saved_at:set.savedAt})})}catch(e2){console.warn("Could not save shared YouTube set.",e2)}}}
+async function deleteSharedSet(name){try{await supabaseRequest("youtube_video_sets?name=eq."+encodeURIComponent(name),{method:"DELETE"})}catch(e){console.warn("Could not delete shared YouTube set.",e)}}
 function refreshSavedSets(selectName=""){const data=getSavedSets();savedSets.innerHTML='<option value="">-- Choose a saved set --</option>';Object.keys(data).sort((a,b)=>a.localeCompare(b)).forEach(name=>{const o=document.createElement("option");o.value=name;o.textContent=name;savedSets.appendChild(o)});if(selectName&&data[selectName])savedSets.value=selectName}
 function buildLinkInputs(values=[]){const n=Number(choiceCount.value);links.innerHTML="";for(let i=0;i<n;i++){const row=document.createElement("div");row.className="linkrow";const num=document.createElement("span");num.textContent=(i+1)+".";const input=document.createElement("input");input.type="text";input.placeholder="Paste YouTube link here";input.dataset.index=i;input.id="video"+i;input.value=values[i]||"";row.append(num,input);links.appendChild(row)}}
 choiceCount.addEventListener("change",()=>buildLinkInputs());
@@ -115,7 +122,7 @@ document.getElementById("saveSet").onclick=()=>{
   data[name]={name,choiceCount:n,scanMs:Number(scanTime.value),urls,savedAt:new Date().toISOString()};if(putSavedSets(data)){refreshSavedSets(name);alert('Video set "'+name+'" saved.')}
 };
 document.getElementById("loadSet").onclick=()=>{const name=savedSets.value;if(!name)return;const set=getSavedSets()[name];if(!set)return;choiceCount.value=String(set.choiceCount);scanTime.value=String(set.scanMs);setName.value=set.name;buildLinkInputs(set.urls||[])};
-document.getElementById("deleteSet").onclick=()=>{const name=savedSets.value;if(!name)return;if(!confirm('Delete the saved set "'+name+'"?'))return;const data=getSavedSets();delete data[name];if(putSavedSets(data)){refreshSavedSets();setName.value=""}};
+document.getElementById("deleteSet").onclick=()=>{const name=savedSets.value;if(!name)return;if(!confirm('Delete the saved set "'+name+'"?'))return;const data=getSavedSets();delete data[name];if(putSavedSets(data)){deleteSharedSet(name);refreshSavedSets();setName.value=""}};
 
 function getVideoId(url){try{const u=new URL(url.trim());if(u.hostname==="youtu.be")return u.pathname.slice(1).split("/")[0];if(u.hostname.includes("youtube.com")){if(u.searchParams.get("v"))return u.searchParams.get("v");const parts=u.pathname.split("/").filter(Boolean);const i=parts.indexOf("embed");if(i>=0&&parts[i+1])return parts[i+1];const s=parts.indexOf("shorts");if(s>=0&&parts[s+1])return parts[s+1];const l=parts.indexOf("live");if(l>=0&&parts[l+1])return parts[l+1]}}catch(e){}return null}
 function thumbnail(id){return "https://img.youtube.com/vi/"+id+"/hqdefault.jpg"}
@@ -145,7 +152,7 @@ document.getElementById("playerBack").onclick=returnToScanner;
 window.addEventListener("keydown",e=>{if(e.code==="Space"){if(activity.style.display!=="none"){e.preventDefault();selectCurrent()}}else if(e.code==="Escape"){if(playerScreen.style.display!=="none"||activity.style.display!=="none"){e.preventDefault();goHome()}}});
 const originalSelect=selectCurrent;
 selectCurrent=function(){originalSelect();watchForVideoEnd()};
-buildLinkInputs();refreshSavedSets();
+buildLinkInputs();refreshSavedSets();loadSharedSets();
 </script>
 </body>
 </html>
