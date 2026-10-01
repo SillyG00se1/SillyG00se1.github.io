@@ -119,7 +119,7 @@ document.getElementById("saveSet").onclick=()=>{
   const n=Number(choiceCount.value),urls=[];for(let i=0;i<n;i++)urls.push(document.getElementById("video"+i).value.trim());
   const bad=urls.findIndex(u=>!getVideoId(u));if(bad>=0){alert("Please enter a valid YouTube video link for choice "+(bad+1)+" before saving.");document.getElementById("video"+bad).focus();return}
   const data=getSavedSets(),exists=!!data[name];if(exists&&!confirm('A saved set named "'+name+'" already exists. Replace it?'))return;
-  data[name]={name,choiceCount:n,scanMs:Number(scanTime.value),urls,savedAt:new Date().toISOString()};if(putSavedSets(data)){refreshSavedSets(name);alert('Video set "'+name+'" saved.')}
+  data[name]={name,choiceCount:n,scanMs:Number(scanTime.value),urls,savedAt:new Date().toISOString()};if(putSavedSets(data)){saveSharedSet(data[name]);refreshSavedSets(name);alert('Video set "'+name+'" saved.')}
 };
 document.getElementById("loadSet").onclick=()=>{const name=savedSets.value;if(!name)return;const set=getSavedSets()[name];if(!set)return;choiceCount.value=String(set.choiceCount);scanTime.value=String(set.scanMs);setName.value=set.name;buildLinkInputs(set.urls||[])};
 document.getElementById("deleteSet").onclick=()=>{const name=savedSets.value;if(!name)return;if(!confirm('Delete the saved set "'+name+'"?'))return;const data=getSavedSets();delete data[name];if(putSavedSets(data)){deleteSharedSet(name);refreshSavedSets();setName.value=""}};
