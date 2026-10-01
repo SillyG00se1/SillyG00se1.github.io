@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Touch Typing Unit</title>
+<style>
+:root{--bg:#000;--fg:#fff;--panel:#222;--button:#444;--current:#808080;--correct:#228B22;--error:#B22222;--corrected:#D4A017}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--fg);font-family:Arial,sans-serif}
+body{overflow:auto}button{font:700 22px Arial;color:#fff;background:var(--button);border:2px solid #666;border-radius:8px;padding:14px 20px;cursor:pointer}
+button:hover,button:focus{background:var(--current);outline:3px solid #fff}.screen{min-height:100vh;padding:24px 30px}.center{display:flex;flex-direction:column;align-items:center}
+h1{font-size:38px;margin:12px 0 8px}h2{font-size:34px;margin:10px 0}.subtitle{font-size:25px;margin:0 0 25px}
+.grid{display:grid;gap:10px;width:100%}.student-grid{grid-template-columns:repeat(2,minmax(220px,1fr));max-width:1100px}
+.lesson-grid{grid-template-columns:repeat(4,minmax(180px,1fr));max-width:1450px;flex:1}.lesson-grid button{min-height:135px;font-size:18px}.level-grid{grid-template-columns:repeat(4,1fr);max-width:1450px}.level-grid button{min-height:125px}
+.bottom{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:16px 0}.prompt-title,.typing-title{font-size:30px;margin:8px 0}
+.prompt{font-size:30px;line-height:1.5;display:flex;flex-wrap:wrap;gap:2px 1px;max-height:260px;overflow:auto;padding:12px 0}.char{display:inline-block;padding:3px;min-width:22px;text-align:center}
+.char.current{background:var(--current);color:#fff}.char.correct{background:var(--correct);color:#fff}.char.error{background:var(--error);color:#fff}.char.corrected{background:var(--corrected);color:#fff}
+textarea{width:100%;min-height:230px;resize:vertical;background:var(--panel);color:#fff;border:2px solid #666;border-radius:6px;font:30px Arial;padding:12px}
+.timer{font-size:22px;text-align:center;margin:8px}.typing-wrap{display:flex;flex-direction:column;min-height:100vh}
+.data-wrap{width:100%;overflow:auto;flex:1}table{border-collapse:collapse;width:100%;font-size:15px;background:#111}th,td{border:1px solid #555;padding:8px;text-align:left;vertical-align:top}th{background:#333;position:sticky;top:0}
+.notice{font-size:20px;max-width:900px;text-align:center;line-height:1.4}
+@media(max-width:900px){.lesson-grid,.level-grid{grid-template-columns:repeat(2,1fr)}}
+</style></head><body><div id="app"></div><script>
+const LESSONS={"1": {"title": "A S D F J K L .", "skill": "A S D F J K L .", "levels": ["asdf. jkl asdf. jkl fdsa lkj ..", "sad lad ask all fall salad", "A lad asks. A sad lad. A salad as all."]}, "2": {"title": "G H", "skill": "G H", "levels": ["fg jh gh gag h j h fgh jhg", "had hag gas has dad glad half", "A glad lad has a flag. Dad had a salad. Alf has a flag."]}, "3": {"title": "E I", "skill": "E I", "levels": ["de ki ei ie fei jdi", "gig hid fig his like slide side hide", "I like all slides. He hid his flag. She is glad."]}, "4": {"title": "R U", "skill": "R U", "levels": ["fr ju ru ur fru jru", "rude sure hair hard fire ride rule fish", "I feel free here. The fish is red. She has a hard ride."]}, "5": {"title": "T Y", "skill": "T Y", "levels": ["ft jy ty yt try thy", "try they stay that this your yurt tasty", "They stay here. Try this. That is a large hat."]}, "6": {"title": "W O", "skill": "W O", "levels": ["we? ow? wo who? two wow lol sws wsw olo lol sws", "we who word work two how now show world", "We work hard. Who has the word. How are you."]}, "7": {"title": "Q P", "skill": "Q P", "levels": ["qp pq qu pu qpq pqp qaq p;p ;p; aqa", "aqua up quit quick quiet queen people paper", "Lift up the paper. The queen is quite a sight. Quiet people work."]}, "8": {"title": "C M", "skill": "C M", "levels": ["cm mc me cmc mcm mjm cfc jmfc", "me can come same time music make home", "Come home with me. I can make music. The same time works."]}, "9": {"title": "V B", "skill": "V B", "levels": ["vb bv be ve vib biv jb fv fvjb jbj fvf", "be van very have above brave blue five", "I have five. The van is blue. Be brave."]}, "10": {"title": "N X", "skill": "N X", "levels": ["nx xn fv jn njn fvf fvnj fvnj", "no next name mix nine nice new box", "What is next? Mix the box. My name is nice."]}, "11": {"title": "Z", "skill": "Z", "levels": ["z az za zaz aza zzaa zaza zaq qaz aqz", "zip zero size zone zoo lazy amazing", "The zoo is amazing. The box is a nice size. Zero is next."]}, "12": {"title": "; ,", "skill": "; ,", "levels": ["l, ;l k, ;k as, s;l", "ask; fall, glass; class, last, less; pass", "Ask the class, because the glass is full. The class is small; I know."]}, "13": {"title": "?", "skill": "?", "levels": ["a? s? go? hi? yes? no?", "hi? go? yes? no? this? that? home?", "Hi, who are you? Can I go home? Hey, what is that?"]}, "14": {"title": "Capital Letters / Shift", "skill": "Capital letters / Shift", "levels": ["A S G H T I W M", "The I He She We They My This", "I Am Here. She Has A Hat. They Work Hard. We Like Music."]}, "15": {"title": "Full-Letter Review & Fluency", "skill": "Full-letter Review & Fluency", "levels": ["asdf jkl; gh qwerty yuiop zxcvbnm rewkljn enchqp er ed en", "quick school typing keyboard practice friend computer", "I can type with both hands. I am getting faster and more accurate. Practice helps me become a better typist."]}};
+const LEVEL_NAMES=["Letter Combinations","Words","Sentences"];
+const STUDENTS_KEY="typingUnitStudents",DATA_KEY="typingUnitData";
+let students=loadJSON(STUDENTS_KEY,[]),data=loadJSON(DATA_KEY,[]);
+let studentName="",lessonNumber=null,levelNumber=null,prompt="";
+let currentPosition=0,correctCount=0,errorCount=0,correctedErrorCount=0;
+let characterStatus=[],timerStarted=false,startTime=0,submitted=false,timerId=null;
+
+function loadJSON(k,f){try{let v=JSON.parse(localStorage.getItem(k));return v??f}catch(e){return f}}
+function saveJSON(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function button(t,fn){return `<button onclick="${fn}">${t}</button>`}
+function screen(x){document.getElementById("app").innerHTML=`<div class="screen">${x}</div>`}
+function stopTimer(){if(timerId)cancelAnimationFrame(timerId);timerId=null;timerStarted=false}
+
+function showStudentMenu(){
+ stopTimer();
+ let list=students.length?`<div class="grid student-grid">${students.map(n=>button(esc(n),`selectStudent(${JSON.stringify(n)})`)).join("")}</div>`:`<div class="notice">No student profiles yet.</div>`;
+ screen(`<div class="center"><h1>Touch Typing Unit</h1><div class="subtitle">Choose a student profile</div>${list}<div class="bottom">
+ ${button("ADD STUDENT","addStudent()")}${button("DELETE STUDENT","deleteStudent()")}${button("VIEW ALL DATA","viewData()")}</div></div>`)
+}
+function addStudent(){
+ let n=prompt("Enter the student's name:");if(!n||!n.trim())return;n=n.trim();
+ if(students.some(s=>s.toLowerCase()===n.toLowerCase())){alert(n+" is already in the student menu.");return}
+ students.push(n);students.sort((a,b)=>a.localeCompare(b));saveJSON(STUDENTS_KEY,students);showStudentMenu()
+}
+function deleteStudent(){
+ if(!students.length){alert("There are no student profiles to delete.");return}
+ let c=prompt("Enter the number of the student to delete:\n\n"+students.map((s,i)=>`${i+1}. ${s}`).join("\n")),i=Number(c)-1;
+ if(!Number.isInteger(i)||i<0||i>=students.length)return;let n=students[i];
+ if(confirm(`Delete the student profile for ${n}?\n\nThis does NOT delete that student's typing data.`)){students.splice(i,1);saveJSON(STUDENTS_KEY,students);if(studentName.toLowerCase()===n.toLowerCase())studentName="";showStudentMenu()}
+}
+function selectStudent(n){studentName=n;showLessonMenu()}
+function bestResult(n){
+ let rows=data.filter(r=>String(r.Student).toLowerCase()===studentName.toLowerCase()&&Number(r.Lesson)===n);
+ return rows.reduce((b,r)=>!b||Number(r.WPM)>Number(b.WPM)||(Number(r.WPM)===Number(b.WPM)&&Number(r.Accuracy)>Number(b.Accuracy))?r:b,null)
+}
+function showLessonMenu(){
+ let lessons=Array.from({length:15},(_,i)=>{let n=i+1,l=LESSONS[n],b=bestResult(n),res=b?`Best: ${Number(b.WPM).toFixed(1)} WPM | ${Number(b.Accuracy).toFixed(1)}% accuracy`:"Not completed";return `<button onclick="showLevelMenu(${n})">Lesson ${n}: ${esc(l.title)}<br><br>${res}</button>`}).join("");
+ let reviews=[3,6,9,12,15].map(n=>button("🍓 TYPING NINJA<br>REVIEW LESSONS "+(n-2)+"-"+n,`reviewNotice(${n})`)).join("");
+ screen(`<div class="center"><h2>${esc(studentName)}'s Touch Typing</h2><div class="subtitle">Choose a lesson</div><div class="grid lesson-grid">${lessons}${reviews}</div><div class="bottom">${button("CHANGE STUDENT","showStudentMenu()")}${button("VIEW DATA","viewData()")}</div></div>`)
+}
+function reviewNotice(n){alert("The Typing Ninja review games still appear in their original positions, but those Python review games need separate HTML conversion before they can run in a browser.")}
+function showLevelMenu(n){
+ lessonNumber=n;let l=LESSONS[n],levels=LEVEL_NAMES.map((x,i)=>button(`LEVEL ${i+1}<br>${x}`,`startLesson(${n},${i+1})`)).join("");
+ let review=[3,6,9,12,15].includes(n)?button("🍓 TYPING NINJA<br>REVIEW "+(n-2)+"-"+n,`reviewNotice(${n})`):"<div></div>";
+ screen(`<div class="center"><h2>Lesson ${n}: ${esc(l.title)}</h2><div class="subtitle">New keys / skill: ${esc(l.skill)}</div><div class="grid level-grid">${levels}${review}</div><div class="bottom">${button("BACK TO LESSONS","showLessonMenu()")}</div></div>`)
+}
+function startLesson(n,lvl){
+ lessonNumber=n;levelNumber=lvl;prompt=LESSONS[n].levels[lvl-1];currentPosition=0;correctCount=0;errorCount=0;correctedErrorCount=0;
+ timerStarted=false;startTime=0;submitted=false;characterStatus=Array.from(prompt,()=> "untyped");showTypingScreen()
+}
+function showTypingScreen(){
+ let chars=prompt.split("").map((c,i)=>`<span id="c${i}" class="char">${c===" "?"\u00a0":esc(c)}</span>`).join("");
+ screen(`<div class="typing-wrap"><h2>Lesson ${lessonNumber} • Level ${levelNumber}: ${LEVEL_NAMES[levelNumber-1]}</h2><div style="font-size:20px;margin-bottom:8px">${esc(studentName)}</div>
+ <div class="prompt-title">Type the following:</div><div id="prompt" class="prompt">${chars}</div><div class="typing-title">Your typing:</div>
+ <textarea id="typingArea" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea><div id="timer" class="timer">Time: 0.0 seconds</div>
+ <div class="bottom">${button("SUBMIT","submitTest()")}${button("BACK TO LESSON","showLevelMenu(lessonNumber)")}</div></div>`);
+ updatePromptColors();let a=document.getElementById("typingArea");a.addEventListener("keydown",handleKey);a.focus();updateTimer()
+}
+function startTimer(){if(!timerStarted){timerStarted=true;startTime=performance.now()}}
+function updateTimer(){let e=document.getElementById("timer");if(!e)return;e.textContent=`Time: ${timerStarted?((performance.now()-startTime)/1000).toFixed(1):"0.0"} seconds`;timerId=requestAnimationFrame(updateTimer)}
+function updatePromptColors(){characterStatus.forEach((s,i)=>{let e=document.getElementById("c"+i);if(!e)return;e.className="char";if(i===currentPosition)e.classList.add("current");else if(s==="correct")e.classList.add("correct");else if(s==="error")e.classList.add("error");else if(s==="corrected")e.classList.add("corrected")})}
+function handleKey(e){
+ if(["Shift","Control","Alt","Meta","CapsLock"].includes(e.key)||(/^F\d+$/.test(e.key)&&e.key.startsWith("F"))){e.preventDefault();return}
+ if(e.key==="Backspace"){e.preventDefault();handleBackspace();return}if(e.key==="Enter"){e.preventDefault();submitTest();return}
+ if(submitted||currentPosition>=prompt.length||e.key.length!==1){e.preventDefault();return}
+ startTimer();let expected=prompt[currentPosition],idx=currentPosition;
+ if(e.key===expected){if(characterStatus[idx]==="error"||characterStatus[idx]==="retry"){characterStatus[idx]="corrected";correctedErrorCount++}else characterStatus[idx]="correct";correctCount++;currentPosition++}
+ else{errorCount++;characterStatus[idx]="error";currentPosition++;document.getElementById("typingArea").value+=e.key}
+ updatePromptColors();e.preventDefault()
+}
+function handleBackspace(){
+ if(currentPosition<=0||submitted)return;let idx=currentPosition-1,s=characterStatus[idx],a=document.getElementById("typingArea");
+ if(a.value.length)a.value=a.value.slice(0,-1);currentPosition--;
+ if(s==="error"||s==="retry")characterStatus[idx]="retry";
+ else if(s==="correct"||s==="corrected"){if(correctCount>0)correctCount--;if(s==="corrected"&&correctedErrorCount>0)correctedErrorCount--;characterStatus[idx]="untyped"}
+ updatePromptColors()
+}
+function submitTest(){
+ if(submitted)return;submitted=true;let elapsed=timerStarted?(performance.now()-startTime)/1000:0;stopTimer();
+ let wpm=elapsed>0?(correctCount/5)/(elapsed/60):0,attempts=correctCount+errorCount,accuracy=attempts>0?correctCount/attempts*100:0;
+ saveData(elapsed,wpm,accuracy);showResults(elapsed,wpm,accuracy)
+}
+function saveData(elapsed,wpm,accuracy){
+ let now=new Date(),row={
+   Date:now.toLocaleDateString("en-US"),Time:now.toLocaleTimeString("en-US"),Student:studentName,Lesson:lessonNumber,Level:levelNumber,
+   "Level Name":LEVEL_NAMES[levelNumber-1],Prompt:prompt,"Time Seconds":Number(elapsed.toFixed(1)),WPM:Number(wpm.toFixed(1)),
+   Accuracy:Number(accuracy.toFixed(1)),"Correct Characters":correctCount,Errors:errorCount,"Corrected Characters":correctedErrorCount
+ };
+ data.push(row);saveJSON(DATA_KEY,data)
+}
+function showResults(elapsed,wpm,accuracy){
+ let b=bestResult(lessonNumber),best=b?`Best for this lesson: ${Number(b.WPM).toFixed(1)} WPM | ${Number(b.Accuracy).toFixed(1)}% accuracy`:"";
+ screen(`<div class="center"><h1>Typing Results</h1><div class="results">Student: ${esc(studentName)}\n\nLesson ${lessonNumber}: ${esc(LESSONS[lessonNumber].title)}\nLevel ${levelNumber}: ${LEVEL_NAMES[levelNumber-1]}\n\nTime: ${elapsed.toFixed(1)} seconds\n\nTyping Speed: ${wpm.toFixed(1)} WPM\n\nAccuracy: ${accuracy.toFixed(1)}%</div><div style="font-size:21px;font-weight:bold;margin:15px">${best}</div>
+ <div class="bottom">${button("TRY AGAIN",`startLesson(${lessonNumber},${levelNumber})`)}${button("OTHER LEVELS",`showLevelMenu(${lessonNumber})`)}${button("ALL LESSONS","showLessonMenu()")}${button("NEXT","nextFromResults()")}</div></div>`)
+}
+function nextFromResults(){
+ if(levelNumber<3)return startLesson(lessonNumber,levelNumber+1);
+ if([3,6,9,12,15].includes(lessonNumber)){reviewNotice(lessonNumber);if(lessonNumber<15)return startLesson(lessonNumber+1,1);return showLessonMenu()}
+ if(lessonNumber<15)return startLesson(lessonNumber+1,1);showLessonMenu()
+}
+function csvCell(v){return `"${String(v??"").replace(/"/g,'""')}"`}
+function downloadData(){
+ let h=["Date","Time","Student","Lesson","Level","Level Name","Prompt","Time Seconds","WPM","Accuracy","Correct Characters","Errors","Corrected Characters"];
+ let lines=[h.map(csvCell).join(",")].concat(data.map(r=>h.map(k=>csvCell(r[k])).join(",")));
+ let blob=new Blob([lines.join("\r\n")],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="typing_data.csv";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)
+}
+function viewData(){
+ stopTimer();let h=["Date","Time","Student","Lesson","Level","Level Name","Prompt","Time Seconds","WPM","Accuracy","Correct Characters","Errors","Corrected Characters"];
+ let rows=data.length?data.map(r=>`<tr>${h.map(k=>`<td>${esc(r[k]??"")}</td>`).join("")}</tr>`).join(""):`<tr><td colspan="${h.length}">No typing data saved yet.</td></tr>`;
+ screen(`<h2>Typing Data</h2><div class="bottom" style="justify-content:flex-start">${button("DOWNLOAD CSV","downloadData()")}${button("BACK","showStudentMenu()")}${button("CLEAR ALL DATA","clearAllData()")}</div><div class="data-wrap"><table><thead><tr>${h.map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`)
+}
+function clearAllData(){if(confirm("Delete ALL saved typing data? This cannot be undone.")){data=[];saveJSON(DATA_KEY,data);viewData()}}
+showStudentMenu();
+</script></body></html>
