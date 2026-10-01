@@ -63,13 +63,13 @@ function showStudentMenu(){
  ${button("ADD STUDENT","addStudent()")}${button("DELETE STUDENT","deleteStudent()")}${button("VIEW ALL DATA","viewData()")}</div></div>`)
 }
 function addStudent(){
- let n=prompt("Enter the student's name:");if(!n||!n.trim())return;n=n.trim();
+ let n=window.prompt("Enter the student's name:");if(!n||!n.trim())return;n=n.trim();
  if(students.some(s=>s.toLowerCase()===n.toLowerCase())){alert(n+" is already in the student menu.");return}
  students.push(n);students.sort((a,b)=>a.localeCompare(b));saveJSON(STUDENTS_KEY,students);saveStudentShared(n);showStudentMenu()
 }
 function deleteStudent(){
  if(!students.length){alert("There are no student profiles to delete.");return}
- let c=prompt("Enter the number of the student to delete:\n\n"+students.map((s,i)=>`${i+1}. ${s}`).join("\n")),i=Number(c)-1;
+ let c=window.prompt("Enter the number of the student to delete:\n\n"+students.map((s,i)=>`${i+1}. ${s}`).join("\n")),i=Number(c)-1;
  if(!Number.isInteger(i)||i<0||i>=students.length)return;let n=students[i];
  if(confirm(`Delete the student profile for ${n}?\n\nThis does NOT delete that student's typing data.`)){students.splice(i,1);saveJSON(STUDENTS_KEY,students);deleteStudentShared(n);if(studentName.toLowerCase()===n.toLowerCase())studentName="";showStudentMenu()}
 }
