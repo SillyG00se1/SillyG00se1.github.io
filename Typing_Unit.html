@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Touch Typing Unit</title>
+<script>
+const SUPABASE_URL="https://bszanoiwepiqhvzbcvnz.supabase.co";
+const SUPABASE_KEY="sb_publishable_B6A3Pp4Tsa3oDKUn3Q7zBA_lM1who2g";
+async function supabaseRequest(path,options={}){
+  const res=await fetch(SUPABASE_URL+"/rest/v1/"+path,{...options,headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY,"Content-Type":"application/json",Prefer:"return=representation",...(options.headers||{})}});
+  if(!res.ok) throw new Error(await res.text());
+  const text=await res.text(); return text?JSON.parse(text):[];
+}
+</script>
 <style>
 :root{--bg:#000;--fg:#fff;--panel:#222;--button:#444;--current:#808080;--correct:#228B22;--error:#B22222;--corrected:#D4A017}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--fg);font-family:Arial,sans-serif}
@@ -21,13 +30,27 @@ textarea{width:100%;min-height:230px;resize:vertical;background:var(--panel);col
 const LESSONS={"1": {"title": "A S D F J K L .", "skill": "A S D F J K L .", "levels": ["asdf. jkl asdf. jkl fdsa lkj ..", "sad lad ask all fall salad", "A lad asks. A sad lad. A salad as all."]}, "2": {"title": "G H", "skill": "G H", "levels": ["fg jh gh gag h j h fgh jhg", "had hag gas has dad glad half", "A glad lad has a flag. Dad had a salad. Alf has a flag."]}, "3": {"title": "E I", "skill": "E I", "levels": ["de ki ei ie fei jdi", "gig hid fig his like slide side hide", "I like all slides. He hid his flag. She is glad."]}, "4": {"title": "R U", "skill": "R U", "levels": ["fr ju ru ur fru jru", "rude sure hair hard fire ride rule fish", "I feel free here. The fish is red. She has a hard ride."]}, "5": {"title": "T Y", "skill": "T Y", "levels": ["ft jy ty yt try thy", "try they stay that this your yurt tasty", "They stay here. Try this. That is a large hat."]}, "6": {"title": "W O", "skill": "W O", "levels": ["we? ow? wo who? two wow lol sws wsw olo lol sws", "we who word work two how now show world", "We work hard. Who has the word. How are you."]}, "7": {"title": "Q P", "skill": "Q P", "levels": ["qp pq qu pu qpq pqp qaq p;p ;p; aqa", "aqua up quit quick quiet queen people paper", "Lift up the paper. The queen is quite a sight. Quiet people work."]}, "8": {"title": "C M", "skill": "C M", "levels": ["cm mc me cmc mcm mjm cfc jmfc", "me can come same time music make home", "Come home with me. I can make music. The same time works."]}, "9": {"title": "V B", "skill": "V B", "levels": ["vb bv be ve vib biv jb fv fvjb jbj fvf", "be van very have above brave blue five", "I have five. The van is blue. Be brave."]}, "10": {"title": "N X", "skill": "N X", "levels": ["nx xn fv jn njn fvf fvnj fvnj", "no next name mix nine nice new box", "What is next? Mix the box. My name is nice."]}, "11": {"title": "Z", "skill": "Z", "levels": ["z az za zaz aza zzaa zaza zaq qaz aqz", "zip zero size zone zoo lazy amazing", "The zoo is amazing. The box is a nice size. Zero is next."]}, "12": {"title": "; ,", "skill": "; ,", "levels": ["l, ;l k, ;k as, s;l", "ask; fall, glass; class, last, less; pass", "Ask the class, because the glass is full. The class is small; I know."]}, "13": {"title": "?", "skill": "?", "levels": ["a? s? go? hi? yes? no?", "hi? go? yes? no? this? that? home?", "Hi, who are you? Can I go home? Hey, what is that?"]}, "14": {"title": "Capital Letters / Shift", "skill": "Capital letters / Shift", "levels": ["A S G H T I W M", "The I He She We They My This", "I Am Here. She Has A Hat. They Work Hard. We Like Music."]}, "15": {"title": "Full-Letter Review & Fluency", "skill": "Full-letter Review & Fluency", "levels": ["asdf jkl; gh qwerty yuiop zxcvbnm rewkljn enchqp er ed en", "quick school typing keyboard practice friend computer", "I can type with both hands. I am getting faster and more accurate. Practice helps me become a better typist."]}};
 const LEVEL_NAMES=["Letter Combinations","Words","Sentences"];
 const STUDENTS_KEY="typingUnitStudents",DATA_KEY="typingUnitData";
-let students=loadJSON(STUDENTS_KEY,[]),data=loadJSON(DATA_KEY,[]);
+let students=loadJSON(STUDENTS_KEY,[]),data=loadJSON(DATA_KEY,[]),remoteReady=false;
 let studentName="",lessonNumber=null,levelNumber=null,prompt="";
 let currentPosition=0,correctCount=0,errorCount=0,correctedErrorCount=0;
 let characterStatus=[],timerStarted=false,startTime=0,submitted=false,timerId=null;
 
 function loadJSON(k,f){try{let v=JSON.parse(localStorage.getItem(k));return v??f}catch(e){return f}}
 function saveJSON(k,v){localStorage.setItem(k,JSON.stringify(v))}
+async function loadSharedData(){
+  try{
+    const [sr,dr]=await Promise.all([
+      supabaseRequest("typing_students?select=name&order=name"),
+      supabaseRequest("typing_results?select=*&order=id.desc")
+    ]);
+    const remoteStudents=sr.map(x=>x.name).filter(Boolean);
+    students=[...new Set([...students,...remoteStudents])].sort((a,b)=>a.localeCompare(b));
+    data=dr.map(x=>({Date:x.date,Time:x.time,Student:x.student,Lesson:x.lesson,Level:x.level,"Level Name":x.level_name,Prompt:x.prompt,"Time Seconds":x.time_seconds,WPM:x.wpm,Accuracy:x.accuracy,"Correct Characters":x.correct_characters,Errors:x.errors,"Corrected Characters":x.corrected_characters}));
+    remoteReady=true;saveJSON(STUDENTS_KEY,students);saveJSON(DATA_KEY,data);
+  }catch(e){console.warn("Shared Supabase storage unavailable; using local browser storage.",e);}
+}
+async function saveStudentShared(name){try{await supabaseRequest("typing_students",{method:"POST",body:JSON.stringify({name})})}catch(e){console.warn("Could not save student to shared storage.",e)}}
+async function deleteStudentShared(name){try{await supabaseRequest("typing_students?name=eq."+encodeURIComponent(name),{method:"DELETE"})}catch(e){console.warn("Could not delete student from shared storage.",e)}}
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function button(t,fn){return `<button onclick="${fn}">${t}</button>`}
 function screen(x){document.getElementById("app").innerHTML=`<div class="screen">${x}</div>`}
@@ -42,13 +65,13 @@ function showStudentMenu(){
 function addStudent(){
  let n=prompt("Enter the student's name:");if(!n||!n.trim())return;n=n.trim();
  if(students.some(s=>s.toLowerCase()===n.toLowerCase())){alert(n+" is already in the student menu.");return}
- students.push(n);students.sort((a,b)=>a.localeCompare(b));saveJSON(STUDENTS_KEY,students);showStudentMenu()
+ students.push(n);students.sort((a,b)=>a.localeCompare(b));saveJSON(STUDENTS_KEY,students);saveStudentShared(n);showStudentMenu()
 }
 function deleteStudent(){
  if(!students.length){alert("There are no student profiles to delete.");return}
  let c=prompt("Enter the number of the student to delete:\n\n"+students.map((s,i)=>`${i+1}. ${s}`).join("\n")),i=Number(c)-1;
  if(!Number.isInteger(i)||i<0||i>=students.length)return;let n=students[i];
- if(confirm(`Delete the student profile for ${n}?\n\nThis does NOT delete that student's typing data.`)){students.splice(i,1);saveJSON(STUDENTS_KEY,students);if(studentName.toLowerCase()===n.toLowerCase())studentName="";showStudentMenu()}
+ if(confirm(`Delete the student profile for ${n}?\n\nThis does NOT delete that student's typing data.`)){students.splice(i,1);saveJSON(STUDENTS_KEY,students);deleteStudentShared(n);if(studentName.toLowerCase()===n.toLowerCase())studentName="";showStudentMenu()}
 }
 function selectStudent(n){studentName=n;showLessonMenu()}
 function bestResult(n){
@@ -102,13 +125,17 @@ function submitTest(){
  let wpm=elapsed>0?(correctCount/5)/(elapsed/60):0,attempts=correctCount+errorCount,accuracy=attempts>0?correctCount/attempts*100:0;
  saveData(elapsed,wpm,accuracy);showResults(elapsed,wpm,accuracy)
 }
+async function saveSharedResult(row){
+ try{await supabaseRequest("typing_results",{method:"POST",body:JSON.stringify({date:row.Date,time:row.Time,student:row.Student,lesson:row.Lesson,level:row.Level,level_name:row["Level Name"],prompt:row.Prompt,time_seconds:row["Time Seconds"],wpm:row.WPM,accuracy:row.Accuracy,correct_characters:row["Correct Characters"],errors:row.Errors,corrected_characters:row["Corrected Characters"]})});remoteReady=true}
+ catch(e){console.warn("Could not save result to shared storage; local backup retained.",e)}
+}
 function saveData(elapsed,wpm,accuracy){
  let now=new Date(),row={
    Date:now.toLocaleDateString("en-US"),Time:now.toLocaleTimeString("en-US"),Student:studentName,Lesson:lessonNumber,Level:levelNumber,
    "Level Name":LEVEL_NAMES[levelNumber-1],Prompt:prompt,"Time Seconds":Number(elapsed.toFixed(1)),WPM:Number(wpm.toFixed(1)),
    Accuracy:Number(accuracy.toFixed(1)),"Correct Characters":correctCount,Errors:errorCount,"Corrected Characters":correctedErrorCount
  };
- data.push(row);saveJSON(DATA_KEY,data)
+ data.push(row);saveJSON(DATA_KEY,data);saveSharedResult(row)
 }
 function showResults(elapsed,wpm,accuracy){
  let b=bestResult(lessonNumber),best=b?`Best for this lesson: ${Number(b.WPM).toFixed(1)} WPM | ${Number(b.Accuracy).toFixed(1)}% accuracy`:"";
@@ -126,11 +153,13 @@ function downloadData(){
  let lines=[h.map(csvCell).join(",")].concat(data.map(r=>h.map(k=>csvCell(r[k])).join(",")));
  let blob=new Blob([lines.join("\r\n")],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="typing_data.csv";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)
 }
-function viewData(){
- stopTimer();let h=["Date","Time","Student","Lesson","Level","Level Name","Prompt","Time Seconds","WPM","Accuracy","Correct Characters","Errors","Corrected Characters"];
+async function viewData(){
+ stopTimer();
+ try{const dr=await supabaseRequest("typing_results?select=*&order=id.desc");data=dr.map(x=>({Date:x.date,Time:x.time,Student:x.student,Lesson:x.lesson,Level:x.level,"Level Name":x.level_name,Prompt:x.prompt,"Time Seconds":x.time_seconds,WPM:x.wpm,Accuracy:x.accuracy,"Correct Characters":x.correct_characters,Errors:x.errors,"Corrected Characters":x.corrected_characters}));saveJSON(DATA_KEY,data)}catch(e){}
+ let h=["Date","Time","Student","Lesson","Level","Level Name","Prompt","Time Seconds","WPM","Accuracy","Correct Characters","Errors","Corrected Characters"];
  let rows=data.length?data.map(r=>`<tr>${h.map(k=>`<td>${esc(r[k]??"")}</td>`).join("")}</tr>`).join(""):`<tr><td colspan="${h.length}">No typing data saved yet.</td></tr>`;
  screen(`<h2>Typing Data</h2><div class="bottom" style="justify-content:flex-start">${button("DOWNLOAD CSV","downloadData()")}${button("BACK","showStudentMenu()")}${button("CLEAR ALL DATA","clearAllData()")}</div><div class="data-wrap"><table><thead><tr>${h.map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`)
 }
 function clearAllData(){if(confirm("Delete ALL saved typing data? This cannot be undone.")){data=[];saveJSON(DATA_KEY,data);viewData()}}
-showStudentMenu();
+loadSharedData().finally(()=>showStudentMenu());
 </script></body></html>
