@@ -13,11 +13,11 @@ async function supabaseRequest(path,options={}){
 <style>
 :root{--bg:#000;--fg:#fff;--panel:#222;--button:#444;--current:#808080;--correct:#228B22;--error:#B22222;--corrected:#D4A017}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--fg);font-family:Arial,sans-serif}
-body{overflow:auto}button{font:700 22px Arial;color:#fff;background:var(--button);border:2px solid #666;border-radius:8px;padding:14px 20px;cursor:pointer}
-button:hover,button:focus{background:var(--current);outline:3px solid #fff}.screen{min-height:100vh;padding:24px 30px}.center{display:flex;flex-direction:column;align-items:center}
+body{overflow:hidden}button{font:700 22px Arial;color:#fff;background:var(--button);border:2px solid #666;border-radius:8px;padding:14px 20px;cursor:pointer}
+button:hover,button:focus{background:var(--current);outline:3px solid #fff}.screen{height:100vh;min-height:0;padding:10px 18px;overflow:hidden}.center{display:flex;flex-direction:column;align-items:center}
 h1{font-size:38px;margin:12px 0 8px}h2{font-size:34px;margin:10px 0}.subtitle{font-size:25px;margin:0 0 25px}
 .grid{display:grid;gap:10px;width:100%}.student-grid{grid-template-columns:repeat(2,minmax(220px,1fr));max-width:1100px}
-.lesson-grid{grid-template-columns:repeat(4,minmax(180px,1fr));max-width:1450px;flex:1}.lesson-grid button{min-height:135px;font-size:18px}.level-grid{grid-template-columns:repeat(4,1fr);max-width:1450px}.level-grid button{min-height:125px}
+.lesson-grid{grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(5,minmax(0,1fr));width:100%;height:calc(100vh - 150px);max-width:none;flex:0 0 auto}.lesson-grid button{min-height:0;height:100%;font-size:17px;padding:8px 10px}.level-grid{grid-template-columns:repeat(4,1fr);max-width:1450px}.level-grid button{min-height:125px}
 .bottom{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:16px 0}.prompt-title,.typing-title{font-size:30px;margin:8px 0}
 .prompt{font-size:30px;line-height:1.5;display:flex;flex-wrap:wrap;gap:2px 1px;max-height:260px;overflow:auto;padding:12px 0}.char{display:inline-block;padding:3px;min-width:22px;text-align:center}
 .char.current{background:var(--current);color:#fff}.char.correct{background:var(--correct);color:#fff}.char.error{background:var(--error);color:#fff}.char.corrected{background:var(--corrected);color:#fff}
@@ -79,14 +79,42 @@ function bestResult(n){
  return rows.reduce((b,r)=>!b||Number(r.WPM)>Number(b.WPM)||(Number(r.WPM)===Number(b.WPM)&&Number(r.Accuracy)>Number(b.Accuracy))?r:b,null)
 }
 function showLessonMenu(){
- let lessons=Array.from({length:15},(_,i)=>{let n=i+1,l=LESSONS[n],b=bestResult(n),res=b?`Best: ${Number(b.WPM).toFixed(1)} WPM | ${Number(b.Accuracy).toFixed(1)}% accuracy`:"Not completed";return `<button onclick="showLevelMenu(${n})">Lesson ${n}: ${esc(l.title)}<br><br>${res}</button>`}).join("");
- let reviews=[3,6,9,12,15].map(n=>button("🍓 TYPING NINJA<br>REVIEW LESSONS "+(n-2)+"-"+n,`reviewNotice(${n})`)).join("");
- screen(`<div class="center"><h2>${esc(studentName)}'s Touch Typing</h2><div class="subtitle">Choose a lesson</div><div class="grid lesson-grid">${lessons}${reviews}</div><div class="bottom">${button("CHANGE STUDENT","showStudentMenu()")}${button("VIEW DATA","viewData()")}</div></div>`)
+ stopTimer();
+ let tiles=[];
+ for(let row=0;row<5;row++){
+   for(let col=0;col<3;col++){
+     const n=row*3+col+1,l=LESSONS[n],b=bestResult(n);
+     const res=b?`Best: ${Number(b.WPM).toFixed(1)} WPM | ${Number(b.Accuracy).toFixed(1)}% accuracy`:"Not completed";
+     tiles.push(`<button onclick="showLevelMenu(${n})">Lesson ${n}: ${esc(l.title)}<br><br>${res}</button>`);
+   }
+   const groupEnd=(row+1)*3;
+   tiles.push(button(`🍓 TYPING NINJA<br>REVIEW LESSONS ${groupEnd-2}-${groupEnd}`,`startNinjaReview(${groupEnd})`));
+ }
+ screen(`<div class="center"><h2>${esc(studentName)}&apos;s Touch Typing</h2><div class="subtitle">Choose a lesson</div><div class="grid lesson-grid">${tiles.join("")}</div><div class="bottom" style="margin:8px 0"><button onclick="showStudentMenu()">CHANGE STUDENT</button><button onclick="viewData()">VIEW DATA</button></div></div>`);
 }
-function reviewNotice(n){alert("The Typing Ninja review games still appear in their original positions, but those Python review games need separate HTML conversion before they can run in a browser.")}
+const NINJA_GROUPS={3:{letters:"asdfjklghei."},6:{letters:"asdfjklgheirutywo"},9:{letters:"asdfjklgheirutywoqpcmvbnx"},12:{letters:"asdfjklgheirutywoqpcmvbnxz;"},15:{letters:"asdfjklgheirutywoqpcmvbnxz;"}};
+let ninjaState=null;
+function startNinjaReview(groupEnd){
+ const cfg=NINJA_GROUPS[groupEnd]||NINJA_GROUPS[3];
+ screen(`<div style="height:100vh;display:flex;flex-direction:column;background:#BDEBFF;color:#000"><div style="display:flex;justify-content:space-between;align-items:center;padding:8px 18px;font-size:28px;font-weight:bold"><span id="ninjaScore">Score: 0</span><span id="ninjaMessage">TYPE THE LETTER!</span><span id="ninjaLives">X X X</span></div><canvas id="ninjaCanvas" style="display:block;flex:1;width:100%;min-height:0"></canvas><div class="bottom" style="margin:5px"><button onclick="endNinjaReview()">RETURN TO LESSONS</button></div></div>`);
+ const canvas=document.getElementById("ninjaCanvas"),ctx=canvas.getContext("2d");
+ ninjaState={canvas,ctx,w:0,h:0,targets:[],score:0,lives:3,gameOver:false,canRestart:false,letters:[...new Set(cfg.letters.split(""))],lastSpawn:0,particles:[],images:{},groupEnd};
+ const resize=()=>{canvas.width=canvas.clientWidth*devicePixelRatio;canvas.height=canvas.clientHeight*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);ninjaState.w=canvas.clientWidth;ninjaState.h=canvas.clientHeight};
+ ninjaState.resize=resize;["1","2","3","4","5","6","bomb"].forEach(k=>{const im=new Image();im.src="Fruit/"+k+".png";ninjaState.images[k]=im});
+ resize();window.addEventListener("resize",resize);window.onkeydown=ninjaKey;ninjaSpawn();ninjaSpawn();ninjaState.lastSpawn=performance.now();ninjaUpdateHUD();requestAnimationFrame(ninjaLoop);
+}
+function ninjaSpawn(){const s=ninjaState;if(!s||s.gameOver||s.targets.length>=3)return;const used=s.targets.map(t=>t.letter),available=s.letters.filter(x=>!used.includes(x));if(!available.length)return;const letter=available[Math.floor(Math.random()*available.length)],bomb=Math.random()<.2,x=150+Math.random()*Math.max(1,s.w-300),y=s.h+100+Math.random()*80;s.targets.push({x,y,letter,bomb,key:bomb?"bomb":String(1+Math.floor(Math.random()*6)),angle:0,vy:5.5+Math.random()*1.2})}
+function ninjaParticles(x,y,bomb){const s=ninjaState;for(let i=0;i<28;i++)s.particles.push({x,y,dx:(Math.random()-.5)*12,dy:(Math.random()-.5)*12,life:18,bomb})}
+function ninjaMessage(t){const e=document.getElementById("ninjaMessage");if(e)e.textContent=t}
+function ninjaUpdateHUD(){const s=ninjaState;if(!s)return;const a=document.getElementById("ninjaScore"),b=document.getElementById("ninjaLives");if(a)a.textContent="Score: "+s.score;if(b)b.textContent=s.lives>0?Array(s.lives).fill("X").join(" "):""}
+function ninjaEndGame(reason){const s=ninjaState;if(!s||s.gameOver)return;s.gameOver=true;s.canRestart=false;ninjaMessage(reason);setTimeout(()=>{if(ninjaState===s){s.canRestart=true;ninjaMessage("GAME OVER — PRESS SPACE TO PLAY AGAIN")}},900)}
+function ninjaKey(e){const s=ninjaState;if(!s)return;if(s.gameOver){if(e.code==="Space"&&s.canRestart)startNinjaReview(s.groupEnd);e.preventDefault();return}const typed=(e.key||"").toLowerCase();if(!s.letters.includes(typed))return;const t=s.targets.find(x=>x.letter===typed);if(!t){ninjaMessage("TRY AGAIN!");setTimeout(()=>ninjaMessage("TYPE THE LETTER!"),450);return}const i=s.targets.indexOf(t);s.targets.splice(i,1);ninjaParticles(t.x,t.y,t.bomb);if(t.bomb)ninjaEndGame("BOOM!");else{s.score++;ninjaMessage("GREAT!");ninjaUpdateHUD();setTimeout(()=>ninjaMessage("TYPE THE LETTER!"),350)}e.preventDefault()}
+function ninjaLoop(now){const s=ninjaState;if(!s)return;const ctx=s.ctx;ctx.clearRect(0,0,s.w,s.h);if(!s.gameOver){if(now-s.lastSpawn>650&&s.targets.length<3){ninjaSpawn();s.lastSpawn=now}for(const t of s.targets){t.y-=t.vy;t.angle+=.035}for(let i=s.targets.length-1;i>=0;i--){const t=s.targets[i];if(t.y<-130){s.targets.splice(i,1);if(!t.bomb){s.lives--;ninjaUpdateHUD();ninjaMessage("MISSED!");if(s.lives<=0)ninjaEndGame("GAME OVER")}else ninjaMessage("GOOD AVOID!")}}}for(const p of s.particles){p.x+=p.dx;p.y+=p.dy;p.dy+=.25;p.life--;ctx.globalAlpha=Math.max(0,p.life/18);ctx.fillStyle=p.bomb?"#333":"#ff3333";ctx.beginPath();ctx.arc(p.x,p.y,5,0,Math.PI*2);ctx.fill()}s.particles=s.particles.filter(p=>p.life>0);ctx.globalAlpha=1;for(const t of s.targets){const im=s.images[t.key],size=t.key==="bomb"?160:150;if(im&&im.complete){ctx.save();ctx.translate(t.x,t.y);ctx.rotate(t.angle);ctx.drawImage(im,-size/2,-size/2,size,size);ctx.restore()}ctx.fillStyle="white";ctx.strokeStyle="black";ctx.lineWidth=4;ctx.fillRect(t.x-60,t.y+70,120,120);ctx.strokeRect(t.x-60,t.y+70,120,120);ctx.fillStyle="black";ctx.font="bold 68px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(t.letter.toUpperCase(),t.x,t.y+130)}if(s.gameOver){ctx.fillStyle="rgba(0,0,0,.72)";ctx.fillRect(0,0,s.w,s.h);ctx.fillStyle="red";ctx.font="bold 68px Arial";ctx.textAlign="center";ctx.fillText("GAME OVER",s.w/2,s.h/2-50);ctx.fillStyle="white";ctx.font="bold 38px Arial";ctx.fillText("FINAL SCORE: "+s.score,s.w/2,s.h/2+20)}requestAnimationFrame(ninjaLoop)}
+function endNinjaReview(){if(ninjaState){window.onkeydown=null;window.removeEventListener("resize",ninjaState.resize)}ninjaState=null;showLessonMenu()}
+function reviewNotice(n){startNinjaReview(n)}
 function showLevelMenu(n){
  lessonNumber=n;let l=LESSONS[n],levels=LEVEL_NAMES.map((x,i)=>button(`LEVEL ${i+1}<br>${x}`,`startLesson(${n},${i+1})`)).join("");
- let review=[3,6,9,12,15].includes(n)?button("🍓 TYPING NINJA<br>REVIEW "+(n-2)+"-"+n,`reviewNotice(${n})`):"<div></div>";
+ let review=[3,6,9,12,15].includes(n)?button("🍓 TYPING NINJA<br>REVIEW "+(n-2)+"-"+n,`startNinjaReview(${n})`):"<div></div>";
  screen(`<div class="center"><h2>Lesson ${n}: ${esc(l.title)}</h2><div class="subtitle">New keys / skill: ${esc(l.skill)}</div><div class="grid level-grid">${levels}${review}</div><div class="bottom">${button("BACK TO LESSONS","showLessonMenu()")}</div></div>`)
 }
 function startLesson(n,lvl){
@@ -153,13 +181,24 @@ function downloadData(){
  let lines=[h.map(csvCell).join(",")].concat(data.map(r=>h.map(k=>csvCell(r[k])).join(",")));
  let blob=new Blob([lines.join("\r\n")],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="typing_data.csv";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)
 }
-async function viewData(){
+async function viewData(refresh=true){
  stopTimer();
- try{const dr=await supabaseRequest("typing_results?select=*&order=id.desc");data=dr.map(x=>({Date:x.date,Time:x.time,Student:x.student,Lesson:x.lesson,Level:x.level,"Level Name":x.level_name,Prompt:x.prompt,"Time Seconds":x.time_seconds,WPM:x.wpm,Accuracy:x.accuracy,"Correct Characters":x.correct_characters,Errors:x.errors,"Corrected Characters":x.corrected_characters}));saveJSON(DATA_KEY,data)}catch(e){}
+ if(refresh)try{const dr=await supabaseRequest("typing_results?select=*&order=id.desc");data=dr.map(x=>({Date:x.date,Time:x.time,Student:x.student,Lesson:x.lesson,Level:x.level,"Level Name":x.level_name,Prompt:x.prompt,"Time Seconds":x.time_seconds,WPM:x.wpm,Accuracy:x.accuracy,"Correct Characters":x.correct_characters,Errors:x.errors,"Corrected Characters":x.corrected_characters}));saveJSON(DATA_KEY,data)}catch(e){}
  let h=["Date","Time","Student","Lesson","Level","Level Name","Prompt","Time Seconds","WPM","Accuracy","Correct Characters","Errors","Corrected Characters"];
  let rows=data.length?data.map(r=>`<tr>${h.map(k=>`<td>${esc(r[k]??"")}</td>`).join("")}</tr>`).join(""):`<tr><td colspan="${h.length}">No typing data saved yet.</td></tr>`;
  screen(`<h2>Typing Data</h2><div class="bottom" style="justify-content:flex-start">${button("DOWNLOAD CSV","downloadData()")}${button("BACK","showStudentMenu()")}${button("CLEAR ALL DATA","clearAllData()")}</div><div class="data-wrap"><table><thead><tr>${h.map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`)
 }
-function clearAllData(){if(confirm("Delete ALL saved typing data? This cannot be undone.")){data=[];saveJSON(DATA_KEY,data);viewData()}}
+async function clearAllData(){
+ const password=window.prompt("Enter the teacher password to clear ALL typing data:");
+ if(password===null)return;
+ if(password!=="TVI2026"){alert("Incorrect password. No data was deleted.");return}
+ if(!confirm("Delete ALL saved typing data for ALL students? This cannot be undone."))return;
+ try{
+   await supabaseRequest("typing_results?id=not.is.null",{method:"DELETE",headers:{Prefer:"return=minimal"}});
+   data=[];saveJSON(DATA_KEY,data);
+   alert("All typing data has been cleared.");
+   viewData(false);
+ }catch(e){console.error(e);alert("The shared typing data could not be cleared. Please add the Supabase DELETE policy.");}
+}
 loadSharedData().finally(()=>showStudentMenu());
 </script></body></html>
