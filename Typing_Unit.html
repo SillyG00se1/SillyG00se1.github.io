@@ -58,7 +58,7 @@ function stopTimer(){if(timerId)cancelAnimationFrame(timerId);timerId=null;timer
 
 function showStudentMenu(){
  stopTimer();
- let list=students.length?`<div class="grid student-grid">${students.map(n=>button(esc(n),`selectStudent(${JSON.stringify(n)})`)).join("")}</div>`:`<div class="notice">No student profiles yet.</div>`;
+ let list=students.length?`<div class="grid student-grid">${students.map(n=>button(esc(n),`selectStudent(${JSON.stringify(n).replace(/"/g,"&quot;")})`)).join("")}</div>`:`<div class="notice">No student profiles yet.</div>`;
  screen(`<div class="center"><h1>Touch Typing Unit</h1><div class="subtitle">Choose a student profile</div>${list}<div class="bottom">
  ${button("ADD STUDENT","addStudent()")}${button("DELETE STUDENT","deleteStudent()")}${button("VIEW ALL DATA","viewData()")}</div></div>`)
 }
