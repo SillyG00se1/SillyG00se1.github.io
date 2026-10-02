@@ -62,7 +62,7 @@ h2{font-size:clamp(28px,3vw,42px);margin:0 0 18px;text-align:center}
 .water-drop{width:22px;height:30px;background:#168cff;border-radius:50% 50% 55% 55%;box-shadow:inset 5px 4px 5px rgba(255,255,255,.65)}
 .confetti-piece{width:15px;height:30px;border-radius:3px}
 .star-piece{font-size:46px;line-height:1;color:#ffd21f;text-shadow:0 2px 2px rgba(0,0,0,.2)}
-.slime-piece{width:34px;height:26px;background:#7bdc24;border-radius:50% 50% 45% 55%;box-shadow:inset 6px 5px 7px rgba(255,255,255,.45)}
+.slime-piece{width:42px;height:30px;background:linear-gradient(135deg,#b85cff,#7f24d6);border-radius:50% 50% 45% 55%;box-shadow:inset 7px 5px 8px rgba(255,255,255,.5),0 4px 6px rgba(76,0,120,.3);position:relative}.slime-piece:after{content:"";position:absolute;left:9px;bottom:-18px;width:24px;height:24px;background:inherit;border-radius:50% 50% 65% 65%;clip-path:polygon(0 0,100% 0,78% 70%,50% 100%,22% 70%)}
 .sparkle-piece{font-size:48px;line-height:1;color:#ff4fa3;text-shadow:0 0 8px #fff,0 0 14px #ff4fa3}
 
 #gameBack{position:absolute;left:18px;bottom:18px;z-index:30;border:2px solid #666;border-radius:10px;padding:10px 16px;background:#fff;font-weight:bold}
@@ -315,10 +315,14 @@ function popBalloon(){
   },4300);
 }
 function explosion(cx,cy){
-  const type=selectedColor?.name||"Red";
-  if(type==="Red")return redBang(cx,cy); if(type==="Blue")return blueWater(cx,cy);
-  if(type==="Green")return greenConfetti(cx,cy); if(type==="Yellow")return yellowStars(cx,cy);
-  if(type==="Purple")return purpleSlime(cx,cy); return pinkSparkles(cx,cy);
+  const type=selectedColor?.name;
+  if(type==="Red") return redBang(cx,cy);
+  if(type==="Blue") return blueWater(cx,cy);
+  if(type==="Green") return greenConfetti(cx,cy);
+  if(type==="Yellow") return yellowStars(cx,cy);
+  if(type==="Purple") return purpleSlime(cx,cy);
+  if(type==="Pink") return pinkSparkles(cx,cy);
+  return redBang(cx,cy);
 }
 function makeEffect(cls,text,cx,cy){
   const e=document.createElement("div");e.className="effect-item "+cls;if(text)e.textContent=text;
@@ -339,9 +343,16 @@ function redBang(cx,cy){
   for(let i=0;i<35;i++){const p=makeEffect("explosion-particle",null,cx,cy),a=Math.random()*6.28,s=100+Math.random()*280;animateEffect(p,Math.cos(a)*s,Math.sin(a)*s,850,180,Math.random()*360)}
 }
 function blueWater(cx,cy){for(let i=0;i<40;i++){const e=makeEffect("water-drop",null,cx,cy),a=Math.random()*6.28,s=80+Math.random()*260;animateEffect(e,Math.cos(a)*s,Math.sin(a)*s-80,1100,330,Math.random()*90-45)}}
-function greenConfetti(cx,cy){const colors=["#22b14c","#8cff5a","#0a8f3c","#ffd21f","#ff4fa3","#2787ff","#9b4dff"];for(let i=0;i<55;i++){const e=makeEffect("confetti-piece",null,cx,cy);e.style.background=colors[i%colors.length];const a=Math.random()*6.28,s=80+Math.random()*300;animateEffect(e,Math.cos(a)*s,Math.sin(a)*s-100,1200,360,Math.random()*720-360)}}
+function greenConfetti(cx,cy){const colors=["#22b14c","#8cff5a","#0a8f3c","#42d66b","#b7ff75"];for(let i=0;i<55;i++){const e=makeEffect("confetti-piece",null,cx,cy);e.style.background=colors[i%colors.length];const a=Math.random()*6.28,s=80+Math.random()*300;animateEffect(e,Math.cos(a)*s,Math.sin(a)*s-100,1200,360,Math.random()*720-360)}}
 function yellowStars(cx,cy){for(let i=0;i<25;i++){const e=makeEffect("star-piece","★",cx,cy),a=Math.random()*6.28,s=90+Math.random()*250;animateEffect(e,Math.cos(a)*s,Math.sin(a)*s-100,1100,230,Math.random()*500-250)}}
-function purpleSlime(cx,cy){for(let i=0;i<30;i++){const e=makeEffect("slime-piece",null,cx,cy);e.style.background=i%3===0?"#b56cff":i%3===1?"#8f39e8":"#7bdc24";const a=Math.random()*6.28,s=70+Math.random()*220;animateEffect(e,Math.cos(a)*s,Math.sin(a)*s-50,1300,300,Math.random()*300-150)}}
+function purpleSlime(cx,cy){
+  for(let i=0;i<24;i++){
+    const e=makeEffect("slime-piece",null,cx+(Math.random()-0.5)*20,cy+(Math.random()-0.5)*16);
+    e.style.background=i%2?"#8f39e8":"#b85cff";
+    const a=Math.random()*6.28,s=50+Math.random()*170;
+    animateEffect(e,Math.cos(a)*s,Math.sin(a)*s-35,1450,390,Math.random()*100-50);
+  }
+}
 function pinkSparkles(cx,cy){for(let i=0;i<30;i++){const e=makeEffect("sparkle-piece",i%2?"✦":"✧",cx,cy),a=Math.random()*6.28,s=70+Math.random()*280;animateEffect(e,Math.cos(a)*s,Math.sin(a)*s-80,1200,180,Math.random()*360)}}
 
 document.querySelectorAll(".setup-btn").forEach(btn=>{
