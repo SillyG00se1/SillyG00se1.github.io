@@ -190,14 +190,20 @@ function saveData(elapsed,wpm,accuracy){
  data.push(row);saveJSON(DATA_KEY,data);saveSharedResult(row)
 }
 function showResults(elapsed,wpm,accuracy){
+ window.onkeydown=null;
  let b=bestResult(lessonNumber),best=b?`Best for this lesson: ${Number(b.WPM).toFixed(1)} WPM | ${Number(b.Accuracy).toFixed(1)}% accuracy`:"";
  screen(`<div class="center"><h1>Typing Results</h1><div class="results">Student: ${esc(studentName)}\n\nLesson ${lessonNumber}: ${esc(LESSONS[lessonNumber].title)}\nLevel ${levelNumber}: ${LEVEL_NAMES[levelNumber-1]}\n\nTime: ${elapsed.toFixed(1)} seconds\n\nTyping Speed: ${wpm.toFixed(1)} WPM\n\nAccuracy: ${accuracy.toFixed(1)}%</div><div style="font-size:21px;font-weight:bold;margin:15px">${best}</div>
- <div class="bottom">${button("TRY AGAIN",`startLesson(${lessonNumber},${levelNumber})`)}${button("OTHER LEVELS",`showLevelMenu(${lessonNumber})`)}${button("ALL LESSONS","showLessonMenu()")}${button("NEXT","nextFromResults()")}</div></div>`)
+ <div class="bottom">${button("TRY AGAIN",`startLesson(${lessonNumber},${levelNumber})`)}${button("OTHER LEVELS",`showLevelMenu(${lessonNumber})`)}${button("ALL LESSONS","showLessonMenu()")}${button([3,6,9,12,15].includes(lessonNumber)&&levelNumber===3?"🍓 NEXT LESSON • TYPING NINJA":"NEXT","nextFromResults()")}</div></div>`);
+ window.onkeydown=function(e){
+   if(e.target&&["INPUT","TEXTAREA","SELECT"].includes(e.target.tagName))return;
+   if(e.code==="Space"){e.preventDefault();nextFromResults()}
+ };
 }
 function nextFromResults(){
  if(levelNumber<3)return startLesson(lessonNumber,levelNumber+1);
- if([3,6,9,12,15].includes(lessonNumber)){reviewNotice(lessonNumber);if(lessonNumber<15)return startLesson(lessonNumber+1,1);return showLessonMenu()}
- if(lessonNumber<15)return startLesson(lessonNumber+1,1);showLessonMenu()
+ if([3,6,9,12,15].includes(lessonNumber))return startNinjaReview(lessonNumber);
+ if(lessonNumber<15)return startLesson(lessonNumber+1,1);
+ showLessonMenu()
 }
 function csvCell(v){return `"${String(v??"").replace(/"/g,'""')}"`}
 function downloadData(){
