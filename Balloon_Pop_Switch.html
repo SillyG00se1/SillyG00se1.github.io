@@ -295,7 +295,9 @@ function gameLoop(now){
     const pr=pin.getBoundingClientRect();
     const ar=area.getBoundingClientRect();
     const balloonTop=br.top-ar.top;
-    const pinTip=pr.bottom-ar.top;
+    // The triangle point is 28px below the pin's shaft/element box.
+    // Use the actual bottom tip of the triangle as the collision point.
+    const pinTip=pr.bottom-ar.top+28;
     if(balloonTop<=pinTip) popBalloon();
   }
   if(!popped) animationId=requestAnimationFrame(gameLoop);
