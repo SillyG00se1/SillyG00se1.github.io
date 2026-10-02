@@ -215,10 +215,10 @@ function gameLoop(now){
   if(!popped){
     if(mode==="hold" && held) balloonSize+=dt*.23;
     if(mode==="hold" && !held) balloonSize-=dt*.075;
-    balloonSize=Math.max(.28,Math.min(1.34,balloonSize));
+    balloonSize=Math.max(.28,Math.min(1.62,balloonSize));
     document.getElementById("balloon").style.transform=
       `translate(-50%,-50%) scale(${balloonSize})`;
-    if(balloonSize>=1.34) popBalloon();
+    if(balloonSize>=1.62) popBalloon();
   }
   if(!popped) animationId=requestAnimationFrame(gameLoop);
 }
@@ -227,12 +227,12 @@ function activateSwitch(){
   if(popped)return;
   if(mode==="tap"){
     tapCount=Math.min(4,tapCount+1);
-    balloonSize=Math.min(1.34,.28+tapCount*.265);
+    balloonSize=Math.min(1.62,.28+tapCount*.335);
     document.getElementById("tapCount").textContent=tapCount+" / 4";
     if(tapCount>=4)popBalloon();
   }else if(mode==="either"){
     held=true;
-    balloonSize=Math.min(1.34,balloonSize+.09);
+    balloonSize=Math.min(1.62,balloonSize+.12);
     if(balloonSize>=1.34)popBalloon();
   }else if(mode==="hold"){
     held=true;
