@@ -145,6 +145,7 @@ const FACES=[
 let mode="hold", selectedColor=null, selectedFace=null;
 let scanTimer=null, scanIndex=0, scanItems=[];
 let balloonSize=.28, held=false, tapCount=0, popped=false, lastTime=0, animationId=null;
+let returnTimer=null, gameSession=0;
 let popAudio=document.getElementById("popSound");
 let audioUnlocked=false;
 function unlockPopAudio(){
@@ -228,6 +229,8 @@ function startFaceScan(){
 function startGame(){
   show("gameScreen");
   unlockPopAudio();
+  gameSession++;
+  if(returnTimer){clearTimeout(returnTimer);returnTimer=null}
   held=false;popped=false;tapCount=0;balloonSize=.28;
   document.getElementById("modeLabel").textContent="Mode: "+mode.toUpperCase();
   document.getElementById("gameInstruction").textContent="SPACE = INFLATE";
@@ -239,10 +242,14 @@ function startGame(){
   const balloon=document.getElementById("balloon");
   balloon.style.setProperty("--balloon-color",selectedColor.value);
   balloon.style.background=selectedColor.value;
+  balloon.style.display="block";
+  balloon.style.visibility="visible";
   balloon.style.opacity="1";
+  balloon.style.transform="translate(-50%,-50%) scale(.28)";
+  balloon.style.zIndex="20";
   document.getElementById("faceOnBalloon").className="face-on-balloon face-"+selectedFace.name.toLowerCase();
-  balloon.style.opacity="1";
-  document.querySelectorAll(".explosion-particle,.explosion-ray").forEach(x=>x.remove());
+  document.querySelectorAll(".explosion-particle,.explosion-ray,.effect-item").forEach(x=>x.remove());
+  void balloon.offsetWidth;
   lastTime=performance.now();
   cancelAnimationFrame(animationId);
   animationId=requestAnimationFrame(gameLoop);
@@ -285,6 +292,7 @@ function releaseSwitch(){
 function popBalloon(){
   if(popped)return;
   popped=true;held=false;
+  const session=gameSession;
   const balloon=document.getElementById("balloon"),rect=balloon.getBoundingClientRect();
   const area=document.getElementById("gameArea"),ar=area.getBoundingClientRect();
   const cx=rect.left+rect.width/2-ar.left,cy=rect.top+rect.height/2-ar.top;
@@ -292,7 +300,11 @@ function popBalloon(){
   balloon.style.opacity="0";
   explosion(cx,cy);
   // Effects run for about 1.3 seconds; wait another 3 seconds after they finish.
-  setTimeout(()=>{if(popped)startColorScan()},4300);
+  if(returnTimer)clearTimeout(returnTimer);
+  returnTimer=setTimeout(()=>{
+    returnTimer=null;
+    if(popped && session===gameSession)startColorScan();
+  },4300);
 }
 function explosion(cx,cy){
   const type=selectedColor?.name||"Red";
@@ -357,7 +369,12 @@ window.addEventListener("keyup",e=>{
 });
 
 document.getElementById("gameBack").addEventListener("click",()=>{
-  cancelAnimationFrame(animationId);popped=false;held=false;stopScan();show("setupScreen");
+  cancelAnimationFrame(animationId);
+  if(returnTimer){clearTimeout(returnTimer);returnTimer=null}
+  gameSession++;
+  popped=false;held=false;
+  document.getElementById("balloon").style.opacity="1";
+  stopScan();show("setupScreen");
 });
 
 buildColorMenu();buildFaceMenu();
