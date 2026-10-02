@@ -26,22 +26,33 @@ h2{font-size:clamp(28px,3vw,42px);margin:0 0 18px;text-align:center}
 .color-balloon{width:min(38%,145px);aspect-ratio:.78;border-radius:50% 50% 48% 48%;position:relative;box-shadow:inset -18px -15px 25px rgba(0,0,0,.16),inset 15px 12px 20px rgba(255,255,255,.38),0 7px 12px rgba(0,0,0,.15)}
 .color-balloon:after{content:"";position:absolute;left:50%;bottom:-18px;transform:translateX(-50%);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:20px solid currentColor}
 .choice-label{position:absolute;bottom:12px;left:10px;right:10px;text-align:center;font-size:clamp(22px,2.3vw,34px);font-weight:bold;background:rgba(255,255,255,.9);border-radius:10px;padding:6px}
-.face{font-size:0;width:150px;height:120px;position:relative}\n.face:before,.face:after{content:"";position:absolute;border:6px solid #111;background:transparent}\n.face:before{width:95px;height:70px;left:27px;top:15px;border-radius:50% 50% 48% 48%;}\n.face:after{width:12px;height:12px;left:69px;top:42px;border-radius:50%;box-shadow:-28px 0 0 -1px #111,28px 0 0 -1px #111}\n.face-label{position:absolute;bottom:12px;left:10px;right:10px;text-align:center;font-size:clamp(22px,2.3vw,34px);font-weight:bold}
+.face{font-size:0;width:150px;height:120px;position:relative}
+.face:before,.face:after{content:"";position:absolute;border:6px solid #111;background:transparent}
+.face:before{width:95px;height:70px;left:27px;top:15px;border-radius:50% 50% 48% 48%;}
+.face:after{width:12px;height:12px;left:69px;top:42px;border-radius:50%;box-shadow:-28px 0 0 -1px #111,28px 0 0 -1px #111}
+.face-label{position:absolute;bottom:12px;left:10px;right:10px;text-align:center;font-size:clamp(22px,2.3vw,34px);font-weight:bold}
 .face-label{position:absolute;bottom:12px;left:10px;right:10px;text-align:center;font-size:clamp(22px,2.3vw,34px);font-weight:bold}
 .scan-bottom{flex:0 0 auto;text-align:center;font-size:clamp(19px,2vw,28px);font-weight:bold;padding:8px}
 .game{background:linear-gradient(#9ee8ff 0%,#e9fbff 75%,#b7e98f 75%,#b7e98f 100%);position:relative}
 .game-top{position:absolute;left:20px;right:20px;top:15px;display:flex;justify-content:space-between;align-items:center;font-size:clamp(20px,2vw,28px);font-weight:bold;z-index:10}
-.cloud{position:absolute;background:rgba(255,255,255,.88);border-radius:50%;z-index:0}.cloud:before,.cloud:after{content:"";position:absolute;background:inherit;border-radius:50%}.cloud1{width:180px;height:55px;top:16%;left:10%}.cloud1:before{width:80px;height:80px;left:28px;top:-38px}.cloud1:after{width:95px;height:95px;left:82px;top:-52px}.cloud2{width:210px;height:62px;top:29%;right:8%}.cloud2:before{width:90px;height:90px;left:35px;top:-44px}.cloud2:after{width:105px;height:105px;left:105px;top:-58px}.cloud3{width:140px;height:45px;top:9%;left:60%}.cloud3:before{width:62px;height:62px;left:20px;top:-30px}.cloud3:after{width:72px;height:72px;left:65px;top:-38px}\n#gameArea{position:absolute;inset:70px 0 0 0;overflow:hidden}
+.cloud{position:absolute;background:rgba(255,255,255,.88);border-radius:50%;z-index:0}.cloud:before,.cloud:after{content:"";position:absolute;background:inherit;border-radius:50%}.cloud1{width:180px;height:55px;top:16%;left:10%}.cloud1:before{width:80px;height:80px;left:28px;top:-38px}.cloud1:after{width:95px;height:95px;left:82px;top:-52px}.cloud2{width:210px;height:62px;top:29%;right:8%}.cloud2:before{width:90px;height:90px;left:35px;top:-44px}.cloud2:after{width:105px;height:105px;left:105px;top:-58px}.cloud3{width:140px;height:45px;top:9%;left:60%}.cloud3:before{width:62px;height:62px;left:20px;top:-30px}.cloud3:after{width:72px;height:72px;left:65px;top:-38px}
+#gameArea{position:absolute;inset:70px 0 0 0;overflow:hidden}
 #pin{position:absolute;left:50%;top:39%;transform:translateX(-50%);width:14px;height:90px;background:#777;border-radius:8px;z-index:3;box-shadow:0 2px 4px rgba(0,0,0,.25)}
 #pin:before{content:"";position:absolute;top:-14px;left:-15px;width:44px;height:34px;background:#444;clip-path:polygon(50% 0,100% 100%,0 100%);transform:rotate(180deg)}
 #pin:after{content:"";position:absolute;bottom:-9px;left:-8px;width:30px;height:12px;border-radius:50%;background:#555}
 #balloon{position:absolute;left:50%;top:66%;width:190px;height:240px;transform:translate(-50%,-50%) scale(.28);transform-origin:center center;border-radius:50% 50% 47% 47%;z-index:2;box-shadow:inset -24px -20px 34px rgba(0,0,0,.16),inset 18px 15px 25px rgba(255,255,255,.42),0 12px 18px rgba(0,0,0,.18);transition:background .2s}
 #balloon:before{content:"";position:absolute;left:50%;bottom:-23px;transform:translateX(-50%);width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-top:25px solid var(--balloon-color)}
 #balloon:after{content:"";position:absolute;left:50%;bottom:-130px;transform:translateX(-50%);width:4px;height:110px;background:#555}
-.face-on-balloon{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:115px;height:82px;border:5px solid #111;border-radius:50%;font-size:0}\n.face-on-balloon:before{content:"";position:absolute;left:27px;top:25px;width:12px;height:12px;background:#111;border-radius:50%;box-shadow:43px 0 0 #111}\n.face-on-balloon:after{content:"";position:absolute;left:42px;top:48px;width:27px;height:14px;border-bottom:5px solid #111;border-radius:0 0 50% 50%}\n.face-on-balloon.face-surprised:after{width:18px;height:18px;left:44px;top:45px;border:5px solid #111;border-radius:50%}\n.face-on-balloon.face-silly:after{left:38px;top:51px;width:38px;height:8px;border-bottom:0;border-top:5px solid #111;transform:rotate(-8deg)}\n.face-on-balloon.face-excited:before{width:12px;height:18px;border-radius:50%;box-shadow:43px 0 0 #111}
+.face-on-balloon{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:115px;height:82px;border:5px solid #111;border-radius:50%;font-size:0}
+.face-on-balloon:before{content:"";position:absolute;left:27px;top:25px;width:12px;height:12px;background:#111;border-radius:50%;box-shadow:43px 0 0 #111}
+.face-on-balloon:after{content:"";position:absolute;left:42px;top:48px;width:27px;height:14px;border-bottom:5px solid #111;border-radius:0 0 50% 50%}
+.face-on-balloon.face-surprised:after{width:18px;height:18px;left:44px;top:45px;border:5px solid #111;border-radius:50%}
+.face-on-balloon.face-silly:after{left:38px;top:51px;width:38px;height:8px;border-bottom:0;border-top:5px solid #111;transform:rotate(-8deg)}
+.face-on-balloon.face-excited:before{width:12px;height:18px;border-radius:50%;box-shadow:43px 0 0 #111}
 #tapCount{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);font-size:clamp(24px,2.5vw,36px);font-weight:bold;background:rgba(255,255,255,.85);padding:8px 18px;border-radius:14px;z-index:8}
 #modeHint{position:absolute;right:20px;bottom:18px;font-size:22px;font-weight:bold;background:rgba(255,255,255,.75);padding:8px 14px;border-radius:12px;z-index:8}
-.explosion-ray{position:absolute;width:10px;height:85px;background:#ffcc00;transform-origin:50% 100%;z-index:9;clip-path:polygon(50% 0,100% 100%,50% 78%,0 100%)}\n.explosion-particle{position:absolute;width:18px;height:18px;border-radius:50%;pointer-events:none;z-index:9}
+.explosion-ray{position:absolute;width:10px;height:85px;background:#ffcc00;transform-origin:50% 100%;z-index:9;clip-path:polygon(50% 0,100% 100%,50% 78%,0 100%)}
+.explosion-particle{position:absolute;width:18px;height:18px;border-radius:50%;pointer-events:none;z-index:9}
 .effect-item{position:absolute;pointer-events:none;z-index:12;will-change:transform,opacity}
 .water-drop{width:22px;height:30px;background:#168cff;border-radius:50% 50% 55% 55%;box-shadow:inset 5px 4px 5px rgba(255,255,255,.65)}
 .confetti-piece{width:15px;height:30px;border-radius:3px}
@@ -217,9 +228,12 @@ function startGame(){
   document.getElementById("tapCount").textContent=mode==="tap"?"0 / 4":"";
   const balloon=document.getElementById("balloon");
   balloon.style.setProperty("--balloon-color",selectedColor.value);
-  balloon.style.background=selectedColor.value;\n  balloon.style.opacity="1";
+  balloon.style.background=selectedColor.value;
+  balloon.style.opacity="1";
   document.getElementById("faceOnBalloon").className="face-on-balloon face-"+selectedFace.name.toLowerCase();
-  document.getElementById("popMessage").style.display="none";\n  balloon.style.opacity="1";\n  document.querySelectorAll(".explosion-particle,.explosion-ray").forEach(x=>x.remove());
+  document.getElementById("popMessage").style.display="none";
+  balloon.style.opacity="1";
+  document.querySelectorAll(".explosion-particle,.explosion-ray").forEach(x=>x.remove());
   lastTime=performance.now();
   cancelAnimationFrame(animationId);
   animationId=requestAnimationFrame(gameLoop);
