@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Balloon Pop Switch Game</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:"Trebuchet MS",Arial,sans-serif;background:#eef8ff;color:#111}
+button{font:700 24px "Trebuchet MS",Arial,sans-serif;cursor:pointer}
+.screen{width:100vw;height:100vh;padding:16px;display:flex;flex-direction:column}
+.center{align-items:center;justify-content:center}
+h1{font-size:clamp(34px,4vw,58px);margin:0 0 22px;text-align:center}
+h2{font-size:clamp(28px,3vw,42px);margin:0 0 18px;text-align:center}
+.instructions{font-size:clamp(20px,2vw,28px);font-weight:bold;text-align:center;margin:0 0 22px}
+.panel{width:min(1050px,94vw);background:#fff;border:3px solid #777;border-radius:18px;padding:26px;box-shadow:0 6px 20px rgba(0,0,0,.15)}
+.setup-options{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:22px 0}
+.setup-btn{min-height:145px;border:5px solid #777;border-radius:18px;background:#ddd;padding:18px;font-size:30px}
+.setup-btn:hover,.setup-btn:focus{outline:5px solid #111;background:#fff}
+.setup-btn small{display:block;font-size:19px;margin-top:12px;font-weight:600}
+.scan-header{flex:0 0 auto;text-align:center}
+.scan-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);gap:22px;padding:12px 18px;overflow:visible}
+.scan-choice{position:relative;min-height:0;border:6px solid #aaa;border-radius:24px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;transform:scale(.95);transition:box-shadow .08s,border-color .08s,transform .08s}
+.scan-choice.scanning{border-color:#ffd400;box-shadow:0 0 0 8px #ffd400 inset,0 0 24px 9px #ffd400,0 0 48px 16px rgba(255,212,0,.75);transform:scale(.98);z-index:3}
+.scan-choice .number{position:absolute;left:12px;top:10px;width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #333;display:flex;align-items:center;justify-content:center;font-size:25px;font-weight:bold;z-index:4}
+.color-balloon{width:min(55%,210px);aspect-ratio:.78;border-radius:50% 50% 48% 48%;position:relative;box-shadow:inset -18px -15px 25px rgba(0,0,0,.16),inset 15px 12px 20px rgba(255,255,255,.38),0 7px 12px rgba(0,0,0,.15)}
+.color-balloon:after{content:"";position:absolute;left:50%;bottom:-18px;transform:translateX(-50%);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:20px solid currentColor}
+.choice-label{position:absolute;bottom:12px;left:10px;right:10px;text-align:center;font-size:clamp(22px,2.3vw,34px);font-weight:bold;background:rgba(255,255,255,.9);border-radius:10px;padding:6px}
+.face{font-size:clamp(70px,8vw,130px);line-height:1}
+.face-label{position:absolute;bottom:12px;left:10px;right:10px;text-align:center;font-size:clamp(22px,2.3vw,34px);font-weight:bold}
+.scan-bottom{flex:0 0 auto;text-align:center;font-size:clamp(19px,2vw,28px);font-weight:bold;padding:8px}
+.game{background:linear-gradient(#9ee8ff 0%,#e9fbff 75%,#b7e98f 75%,#b7e98f 100%);position:relative}
+.game-top{position:absolute;left:20px;right:20px;top:15px;display:flex;justify-content:space-between;align-items:center;font-size:clamp(20px,2vw,28px);font-weight:bold;z-index:10}
+#gameArea{position:absolute;inset:70px 0 0 0;overflow:hidden}
+#pin{position:absolute;left:50%;top:6%;transform:translateX(-50%);width:14px;height:100px;background:#777;border-radius:8px;z-index:3;box-shadow:0 2px 4px rgba(0,0,0,.25)}
+#pin:before{content:"";position:absolute;top:-14px;left:-15px;width:44px;height:34px;background:#444;clip-path:polygon(50% 0,100% 100%,0 100%);transform:rotate(180deg)}
+#pin:after{content:"";position:absolute;bottom:-9px;left:-8px;width:30px;height:12px;border-radius:50%;background:#555}
+#balloon{position:absolute;left:50%;top:66%;width:190px;height:240px;transform:translate(-50%,-50%) scale(.28);transform-origin:center center;border-radius:50% 50% 47% 47%;z-index:2;box-shadow:inset -24px -20px 34px rgba(0,0,0,.16),inset 18px 15px 25px rgba(255,255,255,.42),0 12px 18px rgba(0,0,0,.18);transition:background .2s}
+#balloon:before{content:"";position:absolute;left:50%;bottom:-23px;transform:translateX(-50%);width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-top:25px solid var(--balloon-color)}
+#balloon:after{content:"";position:absolute;left:50%;bottom:-130px;transform:translateX(-50%);width:4px;height:110px;background:#555}
+.face-on-balloon{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);font-size:78px;line-height:1;white-space:nowrap;text-shadow:0 2px 2px rgba(0,0,0,.15)}
+#tapCount{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);font-size:clamp(24px,2.5vw,36px);font-weight:bold;background:rgba(255,255,255,.85);padding:8px 18px;border-radius:14px;z-index:8}
+#modeHint{position:absolute;right:20px;bottom:18px;font-size:22px;font-weight:bold;background:rgba(255,255,255,.75);padding:8px 14px;border-radius:12px;z-index:8}
+.explosion-particle{position:absolute;width:18px;height:18px;border-radius:50%;pointer-events:none;z-index:9}
+#popMessage{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:20;background:rgba(255,255,255,.25)}
+#popMessage .box{background:#fff;border:6px solid #ffbf00;border-radius:24px;padding:25px 40px;text-align:center;box-shadow:0 8px 35px rgba(0,0,0,.25)}
+#popMessage h1{margin:0 0 8px;font-size:64px}
+#popMessage p{font-size:28px;margin:0}
+#gameBack{position:absolute;left:18px;bottom:18px;z-index:30;border:2px solid #666;border-radius:10px;padding:10px 16px;background:#fff;font-weight:bold}
+.hidden{display:none!important}
+@media(max-width:800px){.setup-options{grid-template-columns:1fr}.scan-grid{grid-template-columns:repeat(2,1fr);gap:14px;padding:8px}.scan-choice:last-child{grid-column:1/-1}}
+</style>
+</head>
+<body>
+
+<section id="setupScreen" class="screen center">
+  <h1>Balloon Pop Switch Game</h1>
+  <div class="panel">
+    <h2>Choose How the Switch Will Work</h2>
+    <p class="instructions">The Space bar is the switch.</p>
+    <div class="setup-options">
+      <button class="setup-btn" data-mode="hold">HOLD
+        <small>Hold Space to keep inflating. Let go and the balloon slowly shrinks.</small>
+      </button>
+      <button class="setup-btn" data-mode="tap">TAP
+        <small>Press Space 4 times to inflate the balloon enough to pop.</small>
+      </button>
+      <button class="setup-btn" data-mode="either">EITHER
+        <small>Hold Space or tap Space. The balloon stays inflated when you let go.</small>
+      </button>
+    </div>
+  </div>
+</section>
+
+<section id="colorScreen" class="screen hidden">
+  <div class="scan-header">
+    <h1>Choose a Balloon Color</h1>
+    <p class="instructions">The yellow glow shows the current choice. Press SPACE to choose.</p>
+  </div>
+  <div id="colorGrid" class="scan-grid"></div>
+  <div class="scan-bottom">SPACE = SELECT</div>
+</section>
+
+<section id="faceScreen" class="screen hidden">
+  <div class="scan-header">
+    <h1>Choose a Face</h1>
+    <p class="instructions">The yellow glow shows the current choice. Press SPACE to choose.</p>
+  </div>
+  <div id="faceGrid" class="scan-grid"></div>
+  <div class="scan-bottom">SPACE = SELECT</div>
+</section>
+
+<section id="gameScreen" class="screen game hidden">
+  <div class="game-top">
+    <span id="modeLabel"></span>
+    <span id="gameInstruction"></span>
+  </div>
+  <div id="gameArea">
+    <div id="pin"></div>
+    <div id="balloon"><div id="faceOnBalloon" class="face-on-balloon"></div></div>
+    <div id="tapCount"></div>
+    <div id="modeHint"></div>
+    <div id="popMessage">
+      <div class="box"><h1>POP!</h1><p>Great job!</p></div>
+    </div>
+  </div>
+  <button id="gameBack">BACK</button>
+</section>
+
+<audio id="popSound" preload="auto" src="Fruit/bomb_explode.mp3"></audio>
+
+<script>
+const COLORS=[
+  {name:"Red",value:"#f5222d"},
+  {name:"Blue",value:"#2787ff"},
+  {name:"Green",value:"#28b84b"},
+  {name:"Yellow",value:"#ffd21f"},
+  {name:"Purple",value:"#9b4dff"},
+  {name:"Pink",value:"#ff4fa3"}
+];
+const FACES=[
+  {name:"Happy",emoji:"😀"},
+  {name:"Surprised",emoji:"😮"},
+  {name:"Silly",emoji:"😜"},
+  {name:"Excited",emoji:"🤩"}
+];
+
+let mode="hold", selectedColor=null, selectedFace=null;
+let scanTimer=null, scanIndex=0, scanItems=[];
+let balloonSize=.28, held=false, tapCount=0, popped=false, lastTime=0, animationId=null;
+let popAudio=document.getElementById("popSound");
+
+function show(id){
+  document.querySelectorAll(".screen").forEach(x=>x.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+}
+
+function buildColorMenu(){
+  const grid=document.getElementById("colorGrid");
+  grid.innerHTML=COLORS.map((c,i)=>`<button class="scan-choice" data-index="${i}" aria-label="${c.name}">
+    <span class="number">${i+1}</span>
+    <span class="color-balloon" style="background:${c.value};color:${c.value}"></span>
+    <span class="choice-label">${c.name}</span>
+  </button>`).join("");
+}
+function buildFaceMenu(){
+  const grid=document.getElementById("faceGrid");
+  grid.innerHTML=FACES.map((f,i)=>`<button class="scan-choice" data-index="${i}" aria-label="${f.name}">
+    <span class="number">${i+1}</span>
+    <span class="face">${f.emoji}</span>
+    <span class="face-label">${f.name}</span>
+  </button>`).join("");
+}
+
+function stopScan(){
+  if(scanTimer){clearInterval(scanTimer);scanTimer=null}
+  document.querySelectorAll(".scan-choice").forEach(x=>x.classList.remove("scanning"));
+}
+function startScan(gridId,items,onSelect){
+  stopScan();
+  scanItems=items;scanIndex=0;
+  const choices=[...document.querySelectorAll("#"+gridId+" .scan-choice")];
+  if(!choices.length)return;
+  const highlight=()=>{
+    choices.forEach((x,i)=>x.classList.toggle("scanning",i===scanIndex));
+  };
+  highlight();
+  scanTimer=setInterval(()=>{
+    scanIndex=(scanIndex+1)%choices.length;
+    highlight();
+  },1400);
+  window.currentScanSelect=()=>{
+    stopScan();
+    onSelect(scanItems[scanIndex]);
+  };
+}
+
+function startColorScan(){
+  show("colorScreen");
+  startScan("colorGrid",COLORS,c=>{
+    selectedColor=c;
+    startFaceScan();
+  });
+}
+function startFaceScan(){
+  show("faceScreen");
+  startScan("faceGrid",FACES,f=>{
+    selectedFace=f;
+    startGame();
+  });
+}
+
+function startGame(){
+  show("gameScreen");
+  held=false;popped=false;tapCount=0;balloonSize=.28;
+  document.getElementById("modeLabel").textContent="Mode: "+mode.toUpperCase();
+  document.getElementById("gameInstruction").textContent="SPACE = INFLATE";
+  document.getElementById("modeHint").textContent=
+    mode==="hold"?"Hold SPACE to inflate • Release to shrink":
+    mode==="tap"?"Press SPACE 4 times":
+    "Hold or tap SPACE";
+  document.getElementById("tapCount").textContent=mode==="tap"?"0 / 4":"";
+  const balloon=document.getElementById("balloon");
+  balloon.style.setProperty("--balloon-color",selectedColor.value);
+  balloon.style.background=selectedColor.value;
+  document.getElementById("faceOnBalloon").textContent=selectedFace.emoji;
+  document.getElementById("popMessage").style.display="none";
+  lastTime=performance.now();
+  cancelAnimationFrame(animationId);
+  animationId=requestAnimationFrame(gameLoop);
+}
+
+function gameLoop(now){
+  const dt=Math.min(.04,(now-lastTime)/1000);lastTime=now;
+  if(!popped){
+    if(mode==="hold" && held) balloonSize+=dt*.23;
+    if(mode==="hold" && !held) balloonSize-=dt*.075;
+    balloonSize=Math.max(.28,Math.min(1.34,balloonSize));
+    document.getElementById("balloon").style.transform=
+      `translate(-50%,-50%) scale(${balloonSize})`;
+    if(balloonSize>=1.34) popBalloon();
+  }
+  if(!popped) animationId=requestAnimationFrame(gameLoop);
+}
+
+function activateSwitch(){
+  if(popped)return;
+  if(mode==="tap"){
+    tapCount=Math.min(4,tapCount+1);
+    balloonSize=Math.min(1.34,.28+tapCount*.265);
+    document.getElementById("tapCount").textContent=tapCount+" / 4";
+    if(tapCount>=4)popBalloon();
+  }else if(mode==="either"){
+    held=true;
+    balloonSize=Math.min(1.34,balloonSize+.09);
+    if(balloonSize>=1.34)popBalloon();
+  }else if(mode==="hold"){
+    held=true;
+  }
+}
+
+function releaseSwitch(){
+  if(mode==="hold"||mode==="either")held=false;
+}
+
+function popBalloon(){
+  if(popped)return;
+  popped=true;held=false;
+  const balloon=document.getElementById("balloon");
+  const rect=balloon.getBoundingClientRect();
+  const area=document.getElementById("gameArea");
+  const ar=area.getBoundingClientRect();
+  const cx=rect.left+rect.width/2-ar.left;
+  const cy=rect.top+rect.height/2-ar.top;
+  balloon.style.opacity="0";
+  balloon.style.transform="translate(-50%,-50%) scale(1.45)";
+  try{popAudio.currentTime=0;const p=popAudio.play();if(p)p.catch(()=>{})}catch(e){}
+  explosion(cx,cy);
+  document.getElementById("popMessage").style.display="flex";
+  document.getElementById("gameInstruction").textContent="BALLOON POPPED!";
+  setTimeout(()=>{if(popped) startColorScan()},1800);
+}
+
+function explosion(cx,cy){
+  const area=document.getElementById("gameArea");
+  const colors=["#ff3b30","#ffcc00","#ff7a00","#ffffff","#ff4fa3","#7b2cff"];
+  for(let i=0;i<42;i++){
+    const p=document.createElement("div");
+    p.className="explosion-particle";
+    const a=Math.random()*Math.PI*2;
+    const speed=90+Math.random()*270;
+    p.style.left=cx+"px";p.style.top=cy+"px";
+    p.style.background=colors[Math.floor(Math.random()*colors.length)];
+    p.style.width=p.style.height=(8+Math.random()*18)+"px";
+    area.appendChild(p);
+    const dx=Math.cos(a)*speed,dy=Math.sin(a)*speed;
+    const start=performance.now(),life=700+Math.random()*450;
+    const animate=t=>{
+      const q=Math.min(1,(t-start)/life);
+      p.style.transform=`translate(${dx*q}px,${dy*q+180*q*q}px) scale(${1-q*.5})`;
+      p.style.opacity=String(1-q);
+      if(q<1)requestAnimationFrame(animate);else p.remove();
+    };
+    requestAnimationFrame(animate);
+  }
+}
+
+document.querySelectorAll(".setup-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    mode=btn.dataset.mode;
+    buildColorMenu();buildFaceMenu();startColorScan();
+  });
+});
+
+window.addEventListener("keydown",e=>{
+  if(e.code!=="Space")return;
+  e.preventDefault();
+  if(e.repeat)return;
+  if(!document.getElementById("colorScreen").classList.contains("hidden") ||
+     !document.getElementById("faceScreen").classList.contains("hidden")){
+    if(typeof window.currentScanSelect==="function")window.currentScanSelect();
+    return;
+  }
+  if(!document.getElementById("gameScreen").classList.contains("hidden"))activateSwitch();
+});
+window.addEventListener("keyup",e=>{
+  if(e.code!=="Space")return;
+  e.preventDefault();
+  if(!document.getElementById("gameScreen").classList.contains("hidden"))releaseSwitch();
+});
+
+document.getElementById("gameBack").addEventListener("click",()=>{
+  cancelAnimationFrame(animationId);popped=false;held=false;stopScan();show("setupScreen");
+});
+
+buildColorMenu();buildFaceMenu();
+</script>
+</body>
+</html>
