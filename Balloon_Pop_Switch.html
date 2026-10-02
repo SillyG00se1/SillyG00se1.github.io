@@ -60,10 +60,6 @@ h2{font-size:clamp(28px,3vw,42px);margin:0 0 18px;text-align:center}
 .slime-piece{width:34px;height:26px;background:#7bdc24;border-radius:50% 50% 45% 55%;box-shadow:inset 6px 5px 7px rgba(255,255,255,.45)}
 .sparkle-piece{font-size:48px;line-height:1;color:#ff4fa3;text-shadow:0 0 8px #fff,0 0 14px #ff4fa3}
 
-#popMessage{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:20;background:rgba(255,255,255,.25)}
-#popMessage .box{background:#fff;border:6px solid #ffbf00;border-radius:24px;padding:25px 40px;text-align:center;box-shadow:0 8px 35px rgba(0,0,0,.25)}
-#popMessage h1{margin:0 0 8px;font-size:64px}
-#popMessage p{font-size:28px;margin:0}
 #gameBack{position:absolute;left:18px;bottom:18px;z-index:30;border:2px solid #666;border-radius:10px;padding:10px 16px;background:#fff;font-weight:bold}
 .hidden{display:none!important}
 @media(max-width:800px){.setup-options{grid-template-columns:1fr}.scan-grid{grid-template-columns:repeat(2,1fr);gap:14px;padding:8px}.scan-choice:last-child{grid-column:1/-1}}
@@ -118,8 +114,6 @@ h2{font-size:clamp(28px,3vw,42px);margin:0 0 18px;text-align:center}
     <div id="balloon"><div id="faceOnBalloon" class="face-on-balloon"></div></div>
     <div id="tapCount"></div>
     <div id="modeHint"></div>
-    <div id="popMessage">
-      <div class="box"><h1>POP!</h1><p>Great job!</p></div>
     </div>
   </div>
   <button id="gameBack">BACK</button>
@@ -231,7 +225,6 @@ function startGame(){
   balloon.style.background=selectedColor.value;
   balloon.style.opacity="1";
   document.getElementById("faceOnBalloon").className="face-on-balloon face-"+selectedFace.name.toLowerCase();
-  document.getElementById("popMessage").style.display="none";
   balloon.style.opacity="1";
   document.querySelectorAll(".explosion-particle,.explosion-ray").forEach(x=>x.remove());
   lastTime=performance.now();
@@ -281,8 +274,6 @@ function popBalloon(){
   balloon.style.opacity="0";
   try{popAudio.currentTime=0;const p=popAudio.play();if(p)p.catch(()=>{})}catch(e){}
   explosion(cx,cy);
-  document.getElementById("popMessage").style.display="flex";
-  document.getElementById("gameInstruction").textContent="BALLOON POPPED!";
   setTimeout(()=>{if(popped)startColorScan()},1800);
 }
 function explosion(cx,cy){
