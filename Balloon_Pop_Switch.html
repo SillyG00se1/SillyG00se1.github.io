@@ -275,123 +275,43 @@ function releaseSwitch(){
 function popBalloon(){
   if(popped)return;
   popped=true;held=false;
-  const balloon=document.getElementById("ballofunction explosion(cx,cy){
-  const area=document.getElementById("gameArea");
+  const balloon=document.getElementById("balloon"),rect=balloon.getBoundingClientRect();
+  const area=document.getElementById("gameArea"),ar=area.getBoundingClientRect();
+  const cx=rect.left+rect.width/2-ar.left,cy=rect.top+rect.height/2-ar.top;
+  balloon.style.opacity="0";
+  try{popAudio.currentTime=0;const p=popAudio.play();if(p)p.catch(()=>{})}catch(e){}
+  explosion(cx,cy);
+  document.getElementById("popMessage").style.display="flex";
+  document.getElementById("gameInstruction").textContent="BALLOON POPPED!";
+  setTimeout(()=>{if(popped)startColorScan()},1800);
+}
+function explosion(cx,cy){
   const type=selectedColor?.name||"Red";
-  if(type==="Red") return redBang(cx,cy);
-  if(type==="Blue") return blueWater(cx,cy);
-  if(type==="Green") return greenConfetti(cx,cy);
-  if(type==="Yellow") return yellowStars(cx,cy);
-  if(type==="Purple") return purpleSlime(cx,cy);
-  return pinkSparkles(cx,cy);
+  if(type==="Red")return redBang(cx,cy); if(type==="Blue")return blueWater(cx,cy);
+  if(type==="Green")return greenConfetti(cx,cy); if(type==="Yellow")return yellowStars(cx,cy);
+  if(type==="Purple")return purpleSlime(cx,cy); return pinkSparkles(cx,cy);
 }
-
-function animateEffect(el,cx,cy,dx,dy,life=900,gravity=180,rotate=0){
-  const start=performance.now();
-  const animate=t=>{
-    const q=Math.min(1,(t-start)/life);
-    el.style.transform=`translate(${dx*q}px,${dy*q+gravity*q*q}px) rotate(${rotate*q}deg) scale(${1-q*.35})`;
-    el.style.opacity=String(1-q);
-    if(q<1)requestAnimationFrame(animate);else el.remove();
-  };
-  requestAnimationFrame(animate);
+function makeEffect(cls,text){
+  const e=document.createElement("div");e.className="effect-item "+cls;if(text)e.textContent=text;
+  e.style.left="50%";e.style.top="45%";document.getElementById("gameArea").appendChild(e);return e;
 }
-
+function animateEffect(e,dx,dy,life,gravity,rotate){
+  const st=performance.now();
+  function step(t){const q=Math.min(1,(t-st)/life);
+    e.style.transform=`translate(${dx*q}px,${dy*q+gravity*q*q}px) rotate(${rotate*q}deg) scale(${1-.35*q})`;
+    e.style.opacity=1-q;if(q<1)requestAnimationFrame(step);else e.remove()}
+  requestAnimationFrame(step);
+}
 function redBang(cx,cy){
-  const area=document.getElementById("gameArea");
-  const colors=["#ff3b30","#ffcc00","#ff7a00","#ffffff","#ff4fa3","#7b2cff"];
-  for(let r=0;r<20;r++){
-    const ray=document.createElement("div");
-    ray.className="explosion-ray";
-    ray.style.left=cx+"px";ray.style.top=cy+"px";ray.style.background=colors[r%colors.length];
-    ray.style.transform=`translate(-50%,-100%) rotate(${r*18}deg) scaleY(.2)`;
-    area.appendChild(ray);
-    const start=performance.now();
-    const animate=t=>{
-      const q=Math.min(1,(t-start)/500);
-      ray.style.transform=`translate(-50%,-100%) rotate(${r*18}deg) scaleY(${.2+q*.9})`;
-      ray.style.opacity=String(1-q);
-      if(q<1)requestAnimationFrame(animate);else ray.remove();
-    };
-    requestAnimationFrame(animate);
-  }
-  for(let i=0;i<32;i++){
-    const p=document.createElement("div");p.className="explosion-particle";
-    const a=Math.random()*Math.PI*2,speed=100+Math.random()*280;
-    p.style.left=cx+"px";p.style.top=cy+"px";p.style.background=colors[i%colors.length];
-    p.style.width=p.style.height=(8+Math.random()*18)+"px";area.appendChild(p);
-    animateEffect(p,cx,cy,Math.cos(a)*speed,Math.sin(a)*speed,850,180,Math.random()*360);
-  }
+  const area=document.getElementById("gameArea"),colors=["#ff3b30","#ffcc00","#ff7a00","#fff","#ff4fa3","#7b2cff"];
+  for(let i=0;i<20;i++){const r=document.createElement("div");r.className="explosion-ray";r.style.left=cx+"px";r.style.top=cy+"px";r.style.background=colors[i%colors.length];r.style.transform=`translate(-50%,-100%) rotate(${i*18}deg) scaleY(.2)`;area.appendChild(r);setTimeout(()=>r.remove(),550)}
+  for(let i=0;i<35;i++){const p=makeEffect("explosion-particle"),a=Math.random()*6.28,s=100+Math.random()*280;animateEffect(p,Math.cos(a)*s,Math.sin(a)*s,850,180,Math.random()*360)}
 }
-
-function blueWater(cx,cy){
-  const area=document.getElementById("gameArea");
-  for(let i=0;i<38;i++){
-    const d=document.createElement("div");d.className="effect-item water-drop";
-    d.style.left=cx+"px";d.style.top=cy+"px";area.appendChild(d);
-    const a=Math.random()*Math.PI*2,speed=80+Math.random()*260;
-    animateEffect(d,cx,cy,Math.cos(a)*speed,Math.sin(a)*speed-80,1100,330,Math.random()*90-45);
-  }
-}
-
-function greenConfetti(cx,cy){
-  const area=document.getElementById("gameArea");
-  const colors=["#22b14c","#8cff5a","#0a8f3c","#ffd21f","#ff4fa3","#2787ff","#9b4dff"];
-  for(let i=0;i<55;i++){
-    const p=document.createElement("div");p.className="effect-item confetti-piece";
-    p.style.left=cx+"px";p.style.top=cy+"px";p.style.background=colors[i%colors.length];area.appendChild(p);
-    const a=Math.random()*Math.PI*2,speed=80+Math.random()*300;
-    animateEffect(p,cx,cy,Math.cos(a)*speed,Math.sin(a)*speed-100,1200,360,Math.random()*720-360);
-  }
-}
-
-function yellowStars(cx,cy){
-  const area=document.getElementById("gameArea");
-  for(let i=0;i<24;i++){
-    const s=document.createElement("div");s.className="effect-item star-piece";s.textContent="★";
-    s.style.left=cx+"px";s.style.top=cy+"px";area.appendChild(s);
-    const a=Math.random()*Math.PI*2,speed=90+Math.random()*250;
-    animateEffect(s,cx,cy,Math.cos(a)*speed,Math.sin(a)*speed-100,1100,230,Math.random()*500-250);
-  }
-}
-
-function purpleSlime(cx,cy){
-  const area=document.getElementById("gameArea");
-  for(let i=0;i<30;i++){
-    const s=document.createElement("div");s.className="effect-item slime-piece";
-    s.style.left=cx+"px";s.style.top=cy+"px";
-    s.style.background=i%3===0?"#b56cff":i%3===1?"#8f39e8":"#7bdc24";
-    area.appendChild(s);
-    const a=Math.random()*Math.PI*2,speed=70+Math.random()*220;
-    animateEffect(s,cx,cy,Math.cos(a)*speed,Math.sin(a)*speed-50,1300,300,Math.random()*300-150);
-  }
-}
-
-function pinkSparkles(cx,cy){
-  const area=document.getElementById("gameArea");
-  for(let i=0;i<30;i++){
-    const s=document.createElement("div");s.className="effect-item sparkle-piece";
-    s.textContent=i%2?"✦":"✧";s.style.left=cx+"px";s.style.top=cy+"px";
-    area.appendChild(s);
-    const a=Math.random()*Math.PI*2,speed=70+Math.random()*280;
-    animateEffect(s,cx,cy,Math.cos(a)*speed,Math.sin(a)*speed-80,1200,180,Math.random()*360);
-  }
-}m()*270;
-    p.style.left=cx+"px";p.style.top=cy+"px";
-    p.style.background=colors[Math.floor(Math.random()*colors.length)];
-    p.style.width=p.style.height=(8+Math.random()*18)+"px";
-    area.appendChild(p);
-    const dx=Math.cos(a)*speed,dy=Math.sin(a)*speed;
-    const start=performance.now(),life=700+Math.random()*450;
-    const animate=t=>{
-      const q=Math.min(1,(t-start)/life);
-      p.style.transform=`translate(${dx*q}px,${dy*q+180*q*q}px) scale(${1-q*.5})`;
-      p.style.opacity=String(1-q);
-      if(q<1)requestAnimationFrame(animate);else p.remove();
-    };
-    requestAnimationFrame(animate);
-  }
-}
+function blueWater(cx,cy){for(let i=0;i<40;i++){const e=makeEffect("water-drop"),a=Math.random()*6.28,s=80+Math.random()*260;animateEffect(e,Math.cos(a)*s,Math.sin(a)*s-80,1100,330,Math.random()*90-45)}}
+function greenConfetti(cx,cy){const colors=["#22b14c","#8cff5a","#0a8f3c","#ffd21f","#ff4fa3","#2787ff","#9b4dff"];for(let i=0;i<55;i++){const e=makeEffect("confetti-piece");e.style.background=colors[i%colors.length];const a=Math.random()*6.28,s=80+Math.random()*300;animateEffect(e,Math.cos(a)*s,Math.sin(a)*s-100,1200,360,Math.random()*720-360)}}
+function yellowStars(cx,cy){for(let i=0;i<25;i++){const e=makeEffect("star-piece","★"),a=Math.random()*6.28,s=90+Math.random()*250;animateEffect(e,Math.cos(a)*s,Math.sin(a)*s-100,1100,230,Math.random()*500-250)}}
+function purpleSlime(cx,cy){for(let i=0;i<30;i++){const e=makeEffect("slime-piece");e.style.background=i%3===0?"#b56cff":i%3===1?"#8f39e8":"#7bdc24";const a=Math.random()*6.28,s=70+Math.random()*220;animateEffect(e,Math.cos(a)*s,Math.sin(a)*s-50,1300,300,Math.random()*300-150)}}
+function pinkSparkles(cx,cy){for(let i=0;i<30;i++){const e=makeEffect("sparkle-piece",i%2?"✦":"✧"),a=Math.random()*6.28,s=70+Math.random()*280;animateEffect(e,Math.cos(a)*s,Math.sin(a)*s-80,1200,180,Math.random()*360)}}
 
 document.querySelectorAll(".setup-btn").forEach(btn=>{
   btn.addEventListener("click",()=>chooseInflationMode(btn.dataset.mode));
