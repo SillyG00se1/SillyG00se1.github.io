@@ -17,7 +17,7 @@ h2{font-size:clamp(24px,3vw,40px);margin:0 0 18px}
 label{font-size:22px;font-weight:bold}
 select,input[type=number],input[type=text]{border:2px solid #777;border-radius:8px;padding:10px 12px;background:white}
 select,input[type=number]{font-size:22px}
-input[type=text]{width:100%;font-size:20px}
+input[type=text]{width:100%;font-size:20px;min-width:0}
 .primary{background:#6f32a8;color:white;border:0;border-radius:10px;padding:14px 26px;font-weight:bold;cursor:pointer}
 .secondary{background:#ddd;color:#111;border:2px solid #777;border-radius:10px;padding:12px 20px;font-weight:bold;cursor:pointer}
 .danger{background:#f0d6d6;color:#8b0000;border:2px solid #a66;border-radius:10px;padding:10px 16px;font-weight:bold;cursor:pointer}
@@ -27,7 +27,7 @@ input[type=text]{width:100%;font-size:20px}
 .savedControls input{flex:1;min-width:220px}
 .savedControls select{flex:2;min-width:240px}
 .linkgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:15px;max-height:34vh;overflow:auto}
-.linkrow{display:flex;gap:8px;align-items:center}
+.linkrow{display:grid;grid-template-columns:32px minmax(0,1.35fr) minmax(0,1fr);gap:8px;align-items:center}
 .linkrow span{min-width:32px;font-size:20px;font-weight:bold}
 #setupButtons{display:flex;gap:12px;justify-content:flex-end;margin-top:16px}
 #activity{padding:10px 14px}
@@ -36,7 +36,7 @@ input[type=text]{width:100%;font-size:20px}
 #scanArea{flex:1;min-height:0;display:grid;grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) 74px;gap:8px}
 #choices{display:grid;gap:8px;min-height:0;overflow:hidden}
 .choice{position:relative;min-width:0;min-height:0;border:5px solid #bdbdbd;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.choice.scanning{border-color:#8A4FD6;box-shadow:0 0 0 4px #8A4FD6 inset}
+.choice.scanning{border-color:#8A4FD6;box-shadow:0 0 0 7px #8A4FD6 inset}
 .choice img{width:100%;height:100%;object-fit:cover;display:block}
 .choice .placeholder{padding:12px;text-align:center;font-size:clamp(18px,2vw,30px);font-weight:bold;overflow-wrap:anywhere}
 .choice .num{position:absolute;left:8px;top:8px;background:#fff;border:2px solid #555;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:20px;z-index:2}
@@ -70,7 +70,7 @@ input[type=text]{width:100%;font-size:20px}
     <div class="row"><label for="scanTime">Scan time:</label><select id="scanTime">
       <option value="800">0.8 seconds</option><option value="1200">1.2 seconds</option><option value="1600">1.6 seconds</option><option value="2000">2.0 seconds</option><option value="2300" selected>2.3 seconds</option><option value="2500">2.5 seconds</option><option value="3000">3.0 seconds</option><option value="4000">4.0 seconds</option><option value="5000">5.0 seconds</option>
     </select></div>
-    <p class="small">Paste YouTube video links below. The video's YouTube thumbnail will appear in each scanning box.</p>
+    <p class="small">Enter a YouTube link and a short video title for each choice. The title will be read aloud while that choice is highlighted.</p>
     <div id="links" class="linkgrid"></div>
     <div class="row">
       <button class="secondary" id="youtubeSearch">Search YouTube in a new tab</button>
@@ -110,14 +110,23 @@ async function loadSharedSets(){try{const rows=await supabaseRequest("youtube_vi
 async function saveSharedSet(set){try{await supabaseRequest("youtube_video_sets",{method:"POST",body:JSON.stringify({name:set.name,choice_count:set.choiceCount,scan_ms:set.scanMs,urls:set.urls,saved_at:set.savedAt})})}catch(e){try{await supabaseRequest("youtube_video_sets?name=eq."+encodeURIComponent(set.name),{method:"PATCH",body:JSON.stringify({choice_count:set.choiceCount,scan_ms:set.scanMs,urls:set.urls,saved_at:set.savedAt})})}catch(e2){console.warn("Could not save shared YouTube set.",e2)}}}
 async function deleteSharedSet(name){try{await supabaseRequest("youtube_video_sets?name=eq."+encodeURIComponent(name),{method:"DELETE"})}catch(e){console.warn("Could not delete shared YouTube set.",e)}}
 function refreshSavedSets(selectName=""){const data=getSavedSets();savedSets.innerHTML='<option value="">-- Choose a saved set --</option>';Object.keys(data).sort((a,b)=>a.localeCompare(b)).forEach(name=>{const o=document.createElement("option");o.value=name;o.textContent=name;savedSets.appendChild(o)});if(selectName&&data[selectName])savedSets.value=selectName}
-function buildLinkInputs(values=[]){const n=Number(choiceCount.value);links.innerHTML="";for(let i=0;i<n;i++){const row=document.createElement("div");row.className="linkrow";const num=document.createElement("span");num.textContent=(i+1)+".";const input=document.createElement("input");input.type="text";input.placeholder="Paste YouTube link here";input.dataset.index=i;input.id="video"+i;input.value=values[i]||"";row.append(num,input);links.appendChild(row)}}
+function buildLinkInputs(values=[]){
+ const n=Number(choiceCount.value);links.innerHTML="";
+ for(let i=0;i<n;i++){
+  const value=values[i],url=typeof value==="string"?value:(value?.url||""),title=typeof value==="string"?"":(value?.title||"");
+  const row=document.createElement("div");row.className="linkrow";
+  const num=document.createElement("span");num.textContent=(i+1)+".";
+  const input=document.createElement("input");input.type="text";input.placeholder="Paste YouTube link here";input.dataset.index=i;input.id="video"+i;input.value=url;
+  const titleInput=document.createElement("input");titleInput.type="text";titleInput.placeholder="Video title to read aloud";titleInput.id="videoTitle"+i;titleInput.value=title;
+  row.append(num,input,titleInput);links.appendChild(row);
+ }}
 choiceCount.addEventListener("change",()=>buildLinkInputs());
 document.getElementById("youtubeSearch").onclick=()=>window.open("https://www.youtube.com/results?search_query=","_blank","noopener");
 
 document.getElementById("saveSet").onclick=()=>{
   const name=setName.value.trim();if(!name){alert("Please enter a name for this video set.");setName.focus();return}
-  const n=Number(choiceCount.value),urls=[];for(let i=0;i<n;i++)urls.push(document.getElementById("video"+i).value.trim());
-  const bad=urls.findIndex(u=>!getVideoId(u));if(bad>=0){alert("Please enter a valid YouTube video link for choice "+(bad+1)+" before saving.");document.getElementById("video"+bad).focus();return}
+  const n=Number(choiceCount.value),urls=[];for(let i=0;i<n;i++)urls.push({url:document.getElementById("video"+i).value.trim(),title:document.getElementById("videoTitle"+i).value.trim()});
+  const bad=urls.findIndex(u=>!getVideoId(u.url));if(bad>=0){alert("Please enter a valid YouTube video link for choice "+(bad+1)+" before saving.");document.getElementById("video"+bad).focus();return}
   const data=getSavedSets(),exists=!!data[name];if(exists&&!confirm('A saved set named "'+name+'" already exists. Replace it?'))return;
   data[name]={name,choiceCount:n,scanMs:Number(scanTime.value),urls,savedAt:new Date().toISOString()};if(putSavedSets(data)){saveSharedSet(data[name]);refreshSavedSets(name);alert('Video set "'+name+'" saved.')}
 };
@@ -126,12 +135,13 @@ document.getElementById("deleteSet").onclick=()=>{const name=savedSets.value;if(
 
 function getVideoId(url){try{const u=new URL(url.trim());if(u.hostname==="youtu.be")return u.pathname.slice(1).split("/")[0];if(u.hostname.includes("youtube.com")){if(u.searchParams.get("v"))return u.searchParams.get("v");const parts=u.pathname.split("/").filter(Boolean);const i=parts.indexOf("embed");if(i>=0&&parts[i+1])return parts[i+1];const s=parts.indexOf("shorts");if(s>=0&&parts[s+1])return parts[s+1];const l=parts.indexOf("live");if(l>=0&&parts[l+1])return parts[l+1]}}catch(e){}return null}
 function thumbnail(id){return "https://img.youtube.com/vi/"+id+"/hqdefault.jpg"}
-function makeVideo(url,i){const id=getVideoId(url);return{id,title:"Video choice "+(i+1),url:url.trim(),thumb:id?thumbnail(id):""}}
+function makeVideo(url,i,title=""){const id=getVideoId(url);return{id,title:title.trim()||"Video choice "+(i+1),url:url.trim(),thumb:id?thumbnail(id):""}}
 function renderChoices(){choices.innerHTML="";const n=videos.length,cols=n<=3?n:(n<=6?3:4);choices.style.gridTemplateColumns="repeat("+cols+",minmax(0,1fr))";choices.style.gridTemplateRows="repeat("+Math.ceil(n/cols)+",minmax(0,1fr))";videos.forEach((v,i)=>{const box=document.createElement("div");box.className="choice";const num=document.createElement("div");num.className="num";num.textContent=i+1;box.appendChild(num);if(v.thumb){const img=document.createElement("img");img.src=v.thumb;img.alt="YouTube thumbnail for video choice "+(i+1);img.onerror=()=>{img.remove();const p=document.createElement("div");p.className="placeholder";p.textContent="Thumbnail unavailable";box.appendChild(p)};box.appendChild(img)}else{const p=document.createElement("div");p.className="placeholder";p.textContent="No valid YouTube link";box.appendChild(p)}const title=document.createElement("div");title.className="title";title.textContent=v.title;box.appendChild(title);choices.appendChild(box)});highlight()}
-function highlight(){[...choices.children].forEach((el,i)=>el.classList.toggle("scanning",i===index));positionLabel.textContent="Choice "+(index+1)+" of "+videos.length}
+function speakTitle(title){if(!("speechSynthesis" in window)||!title)return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(title);u.rate=0.95;window.speechSynthesis.speak(u)}
+function highlight(){[...choices.children].forEach((el,i)=>el.classList.toggle("scanning",i===index));positionLabel.textContent="Choice "+(index+1)+" of "+videos.length;if(videos[index])speakTitle(videos[index].title)}
 function startScan(){clearInterval(timer);highlight();timer=setInterval(()=>{index=(index+1)%videos.length;highlight()},scanMs)}
-function stopScan(){clearInterval(timer);timer=null}
-function startGame(){videos=[];for(let i=0;i<Number(choiceCount.value);i++){const val=document.getElementById("video"+i).value.trim();if(!val){alert("Please enter a YouTube link for choice "+(i+1)+".");return}const v=makeVideo(val,i);if(!v.id){alert("Choice "+(i+1)+" does not look like a valid YouTube video link.");return}videos.push(v)}scanMs=Number(scanTime.value);index=0;scanLabel.textContent="Scan: "+(scanMs/1000).toFixed(1)+" sec";home.style.display="none";playerScreen.style.display="none";activity.style.display="flex";renderChoices();startScan()}
+function stopScan(){clearInterval(timer);timer=null;if("speechSynthesis" in window)window.speechSynthesis.cancel()}
+function startGame(){videos=[];for(let i=0;i<Number(choiceCount.value);i++){const val=document.getElementById("video"+i).value.trim(),title=document.getElementById("videoTitle"+i).value.trim();if(!val){alert("Please enter a YouTube link for choice "+(i+1)+".");return}if(!title){alert("Please enter a video title for choice "+(i+1)+" so it can be read aloud.");document.getElementById("videoTitle"+i).focus();return}const v=makeVideo(val,i,title);if(!v.id){alert("Choice "+(i+1)+" does not look like a valid YouTube video link.");return}videos.push(v)}scanMs=Number(scanTime.value);index=0;scanLabel.textContent="Scan: "+(scanMs/1000).toFixed(1)+" sec";home.style.display="none";playerScreen.style.display="none";activity.style.display="flex";renderChoices();startScan()}
 function returnToScanner(){player.src="";playerScreen.style.display="none";activity.style.display="flex";index=0;startScan()}
 function selectCurrent(){if(!videos.length)return;stopScan();const v=videos[index];playerTitle.textContent=v.title;player.src="https://www.youtube.com/embed/"+encodeURIComponent(v.id)+"?autoplay=1&rel=0&enablejsapi=1";activity.style.display="none";playerScreen.style.display="flex"}
 function goHome(){stopScan();player.src="";playerScreen.style.display="none";activity.style.display="none";home.style.display="flex";refreshSavedSets();buildLinkInputs()}
