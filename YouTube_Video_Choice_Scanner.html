@@ -60,7 +60,7 @@ input[type=text]{width:100%;font-size:20px;min-width:0}
         <button class="secondary" id="loadSet">Load Set</button>
         <button class="danger" id="deleteSet">Delete Set</button>
       </div>
-      <p class="small">Saved sets are stored in this browser, so they will still be available when you reopen this game on the same computer/browser.</p>
+      <p class="small">Saved sets are stored inwith Supabase, so they will appear for all users.</p>
     </div>
     <div class="row"><label for="setName">Name this set:</label><input id="setName" type="text" placeholder="Example: Morning Movement Videos"></div>
     <div class="row"><label for="choiceCount">Number of video choices:</label><select id="choiceCount">
@@ -115,8 +115,8 @@ function buildLinkInputs(values=[]){
   const value=values[i],url=typeof value==="string"?value:(value?.url||""),title=typeof value==="string"?"":(value?.title||"");
   const row=document.createElement("div");row.className="linkrow";
   const num=document.createElement("span");num.textContent=(i+1)+".";
-  const input=document.createElement("input");input.type="text";input.placeholder="Paste YouTube link here";input.dataset.index=i;input.id="video"+i;input.value=url;
-  const titleInput=document.createElement("input");titleInput.type="text";titleInput.placeholder="Video title to read aloud";titleInput.id="videoTitle"+i;titleInput.value=title;
+  const input=document.createElement("input");input.type="text";input.placeholder="YouTube link";input.dataset.index=i;input.id="video"+i;input.value=url;
+  const titleInput=document.createElement("input");titleInput.type="text";titleInput.placeholder="Video title";titleInput.id="videoTitle"+i;titleInput.value=title;
   row.append(num,input,titleInput);links.appendChild(row);
  }}
 choiceCount.addEventListener("change",()=>buildLinkInputs());
