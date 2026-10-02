@@ -23,25 +23,25 @@ h2{font-size:clamp(28px,3vw,42px);margin:0 0 18px;text-align:center}
 .scan-choice{position:relative;min-height:0;border:6px solid #aaa;border-radius:24px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;transform:scale(.95);transition:box-shadow .08s,border-color .08s,transform .08s}
 .scan-choice.scanning{border-color:#ffd400;box-shadow:0 0 0 8px #ffd400 inset,0 0 24px 9px #ffd400,0 0 48px 16px rgba(255,212,0,.75);transform:scale(.98);z-index:3}
 .scan-choice .number{position:absolute;left:12px;top:10px;width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #333;display:flex;align-items:center;justify-content:center;font-size:25px;font-weight:bold;z-index:4}
-.color-balloon{width:min(55%,210px);aspect-ratio:.78;border-radius:50% 50% 48% 48%;position:relative;box-shadow:inset -18px -15px 25px rgba(0,0,0,.16),inset 15px 12px 20px rgba(255,255,255,.38),0 7px 12px rgba(0,0,0,.15)}
+.color-balloon{width:min(38%,145px);aspect-ratio:.78;border-radius:50% 50% 48% 48%;position:relative;box-shadow:inset -18px -15px 25px rgba(0,0,0,.16),inset 15px 12px 20px rgba(255,255,255,.38),0 7px 12px rgba(0,0,0,.15)}
 .color-balloon:after{content:"";position:absolute;left:50%;bottom:-18px;transform:translateX(-50%);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:20px solid currentColor}
 .choice-label{position:absolute;bottom:12px;left:10px;right:10px;text-align:center;font-size:clamp(22px,2.3vw,34px);font-weight:bold;background:rgba(255,255,255,.9);border-radius:10px;padding:6px}
-.face{font-size:clamp(70px,8vw,130px);line-height:1}
+.face{font-size:0;width:150px;height:120px;position:relative}\n.face:before,.face:after{content:"";position:absolute;border:6px solid #111;background:transparent}\n.face:before{width:95px;height:70px;left:27px;top:15px;border-radius:50% 50% 48% 48%;}\n.face:after{width:12px;height:12px;left:69px;top:42px;border-radius:50%;box-shadow:-28px 0 0 -1px #111,28px 0 0 -1px #111}\n.face-label{position:absolute;bottom:12px;left:10px;right:10px;text-align:center;font-size:clamp(22px,2.3vw,34px);font-weight:bold}
 .face-label{position:absolute;bottom:12px;left:10px;right:10px;text-align:center;font-size:clamp(22px,2.3vw,34px);font-weight:bold}
 .scan-bottom{flex:0 0 auto;text-align:center;font-size:clamp(19px,2vw,28px);font-weight:bold;padding:8px}
 .game{background:linear-gradient(#9ee8ff 0%,#e9fbff 75%,#b7e98f 75%,#b7e98f 100%);position:relative}
 .game-top{position:absolute;left:20px;right:20px;top:15px;display:flex;justify-content:space-between;align-items:center;font-size:clamp(20px,2vw,28px);font-weight:bold;z-index:10}
-#gameArea{position:absolute;inset:70px 0 0 0;overflow:hidden}
+.cloud{position:absolute;background:rgba(255,255,255,.88);border-radius:50%;z-index:0}.cloud:before,.cloud:after{content:"";position:absolute;background:inherit;border-radius:50%}.cloud1{width:180px;height:55px;top:16%;left:10%}.cloud1:before{width:80px;height:80px;left:28px;top:-38px}.cloud1:after{width:95px;height:95px;left:82px;top:-52px}.cloud2{width:210px;height:62px;top:29%;right:8%}.cloud2:before{width:90px;height:90px;left:35px;top:-44px}.cloud2:after{width:105px;height:105px;left:105px;top:-58px}.cloud3{width:140px;height:45px;top:9%;left:60%}.cloud3:before{width:62px;height:62px;left:20px;top:-30px}.cloud3:after{width:72px;height:72px;left:65px;top:-38px}\n#gameArea{position:absolute;inset:70px 0 0 0;overflow:hidden}
 #pin{position:absolute;left:50%;top:39%;transform:translateX(-50%);width:14px;height:90px;background:#777;border-radius:8px;z-index:3;box-shadow:0 2px 4px rgba(0,0,0,.25)}
 #pin:before{content:"";position:absolute;top:-14px;left:-15px;width:44px;height:34px;background:#444;clip-path:polygon(50% 0,100% 100%,0 100%);transform:rotate(180deg)}
 #pin:after{content:"";position:absolute;bottom:-9px;left:-8px;width:30px;height:12px;border-radius:50%;background:#555}
 #balloon{position:absolute;left:50%;top:66%;width:190px;height:240px;transform:translate(-50%,-50%) scale(.28);transform-origin:center center;border-radius:50% 50% 47% 47%;z-index:2;box-shadow:inset -24px -20px 34px rgba(0,0,0,.16),inset 18px 15px 25px rgba(255,255,255,.42),0 12px 18px rgba(0,0,0,.18);transition:background .2s}
 #balloon:before{content:"";position:absolute;left:50%;bottom:-23px;transform:translateX(-50%);width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-top:25px solid var(--balloon-color)}
 #balloon:after{content:"";position:absolute;left:50%;bottom:-130px;transform:translateX(-50%);width:4px;height:110px;background:#555}
-.face-on-balloon{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);font-size:78px;line-height:1;white-space:nowrap;text-shadow:0 2px 2px rgba(0,0,0,.15)}
+.face-on-balloon{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:115px;height:82px;border:5px solid #111;border-radius:50%;font-size:0}\n.face-on-balloon:before{content:"";position:absolute;left:27px;top:25px;width:12px;height:12px;background:#111;border-radius:50%;box-shadow:43px 0 0 #111}\n.face-on-balloon:after{content:"";position:absolute;left:42px;top:48px;width:27px;height:14px;border-bottom:5px solid #111;border-radius:0 0 50% 50%}\n.face-on-balloon.face-surprised:after{width:18px;height:18px;left:44px;top:45px;border:5px solid #111;border-radius:50%}\n.face-on-balloon.face-silly:after{left:38px;top:51px;width:38px;height:8px;border-bottom:0;border-top:5px solid #111;transform:rotate(-8deg)}\n.face-on-balloon.face-excited:before{width:12px;height:18px;border-radius:50%;box-shadow:43px 0 0 #111}
 #tapCount{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);font-size:clamp(24px,2.5vw,36px);font-weight:bold;background:rgba(255,255,255,.85);padding:8px 18px;border-radius:14px;z-index:8}
 #modeHint{position:absolute;right:20px;bottom:18px;font-size:22px;font-weight:bold;background:rgba(255,255,255,.75);padding:8px 14px;border-radius:12px;z-index:8}
-.explosion-particle{position:absolute;width:18px;height:18px;border-radius:50%;pointer-events:none;z-index:9}
+.explosion-ray{position:absolute;width:10px;height:85px;background:#ffcc00;transform-origin:50% 100%;z-index:9;clip-path:polygon(50% 0,100% 100%,50% 78%,0 100%)}\n.explosion-particle{position:absolute;width:18px;height:18px;border-radius:50%;pointer-events:none;z-index:9}
 #popMessage{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:20;background:rgba(255,255,255,.25)}
 #popMessage .box{background:#fff;border:6px solid #ffbf00;border-radius:24px;padding:25px 40px;text-align:center;box-shadow:0 8px 35px rgba(0,0,0,.25)}
 #popMessage h1{margin:0 0 8px;font-size:64px}
@@ -95,7 +95,7 @@ h2{font-size:clamp(28px,3vw,42px);margin:0 0 18px;text-align:center}
     <span id="modeLabel"></span>
     <span id="gameInstruction"></span>
   </div>
-  <div id="gameArea">
+  <div class="cloud cloud1"></div><div class="cloud cloud2"></div><div class="cloud cloud3"></div><div id="gameArea">
     <div id="pin"></div>
     <div id="balloon"><div id="faceOnBalloon" class="face-on-balloon"></div></div>
     <div id="tapCount"></div>
@@ -147,7 +147,7 @@ function buildFaceMenu(){
   const grid=document.getElementById("faceGrid");
   grid.innerHTML=FACES.map((f,i)=>`<button class="scan-choice" data-index="${i}" aria-label="${f.name}">
     <span class="number">${i+1}</span>
-    <span class="face">${f.emoji}</span>
+    <span class="face face-${f.name.toLowerCase()}"></span>
     <span class="face-label">${f.name}</span>
   </button>`).join("");
 }
@@ -202,9 +202,9 @@ function startGame(){
   document.getElementById("tapCount").textContent=mode==="tap"?"0 / 4":"";
   const balloon=document.getElementById("balloon");
   balloon.style.setProperty("--balloon-color",selectedColor.value);
-  balloon.style.background=selectedColor.value;
-  document.getElementById("faceOnBalloon").textContent=selectedFace.emoji;
-  document.getElementById("popMessage").style.display="none";
+  balloon.style.background=selectedColor.value;\n  balloon.style.opacity="1";
+  document.getElementById("faceOnBalloon").className="face-on-balloon face-"+selectedFace.name.toLowerCase();
+  document.getElementById("popMessage").style.display="none";\n  balloon.style.opacity="1";\n  document.querySelectorAll(".explosion-particle,.explosion-ray").forEach(x=>x.remove());
   lastTime=performance.now();
   cancelAnimationFrame(animationId);
   animationId=requestAnimationFrame(gameLoop);
@@ -264,7 +264,7 @@ function popBalloon(){
 function explosion(cx,cy){
   const area=document.getElementById("gameArea");
   const colors=["#ff3b30","#ffcc00","#ff7a00","#ffffff","#ff4fa3","#7b2cff"];
-  for(let i=0;i<42;i++){
+  for(let r=0;r<20;r++){const ray=document.createElement("div");ray.className="explosion-ray";ray.style.left=cx+"px";ray.style.top=cy+"px";ray.style.background=colors[r%colors.length];ray.style.transform=`translate(-50%,-100%) rotate(${r*18}deg) scaleY(.2)`;area.appendChild(ray);const rs=performance.now(),rl=500;const ra=t=>{const q=Math.min(1,(t-rs)/rl);ray.style.transform=`translate(-50%,-100%) rotate(${r*18}deg) scaleY(${.2+q*.9})`;ray.style.opacity=String(1-q);if(q<1)requestAnimationFrame(ra);else ray.remove()};requestAnimationFrame(ra)}\n  for(let i=0;i<42;i++){
     const p=document.createElement("div");
     p.className="explosion-particle";
     const a=Math.random()*Math.PI*2;
