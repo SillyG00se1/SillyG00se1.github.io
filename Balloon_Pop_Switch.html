@@ -176,6 +176,13 @@ function startScan(gridId,items,onSelect){
   };
 }
 
+function chooseInflationMode(newMode){
+  mode=newMode;
+  buildColorMenu();
+  buildFaceMenu();
+  startColorScan();
+}
+
 function startColorScan(){
   show("colorScreen");
   startScan("colorGrid",COLORS,c=>{
@@ -287,16 +294,24 @@ function explosion(cx,cy){
 }
 
 document.querySelectorAll(".setup-btn").forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    mode=btn.dataset.mode;
-    buildColorMenu();buildFaceMenu();startColorScan();
-  });
+  btn.addEventListener("click",()=>chooseInflationMode(btn.dataset.mode));
 });
+
+let setupIndex=0;
+function setupSelect(){
+  const buttons=[...document.querySelectorAll(".setup-btn")];
+  if(!buttons.length)return;
+  chooseInflationMode(buttons[setupIndex].dataset.mode);
+}
 
 window.addEventListener("keydown",e=>{
   if(e.code!=="Space")return;
   e.preventDefault();
   if(e.repeat)return;
+  if(!document.getElementById("setupScreen").classList.contains("hidden")){
+    setupSelect();
+    return;
+  }
   if(!document.getElementById("colorScreen").classList.contains("hidden") ||
      !document.getElementById("faceScreen").classList.contains("hidden")){
     if(typeof window.currentScanSelect==="function")window.currentScanSelect();
