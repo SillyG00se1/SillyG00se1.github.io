@@ -26,16 +26,32 @@ h2{font-size:clamp(28px,3vw,42px);margin:0 0 18px;text-align:center}
 .color-balloon{width:min(38%,145px);aspect-ratio:.78;border-radius:50% 50% 48% 48%;position:relative;box-shadow:inset -18px -15px 25px rgba(0,0,0,.16),inset 15px 12px 20px rgba(255,255,255,.38),0 7px 12px rgba(0,0,0,.15)}
 .color-balloon:after{content:"";position:absolute;left:50%;bottom:-18px;transform:translateX(-50%);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:20px solid currentColor}
 .choice-label{position:absolute;bottom:12px;left:10px;right:10px;text-align:center;font-size:clamp(22px,2.3vw,34px);font-weight:bold;background:rgba(255,255,255,.9);border-radius:10px;padding:6px}
-.face{width:180px;height:130px;position:relative}
+.face{width:210px;height:150px;position:relative}
 .face:before,.face:after{content:"";position:absolute;display:block}
-.face-happy:before{width:80px;height:30px;left:45px;top:33px;background:radial-gradient(circle at 9px 9px,transparent 0 6px,#111 6px 10px,transparent 10px),radial-gradient(circle at 71px 9px,transparent 0 6px,#111 6px 10px,transparent 10px)}
-.face-happy:after{width:58px;height:30px;left:61px;top:66px;border-bottom:7px solid #111;border-radius:0 0 60px 60px}
-.face-surprised:before{width:80px;height:30px;left:45px;top:30px;background:radial-gradient(circle at 9px 9px,transparent 0 6px,#111 6px 10px,transparent 10px),radial-gradient(circle at 71px 9px,transparent 0 6px,#111 6px 10px,transparent 10px)}
-.face-surprised:after{width:28px;height:34px;left:75px;top:68px;border:6px solid #111;border-radius:50%}
-.face-silly:before{width:86px;height:30px;left:42px;top:31px;background:radial-gradient(circle at 9px 9px,transparent 0 6px,#111 6px 10px,transparent 10px),radial-gradient(circle at 77px 9px,transparent 0 6px,#111 6px 10px,transparent 10px)}
-.face-silly:after{width:68px;height:25px;left:56px;top:70px;border-top:7px solid #111;border-radius:50%;transform:rotate(-7deg)}
-.face-excited:before{width:88px;height:30px;left:43px;top:33px;background:radial-gradient(ellipse at 10px 9px,transparent 0 6px,#111 6px 10px,transparent 10px),radial-gradient(ellipse at 75px 9px,transparent 0 6px,#111 6px 10px,transparent 10px)}
-.face-excited:after{width:64px;height:38px;left:58px;top:67px;border:7px solid #111;border-radius:50%}
+.face-happy:before{width:128px;height:58px;left:41px;top:28px;background:
+radial-gradient(circle at 12px 19px,#111 0 9px,transparent 10px),
+radial-gradient(circle at 116px 19px,#111 0 9px,transparent 10px),
+linear-gradient(165deg,transparent 0 44%,#111 45% 49%,transparent 50%) 2px 0/45px 18px no-repeat,
+linear-gradient(15deg,transparent 0 44%,#111 45% 49%,transparent 50%) 80px 0/45px 18px no-repeat}
+.face-happy:after{width:78px;height:42px;left:66px;top:76px;border-bottom:8px solid #111;border-radius:0 0 70px 70px;box-shadow:0 10px 0 -6px #111}
+.face-surprised:before{width:128px;height:58px;left:41px;top:27px;background:
+radial-gradient(circle at 12px 24px,#111 0 10px,transparent 11px),
+radial-gradient(circle at 116px 24px,#111 0 10px,transparent 11px),
+linear-gradient(160deg,transparent 0 43%,#111 44% 50%,transparent 51%) 0 0/48px 18px no-repeat,
+linear-gradient(20deg,transparent 0 43%,#111 44% 50%,transparent 51%) 80px 0/48px 18px no-repeat}
+.face-surprised:after{width:34px;height:44px;left:88px;top:82px;border:7px solid #111;border-radius:50%}
+.face-silly:before{width:130px;height:58px;left:39px;top:27px;background:
+radial-gradient(ellipse at 12px 20px,#111 0 9px,transparent 10px),
+radial-gradient(ellipse at 118px 15px,#111 0 9px,transparent 10px),
+linear-gradient(8deg,transparent 0 44%,#111 45% 51%,transparent 52%) 0 0/50px 18px no-repeat,
+linear-gradient(-12deg,transparent 0 44%,#111 45% 51%,transparent 52%) 80px 0/50px 18px no-repeat}
+.face-silly:after{width:88px;height:38px;left:61px;top:79px;border-top:8px solid #111;border-radius:50%;transform:rotate(-6deg);box-shadow:0 8px 0 -4px #111}
+.face-excited:before{width:132px;height:60px;left:39px;top:25px;background:
+radial-gradient(ellipse at 13px 23px,#111 0 8px,transparent 9px),
+radial-gradient(ellipse at 119px 23px,#111 0 8px,transparent 9px),
+linear-gradient(155deg,transparent 0 42%,#111 43% 50%,transparent 51%) 0 0/48px 18px no-repeat,
+linear-gradient(25deg,transparent 0 42%,#111 43% 50%,transparent 51%) 84px 0/48px 18px no-repeat}
+.face-excited:after{width:82px;height:50px;left:64px;top:78px;border:8px solid #111;border-radius:50%;box-shadow:inset 0 -7px 0 -2px #111}
 .face-label{position:absolute;bottom:12px;left:10px;right:10px;text-align:center;font-size:clamp(22px,2.3vw,34px);font-weight:bold}
 .scan-bottom{flex:0 0 auto;text-align:center;font-size:clamp(19px,2vw,28px);font-weight:bold;padding:8px}
 .game{background:linear-gradient(#9ee8ff 0%,#e9fbff 75%,#b7e98f 75%,#b7e98f 100%);position:relative}
@@ -48,16 +64,25 @@ h2{font-size:clamp(28px,3vw,42px);margin:0 0 18px;text-align:center}
 #balloon{position:absolute;left:50%;top:66%;width:190px;height:240px;transform:translate(-50%,-50%) scale(.28);transform-origin:center center;border-radius:50% 50% 47% 47%;z-index:2;box-shadow:inset -24px -20px 34px rgba(0,0,0,.16),inset 18px 15px 25px rgba(255,255,255,.42),0 12px 18px rgba(0,0,0,.18);transition:background .2s}
 #balloon:before{content:"";position:absolute;left:50%;bottom:-23px;transform:translateX(-50%);width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-top:25px solid var(--balloon-color)}
 #balloon:after{content:"";position:absolute;left:50%;bottom:-130px;transform:translateX(-50%);width:4px;height:110px;background:#555}
-.face-on-balloon{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:115px;height:82px;font-size:0}
-.face-on-balloon:before{content:"";position:absolute;left:27px;top:25px;width:12px;height:12px;background:#111;border-radius:50%;box-shadow:43px 0 0 #111}
-.face-on-balloon:after{content:"";position:absolute;left:42px;top:48px;width:27px;height:14px;border-bottom:5px solid #111;border-radius:0 0 50% 50%}
-.face-on-balloon.face-surprised:after{width:18px;height:18px;left:44px;top:45px;border:5px solid #111;border-radius:50%}
-.face-on-balloon.face-silly:after{left:38px;top:51px;width:38px;height:8px;border-bottom:0;border-top:5px solid #111;transform:rotate(-8deg)}
-.face-on-balloon.face-excited:before{width:12px;height:18px;border-radius:50%;box-shadow:43px 0 0 #111}
+.face-on-balloon{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);width:120px;height:92px;font-size:0}
+.face-on-balloon:before{content:"";position:absolute;left:24px;top:21px;width:72px;height:30px;background:
+radial-gradient(circle at 8px 15px,#111 0 6px,transparent 7px),
+radial-gradient(circle at 64px 15px,#111 0 6px,transparent 7px),
+linear-gradient(165deg,transparent 0 43%,#111 44% 50%,transparent 51%) 0 0/30px 12px no-repeat,
+linear-gradient(15deg,transparent 0 43%,#111 44% 50%,transparent 51%) 42px 0/30px 12px no-repeat}
+.face-on-balloon:after{content:"";position:absolute;left:39px;top:51px;width:42px;height:23px;border-bottom:5px solid #111;border-radius:0 0 45px 45px}
+.face-on-balloon.face-surprised:after{width:22px;height:24px;left:49px;top:49px;border:5px solid #111;border-radius:50%}
+.face-on-balloon.face-silly:after{left:34px;top:54px;width:52px;height:10px;border-top:5px solid #111;border-radius:50%;transform:rotate(-7deg);box-shadow:0 8px 0 -4px #111}
+.face-on-balloon.face-excited:before{background:
+radial-gradient(ellipse at 8px 15px,#111 0 6px,transparent 7px),
+radial-gradient(ellipse at 64px 15px,#111 0 6px,transparent 7px),
+linear-gradient(155deg,transparent 0 42%,#111 43% 50%,transparent 51%) 0 0/30px 12px no-repeat,
+linear-gradient(25deg,transparent 0 42%,#111 43% 50%,transparent 51%) 42px 0/30px 12px no-repeat}
+.face-on-balloon.face-excited:after{width:48px;height:28px;left:36px;top:50px;border:5px solid #111;border-radius:50%}
 #tapCount{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);font-size:clamp(24px,2.5vw,36px);font-weight:bold;background:rgba(255,255,255,.85);padding:8px 18px;border-radius:14px;z-index:8}
 #modeHint{position:absolute;right:20px;bottom:18px;font-size:22px;font-weight:bold;background:rgba(255,255,255,.75);padding:8px 14px;border-radius:12px;z-index:8}
-.explosion-ray{position:absolute;width:10px;height:85px;background:#ffcc00;transform-origin:50% 100%;z-index:9;clip-path:polygon(50% 0,100% 100%,50% 78%,0 100%)}
-.explosion-particle{position:absolute;width:18px;height:18px;border-radius:50%;pointer-events:none;z-index:9}
+.explosion-ray{position:absolute;width:18px;height:165px;background:#ffcc00;transform-origin:50% 100%;z-index:9;clip-path:polygon(50% 0,100% 100%,50% 78%,0 100%);filter:drop-shadow(0 0 5px rgba(255,180,0,.7))}
+.explosion-particle{position:absolute;width:22px;height:22px;border-radius:50%;pointer-events:none;z-index:9;box-shadow:0 0 8px rgba(255,70,30,.45)}
 .effect-item{position:absolute;pointer-events:none;z-index:12;will-change:transform,opacity}
 .water-drop{width:22px;height:30px;background:#168cff;border-radius:50% 50% 55% 55%;box-shadow:inset 5px 4px 5px rgba(255,255,255,.65)}
 .confetti-piece{width:15px;height:30px;border-radius:3px}
@@ -338,9 +363,12 @@ function animateEffect(e,dx,dy,life,gravity,rotate){
   requestAnimationFrame(step);
 }
 function redBang(cx,cy){
-  const area=document.getElementById("gameArea"),colors=["#ff3b30","#ffcc00","#ff7a00","#fff","#ff4fa3","#7b2cff"];
-  for(let i=0;i<20;i++){const r=document.createElement("div");r.className="explosion-ray";r.style.left=cx+"px";r.style.top=cy+"px";r.style.background=colors[i%colors.length];r.style.transform=`translate(-50%,-100%) rotate(${i*18}deg) scaleY(.2)`;area.appendChild(r);setTimeout(()=>r.remove(),550)}
-  for(let i=0;i<35;i++){const p=makeEffect("explosion-particle",null,cx,cy),a=Math.random()*6.28,s=100+Math.random()*280;animateEffect(p,Math.cos(a)*s,Math.sin(a)*s,850,180,Math.random()*360)}
+  const area=document.getElementById("gameArea"),colors=["#ff2d20","#ff5a36","#ffcc00","#fff","#ff8a00"];
+  const flash=document.createElement("div");
+  flash.style.cssText=`position:absolute;left:${cx}px;top:${cy}px;width:180px;height:180px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,#fff 0,#fff7 16%,#ff4b2b 38%,#ff1f1f 62%,transparent 72%);z-index:11;pointer-events:none`;
+  area.appendChild(flash);setTimeout(()=>flash.remove(),260);
+  for(let i=0;i<28;i++){const r=document.createElement("div");r.className="explosion-ray";r.style.left=cx+"px";r.style.top=cy+"px";r.style.background=colors[i%colors.length];r.style.transform=`translate(-50%,-100%) rotate(${i*(360/28)}deg) scaleY(.42)`;area.appendChild(r);setTimeout(()=>r.remove(),800)}
+  for(let i=0;i<60;i++){const p=makeEffect("explosion-particle",null,cx,cy),a=Math.random()*6.28,s=140+Math.random()*420;animateEffect(p,Math.cos(a)*s,Math.sin(a)*s,1100,210,Math.random()*720-360)}
 }
 function blueWater(cx,cy){for(let i=0;i<40;i++){const e=makeEffect("water-drop",null,cx,cy),a=Math.random()*6.28,s=80+Math.random()*260;animateEffect(e,Math.cos(a)*s,Math.sin(a)*s-80,1100,330,Math.random()*90-45)}}
 function greenConfetti(cx,cy){const colors=["#22b14c","#8cff5a","#0a8f3c","#42d66b","#b7ff75"];for(let i=0;i<55;i++){const e=makeEffect("confetti-piece",null,cx,cy);e.style.background=colors[i%colors.length];const a=Math.random()*6.28,s=80+Math.random()*300;animateEffect(e,Math.cos(a)*s,Math.sin(a)*s-100,1200,360,Math.random()*720-360)}}
