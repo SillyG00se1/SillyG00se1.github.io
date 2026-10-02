@@ -161,6 +161,7 @@ function startScan(gridId,items,onSelect){
   scanItems=items;scanIndex=0;
   const choices=[...document.querySelectorAll("#"+gridId+" .scan-choice")];
   if(!choices.length)return;
+  choices.forEach((choice,i)=>{choice.addEventListener("click",()=>{scanIndex=i;stopScan();onSelect(scanItems[i])})});
   const highlight=()=>{
     choices.forEach((x,i)=>x.classList.toggle("scanning",i===scanIndex));
   };
@@ -213,7 +214,7 @@ function startGame(){
 function gameLoop(now){
   const dt=Math.min(.04,(now-lastTime)/1000);lastTime=now;
   if(!popped){
-    if(mode==="hold" && held) balloonSize+=dt*.23;
+    if((mode==="hold"||mode==="either") && held) balloonSize+=dt*.23;
     if(mode==="hold" && !held) balloonSize-=dt*.075;
     balloonSize=Math.max(.28,Math.min(1.62,balloonSize));
     document.getElementById("balloon").style.transform=
