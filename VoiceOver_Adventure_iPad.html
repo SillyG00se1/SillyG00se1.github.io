@@ -139,7 +139,6 @@ obstacle.innerHTML="<div>"+item.emoji+"</div><div class=\"obstacle-name\">"+item
 obstacle.setAttribute("aria-label",item.name+". "+prettyCommand(expected)+" required.");
 command.textContent="";
 status.textContent="";
-instructionText.textContent="";
 requestAnimationFrame(()=>{if(state.screen==="game")obstacle.focus({preventScroll:true})});
 }
 function speakCurrent(){
@@ -192,6 +191,7 @@ if(!ok)console.warn("VoiceOver Adventure: Supabase save did not complete.");
 }
 async function clearAllData(){
 const password=window.prompt("Teacher password:");
+
 if(password===null)return;
 if(password!=="1234"){
   window.alert("Incorrect password.");
@@ -201,8 +201,16 @@ if(!window.confirm("Clear ALL VoiceOver Adventure session data? This cannot be u
 $("dataStatus").textContent="Clearing data…";
 let supabaseOk=false;
 try{
-  const r=await fetch(SUPABASE_URL+"/rest/v1/"+SUPABASE_TABLE,{method:"DELETE",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Prefer":"return=minimal"}});
+  const r=await fetch(SUPABASE_URL+"/rest/v1/"+SUPABASE_TABLE+"?id=gt.0",{method:"DELETE",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Prefer":"return=representation"}});
   supabaseOk=r.ok;
+  if(supabaseOk){
+    const check=await fetch(SUPABASE_URL+"/rest/v1/"+SUPABASE_TABLE+"?select=id&limit=1",{headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY}});
+    if(!check.ok) supabaseOk=false;
+    else {
+      const remaining=await check.json();
+      if(Array.isArray(remaining)&&remaining.length>0) supabaseOk=false;
+    }
+  }
 }catch(e){supabaseOk=false}
 try{localStorage.removeItem(LOCAL_DATA_KEY)}catch(e){}
 renderData([]);
