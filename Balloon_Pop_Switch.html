@@ -291,13 +291,19 @@ function gameLoop(now){
     document.getElementById("balloon").style.transform=
       `translate(-50%,-50%) scale(${balloonSize})`;
     const balloon=document.getElementById("balloon");
-    const cactus=document.getElementById("cactus");
     const br=balloon.getBoundingClientRect();
-    const cr=cactus.getBoundingClientRect();
-    // Pop when the balloon reaches the visible cactus image.
-    const spikeEdge=cr.right-18;
-    const verticalOverlap=br.bottom>cr.top+55 && br.top<cr.bottom-45;
-    if(br.left<=spikeEdge && verticalOverlap) popBalloon();
+    // Use a fixed collision point instead of the PNG's box.
+    // This point is positioned at the visible cactus/spike area.
+    const gameArea=document.getElementById("gameArea").getBoundingClientRect();
+    const collisionX=gameArea.left + gameArea.width*0.425;
+    const collisionY=gameArea.top + gameArea.height*0.44;
+    const pointSize=10;
+    const balloonTouchesPoint =
+      br.left <= collisionX + pointSize &&
+      br.right >= collisionX - pointSize &&
+      br.top <= collisionY + pointSize &&
+      br.bottom >= collisionY - pointSize;
+    if(balloonTouchesPoint) popBalloon();
   }
   if(!popped) animationId=requestAnimationFrame(gameLoop);
 }
