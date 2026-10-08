@@ -176,7 +176,7 @@ function drawPlayer(){
  ctx.fillStyle="#e0a14a";ctx.beginPath();ctx.arc(x+76,y-26,8,0,7);ctx.fill();
 }
 function draw(){
- ctx.clearRect(0,0,W,H);drawSky();drawHospital();
+ ctx.clearRect(0,0,W,H);drawSky();if(level===1)drawHospital();else if(level===2)drawOffice();else if(level===3)drawPark();else if(level===4)drawSkatePark();else drawPumpkinPatch();
  if(screen==="game"){drawPlayer();for(let z of zombies)zombie(z);drawEffects();return}
 }
 function drawEffects(){
