@@ -170,6 +170,7 @@ const FACES=[
 ];
 
 let mode="hold", selectedColor=null, selectedFace=null;
+let setupScanTimer=null, setupIndex=0;
 let scanTimer=null, scanIndex=0, scanItems=[];
 let balloonSize=.28, held=false, tapCount=0, popped=false, lastTime=0, animationId=null;
 let returnTimer=null, gameSession=0;
@@ -188,6 +189,27 @@ function unlockPopAudio(){
 function show(id){
   document.querySelectorAll(".screen").forEach(x=>x.classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
+}
+
+function clearEffects(){
+  const area=document.getElementById("gameArea");
+  if(!area)return;
+  area.querySelectorAll(".effect-item,.explosion-ray,.explosion-particle").forEach(x=>x.remove());
+}
+
+function stopSetupScan(){
+  if(setupScanTimer!==null){clearInterval(setupScanTimer);setupScanTimer=null;}
+  document.querySelectorAll(".setup-btn").forEach(x=>x.classList.remove("scanning"));
+}
+
+function startSetupScan(){
+  stopSetupScan();
+  const buttons=[...document.querySelectorAll(".setup-btn")];
+  if(!buttons.length)return;
+  setupIndex=0;
+  const highlight=()=>buttons.forEach((b,i)=>b.classList.toggle("scanning",i===setupIndex));
+  highlight();
+  setupScanTimer=setInterval(()=>{setupIndex=(setupIndex+1)%buttons.length;highlight();},1400);
 }
 
 function buildColorMenu(){
@@ -269,6 +291,7 @@ function startMenuScan(screenId, choices, onSelect){
 
 function chooseInflationMode(newMode){
   if(!["hold","tap","either"].includes(newMode)) return;
+  stopSetupScan();
 
   mode = newMode;
   selectedColor = null;
@@ -353,18 +376,19 @@ function startGame(){
   clearEffects();
 
   // The selected color is the single source of truth for the balloon.
-  balloon.style.setProperty("--balloon-color",selectedColor.value);
-  balloon.style.backgroundColor=selectedColor.value;
-  balloon.style.display="block";
-  balloon.style.visibility="visible";
-  balloon.style.opacity="1";
-  balloon.style.transform="translate(-50%,-50%) scale(.28)";
-  balloon.style.zIndex="20";
+  const balloonEl=document.getElementById("balloon");
+  balloonEl.style.setProperty("--balloon-color",selectedColor.value);
+  balloonEl.style.backgroundColor=selectedColor.value;
+  balloonEl.style.display="block";
+  balloonEl.style.visibility="visible";
+  balloonEl.style.opacity="1";
+  balloonEl.style.transform="translate(-50%,-50%) scale(.28)";
+  balloonEl.style.zIndex="20";
 
   document.getElementById("faceOnBalloon").className=
     "face-on-balloon face-"+selectedFace.name.toLowerCase();
 
-  void balloon.offsetWidth;
+  void balloonEl.offsetWidth;
   lastTime=performance.now();
   animationId=requestAnimationFrame(gameLoop);
 }
@@ -504,7 +528,6 @@ document.querySelectorAll(".setup-btn").forEach(btn=>{
   btn.addEventListener("click",()=>chooseInflationMode(btn.dataset.mode));
 });
 
-let setupIndex=0;
 function setupSelect(){
   const buttons=[...document.querySelectorAll(".setup-btn")];
   if(!buttons.length)return;
@@ -537,6 +560,7 @@ window.addEventListener("keydown", function(e){
       show("setupScreen");
     }else{
       show("setupScreen");
+      startSetupScan();
     }
 
     return;
@@ -599,7 +623,7 @@ document.getElementById("gameBack").addEventListener("click",()=>{
   stopScan();show("setupScreen");
 });
 
-buildColorMenu();buildFaceMenu();
+buildColorMenu();buildFaceMenu();startSetupScan();
 </script>
 </body>
 </html>
