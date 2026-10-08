@@ -232,33 +232,81 @@ function startScan(gridId,items,onSelect){
 }
 
 function chooseInflationMode(newMode){
+  if(!["hold","tap","either"].includes(newMode)) return;
   mode=newMode;
-  buildColorMenu();
-  buildFaceMenu();
+  selectedColor=null;
+  selectedFace=null;
+  cancelAnimationFrame(animationId);
+  if(returnTimer){clearTimeout(returnTimer);returnTimer=null}
+  gameSession++;
+  held=false;
+  popped=false;
+  tapCount=0;
+  balloonSize=.28;
+  clearEffects();
+  balloon.style.display="block";
+  balloon.style.visibility="visible";
+  balloon.style.opacity="1";
   startColorScan();
 }
 
 function startColorScan(){
+  stopScan();
   show("colorScreen");
-  startScan("colorGrid",COLORS,c=>{
-    selectedColor=c;
-    startFaceScan();
-  });
+  scanPhase="color";
+  scanIndex=0;
+  const choices=[...document.querySelectorAll("#colorGrid .scan-choice")];
+  if(!choices.length)return;
+  const highlight=()=>{
+    choices.forEach((x,i)=>x.classList.toggle("scanning",i===scanIndex));
+  };
+  highlight();
+  scanTimer=setInterval(()=>{
+    if(scanPhase!=="color"){stopScan();return}
+    scanIndex=(scanIndex+1)%choices.length;
+    highlight();
+  },1400);
 }
 function startFaceScan(){
+  stopScan();
   show("faceScreen");
-  startScan("faceGrid",FACES,f=>{
-    selectedFace=f;
-    startGame();
-  });
+  scanPhase="face";
+  scanIndex=0;
+  const choices=[...document.querySelectorAll("#faceGrid .scan-choice")];
+  if(!choices.length)return;
+  const highlight=()=>{
+    choices.forEach((x,i)=>x.classList.toggle("scanning",i===scanIndex));
+  };
+  highlight();
+  scanTimer=setInterval(()=>{
+    if(scanPhase!=="face"){stopScan();return}
+    scanIndex=(scanIndex+1)%choices.length;
+    highlight();
+  },1400);
 }
 
 function startGame(){
+  if(!selectedColor || !selectedColor.value){
+    startColorScan();
+    return;
+  }
+  if(!selectedFace || !selectedFace.name){
+    startFaceScan();
+    return;
+  }
+
   show("gameScreen");
   unlockPopAudio();
-  gameSession++;
+
   if(returnTimer){clearTimeout(returnTimer);returnTimer=null}
-  held=false;popped=false;tapCount=0;balloonSize=.28;
+  cancelAnimationFrame(animationId);
+
+  gameSession++;
+  held=false;
+  popped=false;
+  tapCount=0;
+  balloonSize=.28;
+
   document.getElementById("modeLabel").textContent="Mode: "+mode.toUpperCase();
   document.getElementById("gameInstruction").textContent="SPACE = INFLATE";
   document.getElementById("modeHint").textContent=
@@ -266,19 +314,23 @@ function startGame(){
     mode==="tap"?"Press SPACE 4 times":
     "Hold or tap SPACE";
   document.getElementById("tapCount").textContent=mode==="tap"?"0 / 4":"";
-  const balloon=document.getElementById("balloon");
+
+  clearEffects();
+
+  // The selected color is the single source of truth for the balloon.
   balloon.style.setProperty("--balloon-color",selectedColor.value);
-  balloon.style.background=selectedColor.value;
+  balloon.style.backgroundColor=selectedColor.value;
   balloon.style.display="block";
   balloon.style.visibility="visible";
   balloon.style.opacity="1";
   balloon.style.transform="translate(-50%,-50%) scale(.28)";
   balloon.style.zIndex="20";
-  document.getElementById("faceOnBalloon").className="face-on-balloon face-"+selectedFace.name.toLowerCase();
-  document.querySelectorAll(".explosion-particle,.explosion-ray,.effect-item").forEach(x=>x.remove());
+
+  document.getElementById("faceOnBalloon").className=
+    "face-on-balloon face-"+selectedFace.name.toLowerCase();
+
   void balloon.offsetWidth;
   lastTime=performance.now();
-  cancelAnimationFrame(animationId);
   animationId=requestAnimationFrame(gameLoop);
 }
 
@@ -343,18 +395,26 @@ function popBalloon(){
   if(returnTimer)clearTimeout(returnTimer);
   returnTimer=setTimeout(()=>{
     returnTimer=null;
-    if(popped && session===gameSession)startColorScan();
+    if(popped && session===gameSession){
+      popped=false;
+      held=false;
+      balloonSize=.28;
+      balloon.style.opacity="1";
+      startColorScan();
+    }
   },4300);
 }
 function explosion(cx,cy){
-  const type=selectedColor?.name;
-  if(type==="Red") return redBang(cx,cy);
-  if(type==="Blue") return blueWater(cx,cy);
-  if(type==="Green") return greenConfetti(cx,cy);
-  if(type==="Yellow") return yellowStars(cx,cy);
-  if(type==="Purple") return purpleSlime(cx,cy);
-  if(type==="Pink") return pinkSparkles(cx,cy);
-  return redBang(cx,cy);
+  if(!selectedColor || !selectedColor.name) return;
+
+  switch(selectedColor.name){
+    case "Red": redBang(cx,cy); break;
+    case "Blue": blueWater(cx,cy); break;
+    case "Green": greenConfetti(cx,cy); break;
+    case "Yellow": yellowStars(cx,cy); break;
+    case "Purple": purpleSlime(cx,cy); break;
+    case "Pink": pinkSparkles(cx,cy); break;
+  }
 }
 function makeEffect(cls,text,cx,cy){
   const e=document.createElement("div");e.className="effect-item "+cls;if(text)e.textContent=text;
