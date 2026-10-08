@@ -154,7 +154,7 @@ function startLesson(n,lvl){
 function showTypingScreen(){
  let chars="";for(let start=0;start<prompt.length;start+=50){let row=prompt.slice(start,start+50).split("").map((c,j)=>{let i=start+j;return `<span id="c${i}" class="char">${c===" "?"\u00a0":esc(c)}</span>`}).join("");chars+=`<div class="prompt-row">${row}</div>`;}
  screen(`<div class="typing-wrap"><h2>Lesson ${lessonNumber} • Level ${levelNumber}: ${LEVEL_NAMES[levelNumber-1]}</h2><div style="font-size:20px;margin-bottom:8px">${esc(studentName)}</div>
- <div class="prompt-title">Type the following:</div><div id="prompt" class="prompt">${chars}</div><div class="typing-title">Your typing:</div>
+ <div id="prompt" class="prompt">${chars}</div>
  <textarea id="typingArea" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea><div id="timer" class="timer">Time: 0.0 seconds</div>
  <div class="bottom">${button("SUBMIT","submitTest()")}${button("BACK TO LESSON","showLevelMenu(lessonNumber)")}</div></div>`);
  updatePromptColors();let a=document.getElementById("typingArea");a.addEventListener("keydown",handleKey);a.focus();updateTimer()
