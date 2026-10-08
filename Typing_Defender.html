@@ -42,11 +42,11 @@ let W=1200,H=760,dpr=1,screen="menu",level=1,running=false,last=0,raf=0;
 let score=0,correct=0,wrong=0,typed="",word="",wordIndex=0,startTime=0,combo=0;
 let zombies=[],splats=[],particles=[],clouds=[],shake=0,spawnTimer=0,round=0;
 const LEVELS={
-  1:{name:"HOME ROW",words:["ask","sad","dad","fall","jag","lag","glass","flash","all","flag"],speed:24},
-  2:{name:"HOME ROW + G H",words:["had","has","hag","gash","hall","dash","flash","glass","shall","flag"],speed:27},
-  3:{name:"LESSONS 1-3",words:["the","that","this","with","there","three","right","after","water","earth"],speed:30},
-  4:{name:"LESSONS 10-12",words:["quiet","quick","queen","zone","amazing","typing","school","practice","keyboard","accuracy"],speed:33},
-  5:{name:"ALL LETTERS",words:["hospital","defender","computer","student","excellent","challenge","practice","adventure","keyboard","zombies"],speed:36}
+  1:{name:"HOME ROW",words:["ask","sad","dad","fall","jag","lag","glass","flash","all","flag","add","fall","lass","flask","salad","dash","half","gall","jazz","ask"],speed:48},
+  2:{name:"HOME ROW + G H",words:["had","has","hag","gash","hall","dash","flash","glass","shall","flag","glad","half","hash","lash","shag","sash","jag","ash","had","shall"],speed:58},
+  3:{name:"LEVEL 3",words:["her","here","there","these","their","the","three","tree","free","fresh","red","read","dear","hear","heart","earth","after","father","rather","great"],speed:68},
+  4:{name:"LEVEL 4",words:["type","typing","quiet","quite","write","writer","pretty","party","paper","proper","power","tower","your","yourself","question","practice","teacher","favorite","keyboard","property"],speed:78},
+  5:{name:"LEVEL 5",words:["hospital","defender","computer","student","excellent","challenge","practice","adventure","keyboard","zombies","pumpkin","patch","skateboard","office","park","building","paintball","accuracy","strength","everything"],speed:88}
 };
 function resize(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);draw()}
 addEventListener("resize",resize);
@@ -55,7 +55,7 @@ function ui(html){document.getElementById("ui").innerHTML=html}
 function showMenu(){
  running=false;cancelAnimationFrame(raf);screen="menu";document.getElementById("hud").hidden=true;
  document.getElementById("word").hidden=true;document.getElementById("typed").hidden=true;
- ui('<div class="overlay"><div class="panel"><h1>Typing Defender</h1><p>Defend the school hospital with paintballs.</p><p class="small">Type the word above the approaching zombie. Finish the word to cover it with paint and make it disappear.</p><div class="levels">'+Object.keys(LEVELS).map(n=>'<button onclick="startGame('+n+')">LEVEL '+n+'<br><span style="font-size:17px">'+LEVELS[n].name+'</span></button>').join("")+'</div><p class="small">Prototype 1, keyboard typing only</p></div></div>');
+ ui('<div class="overlay"><div class="panel"><h1>Typing Defender</h1><div class="levels">'+Object.keys(LEVELS).map(n=>'<button onclick="startGame('+n+')">LEVEL '+n+'<br><span style="font-size:17px">'+LEVELS[n].name+'</span></button>').join("")+'</div></div></div>');
  draw();
 }
 function startGame(n){
@@ -107,7 +107,7 @@ function drawHospital(){
  for(let i=0;i<2;i++){let x=W*.32+i*250;ctx.fillStyle="#a9b5b8";ctx.fillRect(x,floor-150,150,150);ctx.fillStyle="#647378";ctx.fillRect(x+12,floor-138,126,126);ctx.fillStyle="#d9e3e5";ctx.fillRect(x+25,floor-120,88,65);ctx.fillStyle="#f5c94b";ctx.fillRect(x+115,floor-80,8,20)}
  // sign
  ctx.fillStyle="#f3f4f1";ctx.fillRect(W*.39,70,220,55);ctx.strokeStyle="#697579";ctx.lineWidth=3;ctx.strokeRect(W*.39,70,220,55);
- ctx.fillStyle="#287d91";ctx.font="700 26px Arial";ctx.textAlign="center";ctx.fillText("SCHOOL HOSPITAL",W*.50,105);ctx.textAlign="left";
+ ctx.fillStyle="#287d91";ctx.font="700 26px Arial";ctx.textAlign="center";ctx.fillText("HOSPITAL",W*.50,105);ctx.textAlign="left";
 }
 function zombie(z){
  let base=H*.53+z.lane*H*.12,scale=z.scale,p=z.x,body=100*scale,head=48*scale;
@@ -134,6 +134,34 @@ function zombie(z){
  // paint spots
  for(let s of z.paint){ctx.fillStyle=s.c;ctx.globalAlpha=.9;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,7);ctx.fill();ctx.globalAlpha=1}
  ctx.restore();
+}
+function drawOffice(){
+ ctx.fillStyle="#8b9197";ctx.fillRect(0,0,W,H);ctx.fillStyle="#d8dadd";ctx.fillRect(0,H*.58,W,H*.42);ctx.fillStyle="#aab0b5";ctx.fillRect(0,H*.55,W,18);
+ for(let i=0;i<5;i++){let x=70+i*250;ctx.fillStyle="#496778";ctx.fillRect(x,145,190,220);ctx.strokeStyle="#dce4e7";ctx.lineWidth=8;ctx.strokeRect(x,145,190,220);ctx.beginPath();ctx.moveTo(x+95,145);ctx.lineTo(x+95,365);ctx.stroke()}
+ for(let i=0;i<6;i++){let x=70+i*210;ctx.fillStyle="#f7f7f7";ctx.fillRect(x,70,130,18)}
+ for(let i=0;i<4;i++){let x=80+i*290;ctx.fillStyle="#765f4c";ctx.fillRect(x,H*.49,170,25);ctx.fillStyle="#30383d";ctx.fillRect(x+15,H*.49-60,140,60)}
+ ctx.fillStyle="#fff";ctx.fillRect(W*.43,55,170,48);ctx.fillStyle="#303b40";ctx.font="700 25px Arial";ctx.textAlign="center";ctx.fillText("OFFICE",W*.515,88);ctx.textAlign="left";
+}
+function drawPark(){
+ ctx.fillStyle="#86c7e5";ctx.fillRect(0,0,W,H*.55);ctx.fillStyle="#69a94f";ctx.fillRect(0,H*.55,W,H*.45);
+ ctx.fillStyle="#c9a56a";ctx.beginPath();ctx.moveTo(W*.36,H);ctx.quadraticCurveTo(W*.5,H*.62,W*.62,H*.55);ctx.quadraticCurveTo(W*.72,H*.75,W*.78,H);ctx.fill();
+ for(let i=0;i<5;i++){let x=90+i*240,y=H*.43;ctx.fillStyle="#6b442c";ctx.fillRect(x,y,25,150);ctx.fillStyle="#3c7c3b";ctx.beginPath();ctx.arc(x+10,y-30,65,0,7);ctx.fill()}
+ ctx.fillStyle="#dce8ed";ctx.fillRect(W*.08,H*.27,180,20);ctx.fillStyle="#64777d";ctx.fillRect(W*.12,H*.27+20,20,95);ctx.fillRect(W*.23,H*.27+20,20,95);
+ ctx.fillStyle="#fff";ctx.fillRect(W*.43,55,170,48);ctx.fillStyle="#303b40";ctx.font="700 25px Arial";ctx.textAlign="center";ctx.fillText("PARK",W*.515,88);ctx.textAlign="left";
+}
+function drawSkatePark(){
+ ctx.fillStyle="#89b8d2";ctx.fillRect(0,0,W,H*.52);ctx.fillStyle="#9a9b9d";ctx.fillRect(0,H*.52,W,H*.48);
+ ctx.fillStyle="#77797b";ctx.beginPath();ctx.moveTo(W*.05,H);ctx.quadraticCurveTo(W*.13,H*.47,W*.22,H);ctx.fill();
+ ctx.fillStyle="#c5c7c8";ctx.beginPath();ctx.moveTo(W*.32,H*.9);ctx.quadraticCurveTo(W*.4,H*.5,W*.48,H*.9);ctx.lineTo(W*.48,H);ctx.lineTo(W*.32,H);ctx.fill();
+ ctx.strokeStyle="#55585b";ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(W*.62,H*.78);ctx.lineTo(W*.82,H*.78);ctx.stroke();ctx.fillStyle="#55585b";ctx.fillRect(W*.69,H*.78,8,90);ctx.fillRect(W*.79,H*.78,8,90);
+ ctx.fillStyle="#fff";ctx.fillRect(W*.43,55,210,48);ctx.fillStyle="#303b40";ctx.font="700 25px Arial";ctx.textAlign="center";ctx.fillText("SKATE PARK",W*.535,88);ctx.textAlign="left";
+}
+function drawPumpkinPatch(){
+ ctx.fillStyle="#8bc6e4";ctx.fillRect(0,0,W,H*.5);ctx.fillStyle="#8b9f4e";ctx.fillRect(0,H*.5,W,H*.5);
+ ctx.fillStyle="#6c813b";for(let y=H*.6;y<H;y+=55)ctx.fillRect(0,y,W,8);
+ for(let i=0;i<24;i++){let x=40+(i*83)%W,y=H*.56+((i*47)%(H*.4));ctx.fillStyle=i%3?"#e87828":"#f28c28";ctx.beginPath();ctx.ellipse(x,y,22,18,0,0,7);ctx.ellipse(x+20,y,22,18,0,0,7);ctx.fill();ctx.fillStyle="#4d7034";ctx.fillRect(x+8,y-25,8,12)}
+ ctx.fillStyle="#6f4a2e";ctx.fillRect(W*.73,H*.27,25,210);ctx.fillStyle="#4e7b3d";ctx.beginPath();ctx.arc(W*.74,H*.25,90,0,7);ctx.fill();
+ ctx.fillStyle="#fff";ctx.fillRect(W*.39,55,240,48);ctx.fillStyle="#303b40";ctx.font="700 25px Arial";ctx.textAlign="center";ctx.fillText("PUMPKIN PATCH",W*.51,88);ctx.textAlign="left";
 }
 function drawPlayer(){
  let x=W*.15,y=H*.48;
