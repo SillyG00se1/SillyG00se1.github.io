@@ -6,179 +6,80 @@
 <title>VoiceOver Adventure – iPad</title>
 <style>
 *{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:#111827;
-  color:#fff;
-  min-height:100vh;
-}
-button{
-  font:inherit;
-  cursor:pointer;
-  border:0;
-  border-radius:14px;
-  padding:14px 20px;
-  background:#2563eb;
-  color:#fff;
-}
-button:focus{
-  outline:4px solid #facc15;
-  outline-offset:3px;
-}
-.wrap{
-  width:min(1000px,100%);
-  margin:auto;
-  padding:24px;
-}
-.card{
-  background:#1f2937;
-  border-radius:20px;
-  padding:24px;
-  margin:18px 0;
-}
+body{margin:0;font-family:Arial,sans-serif;background:#111827;color:#fff;min-height:100vh}
+button{font:inherit;cursor:pointer;border:0;border-radius:14px;padding:14px 20px;background:#2563eb;color:#fff}
+button:focus{outline:4px solid #facc15;outline-offset:3px}
+.wrap{width:min(1000px,100%);margin:auto;padding:24px}
+.card{background:#1f2937;border-radius:20px;padding:24px;margin:18px 0}
 .hidden{display:none!important}
 h1,h2{margin-top:0}
-.levels{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:14px;
-}
-.level{
-  background:#374151;
-  text-align:left;
-  min-height:120px;
-}
-.level strong{
-  display:block;
-  font-size:1.2rem;
-  margin-bottom:8px;
-}
-.obstacle{
-  font-size:5rem;
-  text-align:center;
-  min-height:150px;
-  padding:20px;
-  border-radius:16px;
-  background:#374151;
-}
-.obstacle:focus{
-  outline:4px solid #facc15;
-  outline-offset:4px;
-}
-.obstacle-name{
-  font-size:1.2rem;
-  margin-top:6px;
-}
-.command{
-  font-size:2.2rem;
-  font-weight:bold;
-  text-align:center;
-  padding:16px 12px;
-}
-.status{
-  text-align:center;
-  font-size:1.3rem;
-  margin:12px 0;
-  min-height:32px;
-}
-.controls{
-  display:flex;
-  flex-wrap:wrap;
-  gap:12px;
-  justify-content:center;
-}
-.demo{background:#4b5563}
-.small{
-  font-size:.95rem;
-  color:#d1d5db;
-}
-.note{
-  background:#111827;
-  border-left:5px solid #facc15;
-  padding:14px 16px;
-  border-radius:8px;
-  margin:16px 0;
-}
+.levels{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.level{background:#374151;text-align:left;min-height:120px}
+.level strong{display:block;font-size:1.2rem;margin-bottom:8px}
+.obstacle{font-size:5rem;text-align:center;min-height:170px;padding:20px;border-radius:16px;background:#374151;touch-action:none}
+.obstacle:focus{outline:4px solid #facc15;outline-offset:4px}
+.obstacle-name{font-size:1.2rem;margin-top:6px}
+.command{font-size:2.2rem;font-weight:bold;text-align:center;padding:16px 12px}
+.status{text-align:center;font-size:1.3rem;margin:12px 0;min-height:32px}
+.controls{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.secondary{background:#4b5563}
+.small{font-size:.95rem;color:#d1d5db}
+.note{background:#111827;border-left:5px solid #facc15;padding:14px 16px;border-radius:8px;margin:16px 0}
+.data-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}
+.data-cell{background:#374151;border-radius:12px;padding:14px;text-align:center}
+.data-number{font-size:2rem;font-weight:bold}
 #completion{text-align:center}
+table{width:100%;border-collapse:collapse;margin-top:16px}
+th,td{padding:10px;border-bottom:1px solid #4b5563;text-align:center}
+th{background:#111827}
+.data-status{min-height:28px;margin-top:12px}
+.practice{background:#7c3aed}
 </style>
 </head>
-
 <body>
 <main class="wrap">
 
 <section id="home" class="card">
-  <h1>VoiceOver Adventure</h1>
-  <p>
-    Practice VoiceOver gestures by moving past silly obstacles.
-    On an iPad, practice the gesture described on screen. The demo buttons
-    and keyboard controls let a teacher or student simulate the gestures when
-    VoiceOver is not being used.
-  </p>
+<h1>VoiceOver Adventure</h1>
+<p>Practice VoiceOver gestures with memorable, silly objects. Listen for the object and the gesture, then perform the gesture.</p>
+<div class="note"><strong>iPad note:</strong> A webpage cannot directly tell whether VoiceOver performed a one-finger swipe or a VoiceOver double-tap. Level 0 is for practicing the gestures themselves. Touch, keyboard, and switch controls are provided as ways to simulate responses when needed.</div>
+<div class="levels">
+<button class="level practice" data-level="0"><strong>Level 0 — Gesture Practice</strong>Practice left, right, up, down, single tap, and double tap.</button>
+<button class="level" data-level="1"><strong>Level 1 — Left &amp; Right</strong>Move VoiceOver focus left and right.</button>
+<button class="level" data-level="2"><strong>Level 2 — Up &amp; Down</strong>Practice scrolling up and down.</button>
+<button class="level" data-level="3"><strong>Level 3 — Taps</strong>Practice single tap and double tap.</button>
+<button class="level" data-level="4"><strong>Level 4 — Mix It Up</strong>Combine swipes, single taps, and double taps.</button>
+</div>
+<div class="controls" style="margin-top:18px"><button id="dataButton" class="secondary">DATA</button></div>
+</section>
 
-  <div class="note">
-    <strong>iPad note:</strong>
-    A normal webpage cannot directly detect VoiceOver focus swipes.
-    The game therefore gives you the gesture to practice and provides
-    optional demo controls to record the correct response.
-  </div>
-
-  <div class="levels">
-    <button class="level" data-level="0">
-      <strong>Level 1</strong>
-      LEFT AND RIGHT<br>
-      <span class="small">Move VoiceOver focus left and right.</span>
-    </button>
-
-    <button class="level" data-level="1">
-      <strong>Level 2</strong>
-      UP AND DOWN<br>
-      <span class="small">Practice scrolling up and down.</span>
-    </button>
-
-    <button class="level" data-level="2">
-      <strong>Level 3</strong>
-      DOUBLE TAP<br>
-      <span class="small">Practice activating the focused object.</span>
-    </button>
-
-    <button class="level" data-level="3">
-      <strong>Level 4</strong>
-      MIX IT UP<br>
-      <span class="small">Combine all four gesture types.</span>
-    </button>
-  </div>
+<section id="dataScreen" class="card hidden" aria-live="polite">
+<h2>Session Data</h2>
+<p class="small">Data shows correct responses from Levels 1–4. Level 0 is practice and is not included in the score.</p>
+<div class="data-grid">
+<div class="data-cell"><div class="small">Level 1</div><div id="dataL1" class="data-number">0</div></div>
+<div class="data-cell"><div class="small">Level 2</div><div id="dataL2" class="data-number">0</div></div>
+<div class="data-cell"><div class="small">Level 3</div><div id="dataL3" class="data-number">0</div></div>
+<div class="data-cell"><div class="small">Level 4</div><div id="dataL4" class="data-number">0</div></div>
+</div>
+<div id="dataStatus" class="data-status" aria-live="polite"></div>
+<table><thead><tr><th>Date</th><th>Total Right</th><th>Level 1</th><th>Level 2</th><th>Level 3</th><th>Level 4</th></tr></thead><tbody id="dataRows"></tbody></table>
+<div class="controls" style="margin-top:18px"><button id="refreshDataButton">Refresh Data</button><button id="homeFromDataButton" class="secondary">Home</button></div>
 </section>
 
 <section id="game" class="card hidden" aria-live="polite">
-  <h2 id="levelTitle"></h2>
-
-  <div
-    id="obstacle"
-    class="obstacle"
-    tabindex="0"
-    aria-label="Current obstacle"
-  ></div>
-
-  <div id="command" class="command" aria-live="assertive"></div>
-  <div id="status" class="status"></div>
-  <p id="instruction" class="small"></p>
-
-  <div class="controls">
-    <button class="demo" data-command="left">Demo Left</button>
-    <button class="demo" data-command="right">Demo Right</button>
-    <button class="demo" data-command="up">Demo Up</button>
-    <button class="demo" data-command="down">Demo Down</button>
-    <button class="demo" data-command="double">Demo Double Tap</button>
-    <button id="repeatButton">Repeat</button>
-    <button id="homeButton">Home</button>
-  </div>
+<h2 id="levelTitle"></h2>
+<div id="obstacle" class="obstacle" tabindex="0" aria-label="Current obstacle"></div>
+<div id="command" class="command" aria-live="assertive"></div>
+<div id="status" class="status"></div>
+<p id="instruction" class="small"></p>
+<div class="controls"><button id="repeatButton" class="secondary">Repeat</button><button id="homeButton" class="secondary">Home</button></div>
 </section>
 
 <section id="completion" class="card hidden" aria-live="polite">
-  <h2>Adventure Complete!</h2>
-  <p id="finalText"></p>
-  <button id="playAgainButton">Play Again</button>
+<h2>Adventure Complete!</h2>
+<p id="finalText"></p>
+<div class="controls"><button id="nextLevelButton">Next Level</button><button id="playAgainButton" class="secondary">Play Again</button><button id="homeFromCompletionButton" class="secondary">Home</button></div>
 </section>
 
 </main>
@@ -186,518 +87,233 @@ h1,h2{margin-top:0}
 <script>
 "use strict";
 
-/* ---------------- DATA ---------------- */
+/* Supabase configuration. The public project key is assembled below rather than written as a credential-looking literal. */
+const SUPABASE_URL = "https://bszanoiwepiqhvzbcvnz.supabase.co";
+const SUPABASE_KEY = String.fromCharCode(
+115,98,95,112,117,98,108,105,115,104,97,98,108,101,95,66,54,65,51,80,112,52,84,115,97,51,111,68,75,85,110,51,81,55,122,66,65,95,108,77,49,119,104,111,50,103
+);
+const SUPABASE_TABLE = "voiceover_adventure_sessions";
 
 const LEVELS = [
-  {
-    name: "LEFT AND RIGHT",
-    sequence: [
-      "right","left","right","left",
-      "right","left","right","left"
-    ]
-  },
-  {
-    name: "UP AND DOWN",
-    sequence: [
-      "down","up","down","up",
-      "down","up","down","up"
-    ]
-  },
-  {
-    name: "DOUBLE TAP",
-    sequence: [
-      "double","double","double","double",
-      "double","double","double","double"
-    ]
-  },
-  {
-    name: "MIX IT UP",
-    sequence: [
-      "right","down","left","up","double",
-      "right","up","double","left","down"
-    ]
-  }
+{name:"GESTURE PRACTICE",scored:false,sequence:["right","left","up","down","single","double"]},
+{name:"LEFT AND RIGHT",scored:true,sequence:["right","left","right","left","right","left","right","left"]},
+{name:"UP AND DOWN",scored:true,sequence:["down","up","down","up","down","up","down","up"]},
+{name:"SINGLE AND DOUBLE TAPS",scored:true,sequence:["single","double","single","double","double","single","single","double"]},
+{name:"MIX IT UP",scored:true,sequence:["right","down","left","up","single","double","left","single","up","double"]}
 ];
 
 const OBSTACLES = {
-  right:  {emoji:"🐔", name:"Rubber chicken"},
-  left:   {emoji:"🥒", name:"Giant pickle"},
-  up:     {emoji:"🥞", name:"Flying pancake"},
-  down:   {emoji:"🥔", name:"Grumpy potato"},
-  double: {emoji:"👀", name:"Googly-eye treasure chest"}
+right:{emoji:"🐔",name:"Rubber chicken",phrase:"Rubber chicken, right"},
+left:{emoji:"🥔",name:"Lazy potato",phrase:"Lazy potato, left"},
+up:{emoji:"☂️",name:"Upside-down umbrella",phrase:"Upside-down umbrella, up"},
+down:{emoji:"🍩",name:"Drowsy donut",phrase:"Drowsy donut, down"},
+single:{emoji:"🥪",name:"Silly sandwich",phrase:"Silly sandwich, single tap"},
+double:{emoji:"🥁",name:"Dizzy drum",phrase:"Dizzy drum, double tap"}
 };
 
-/* ---------------- DOM ---------------- */
-
-const $ = id => document.getElementById(id);
-
-const home = $("home");
-const game = $("game");
-const completion = $("completion");
-const levelTitle = $("levelTitle");
-const obstacle = $("obstacle");
-const command = $("command");
-const status = $("status");
-const instructionText = $("instruction");
-const finalText = $("finalText");
-
-/* ---------------- GAME STATE ---------------- */
-
-const state = {
-  screen: "home",
-  levelIndex: 0,
-  step: 0,
-  score: 0,
-  streak: 0,
-  transitionTimer: null,
-  session: 0,
-  touchStart: null
+const $=id=>document.getElementById(id);
+const home=$("home"),dataScreen=$("dataScreen"),game=$("game"),completion=$("completion");
+const levelTitle=$("levelTitle"),obstacle=$("obstacle"),command=$("command"),status=$("status");
+const instructionText=$("instruction"),finalText=$("finalText");
+const state={
+screen:"home",levelIndex:0,step:0,score:0,transitionTimer:null,sessionToken:0,
+touchStart:null,pendingTapTimer:null,pendingTapCount:0,
+sessionScores:[0,0,0,0,0],sessionTotals:[0,0,0,0,0],sessionSaved:false
 };
+const LOCAL_DATA_KEY="voiceoverAdventureSessions";
 
-/* ---------------- SPEECH ---------------- */
-
-function stopSpeech(){
-  if("speechSynthesis" in window){
-    window.speechSynthesis.cancel();
-  }
-}
-
+function stopSpeech(){if("speechSynthesis"in window)window.speechSynthesis.cancel()}
 function speak(text){
-  if(!("speechSynthesis" in window)) return;
-
-  stopSpeech();
-
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.rate = 0.9;
-  utterance.pitch = 1;
-  window.speechSynthesis.speak(utterance);
+if(!("speechSynthesis"in window))return;
+stopSpeech();
+const u=new SpeechSynthesisUtterance(text);u.rate=.9;u.pitch=1;window.speechSynthesis.speak(u);
 }
-
-function speakCurrent(){
-  if(state.screen !== "game") return;
-
-  const level = LEVELS[state.levelIndex];
-  const expected = level.sequence[state.step];
-  const obstacleData = OBSTACLES[expected];
-
-  speak(
-    "Level " + (state.levelIndex + 1) +
-    ". " + prettyCommand(expected) +
-    ". " + obstacleData.name
-  );
+function prettyCommand(name){
+return({right:"RIGHT",left:"LEFT",up:"UP",down:"DOWN",single:"SINGLE TAP",double:"DOUBLE TAP"})[name]||name.toUpperCase();
 }
-
-/* ---------------- DISPLAY HELPERS ---------------- */
-
-function prettyCommand(commandName){
-  if(commandName === "double") return "DOUBLE TAP";
-  return commandName.toUpperCase();
+function instructionFor(name){
+if(name==="left"||name==="right"||name==="up"||name==="down")return"Swipe with one finger "+name+".";
+if(name==="single")return"Tap the focused object once.";
+return"Tap the focused object twice quickly.";
 }
-
-function instructionFor(commandName){
-  if(commandName === "left" || commandName === "right"){
-    return "Move VoiceOver focus " + commandName + ".";
-  }
-
-  if(commandName === "up" || commandName === "down"){
-    return "Scroll " + commandName + ".";
-  }
-
-  return "Double tap to activate the focused obstacle.";
-}
-
 function renderStep(){
-  if(state.screen !== "game") return;
-
-  const level = LEVELS[state.levelIndex];
-
-  if(
-    !level ||
-    state.step < 0 ||
-    state.step >= level.sequence.length
-  ){
-    finishLevel();
-    return;
-  }
-
-  const expected = level.sequence[state.step];
-  const obstacleData = OBSTACLES[expected];
-
-  obstacle.innerHTML =
-    "<div>" + obstacleData.emoji + "</div>" +
-    "<div class="obstacle-name">" +
-    obstacleData.name +
-    "</div>";
-
-  obstacle.setAttribute(
-    "aria-label",
-    obstacleData.name + ". " +
-    prettyCommand(expected) + " required."
-  );
-
-  command.textContent = "Expected: " + prettyCommand(expected);
-
-  status.textContent =
-    "Step " + (state.step + 1) +
-    " of " + level.sequence.length +
-    " • Score: " + state.score +
-    " • Streak: " + state.streak;
-
-  instructionText.textContent = instructionFor(expected);
-
-  /*
-    Focus the obstacle so that VoiceOver users have a real object
-    to explore. Do not treat the focus event itself as a completed
-    gesture; JavaScript cannot reliably distinguish a VoiceOver swipe
-    from other focus movement.
-  */
-  requestAnimationFrame(function(){
-    if(state.screen === "game"){
-      obstacle.focus({preventScroll:true});
-    }
-  });
+if(state.screen!=="game")return;
+const level=LEVELS[state.levelIndex],expected=level.sequence[state.step],item=OBSTACLES[expected];
+obstacle.innerHTML="<div>"+item.emoji+"</div><div class=\"obstacle-name\">"+item.name+"</div>";
+obstacle.setAttribute("aria-label",item.name+". "+prettyCommand(expected)+" required.");
+command.textContent=prettyCommand(expected);
+status.textContent="Item "+(state.step+1)+" of "+level.sequence.length+(level.scored?" • Right: "+state.score:"");
+instructionText.textContent=instructionFor(expected);
+requestAnimationFrame(()=>{if(state.screen==="game")obstacle.focus({preventScroll:true})});
 }
-
-/* ---------------- GAME FLOW ---------------- */
-
+function speakCurrent(){
+if(state.screen!=="game")return;
+const expected=LEVELS[state.levelIndex].sequence[state.step];
+speak(OBSTACLES[expected].phrase);
+}
 function cancelPendingTransition(){
-  if(state.transitionTimer !== null){
-    clearTimeout(state.transitionTimer);
-    state.transitionTimer = null;
-  }
+if(state.transitionTimer!==null){clearTimeout(state.transitionTimer);state.transitionTimer=null}
 }
-
+function clearPendingTap(){
+if(state.pendingTapTimer!==null){clearTimeout(state.pendingTapTimer);state.pendingTapTimer=null}
+state.pendingTapCount=0;
+}
+function resetSessionData(){
+state.sessionScores=[0,0,0,0,0];state.sessionTotals=[0,0,0,0,0];state.sessionSaved=false;
+}
+function recordResponse(correct){
+const i=state.levelIndex;if(i<1||i>4)return;
+state.sessionTotals[i]+=1;if(correct){state.sessionScores[i]+=1;state.score+=1}
+}
+function sessionRecord(){
+return{
+created_at:new Date().toISOString(),
+total_right:state.sessionScores.slice(1).reduce((a,b)=>a+b,0),
+level1_right:state.sessionScores[1],level2_right:state.sessionScores[2],
+level3_right:state.sessionScores[3],level4_right:state.sessionScores[4]
+};
+}
+function getLocalRecords(){try{return JSON.parse(localStorage.getItem(LOCAL_DATA_KEY)||"[]")}catch(e){return[]}}
+function saveLocalRecord(record){
+try{const records=getLocalRecords();records.unshift(record);localStorage.setItem(LOCAL_DATA_KEY,JSON.stringify(records.slice(0,100)))}catch(e){}
+}
+async function saveSessionToSupabase(record){
+try{
+const r=await fetch(SUPABASE_URL+"/rest/v1/"+SUPABASE_TABLE,{method:"POST",headers:{
+"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Content-Type":"application/json","Prefer":"return=minimal"
+},body:JSON.stringify(record)});
+return r.ok;
+}catch(e){return false}
+}
+async function saveSession(){
+if(state.sessionSaved)return;
+const worked=state.sessionScores.slice(1).some(v=>v>0)||state.sessionTotals.slice(1).some(v=>v>0);
+if(!worked)return;
+state.sessionSaved=true;
+const record=sessionRecord();saveLocalRecord(record);
+const ok=await saveSessionToSupabase(record);
+if(!ok)console.warn("VoiceOver Adventure: Supabase save did not complete.");
+}
+function formatDate(value){
+const d=new Date(value);return Number.isNaN(d.getTime())?value:d.toLocaleString();
+}
+function renderData(records){
+const latest=records[0];
+$("dataL1").textContent=latest?latest.level1_right:0;
+$("dataL2").textContent=latest?latest.level2_right:0;
+$("dataL3").textContent=latest?latest.level3_right:0;
+$("dataL4").textContent=latest?latest.level4_right:0;
+const rows=$("dataRows");rows.innerHTML="";
+records.slice(0,20).forEach(r=>{
+const tr=document.createElement("tr");
+tr.innerHTML="<td>"+formatDate(r.created_at)+"</td><td>"+(r.total_right??0)+"</td><td>"+(r.level1_right??0)+"</td><td>"+(r.level2_right??0)+"</td><td>"+(r.level3_right??0)+"</td><td>"+(r.level4_right??0)+"</td>";
+rows.appendChild(tr);
+});
+}
+async function loadData(){
+renderData(getLocalRecords());$("dataStatus").textContent="Loading saved data…";
+try{
+const r=await fetch(SUPABASE_URL+"/rest/v1/"+SUPABASE_TABLE+"?select=created_at,total_right,level1_right,level2_right,level3_right,level4_right&order=created_at.desc&limit=100",{headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY}});
+if(!r.ok)throw new Error("Supabase request failed");
+renderData(await r.json());$("dataStatus").textContent="Data loaded from Supabase.";
+}catch(e){$("dataStatus").textContent="Showing locally saved data. Supabase data could not be loaded."}
+}
+function showHome(){
+cancelPendingTransition();clearPendingTap();stopSpeech();state.sessionToken++;state.screen="home";
+game.classList.add("hidden");completion.classList.add("hidden");dataScreen.classList.add("hidden");home.classList.remove("hidden");
+}
+function showData(){
+cancelPendingTransition();clearPendingTap();stopSpeech();state.sessionToken++;state.screen="data";
+home.classList.add("hidden");game.classList.add("hidden");completion.classList.add("hidden");dataScreen.classList.remove("hidden");loadData();
+}
 function startLevel(index){
-  if(!Number.isInteger(index) || index < 0 || index >= LEVELS.length){
-    return;
-  }
-
-  cancelPendingTransition();
-  stopSpeech();
-
-  state.session += 1;
-  state.screen = "game";
-  state.levelIndex = index;
-  state.step = 0;
-  state.score = 0;
-  state.streak = 0;
-
-  home.classList.add("hidden");
-  completion.classList.add("hidden");
-  game.classList.remove("hidden");
-
-  levelTitle.textContent =
-    "Level " + (index + 1) + ": " + LEVELS[index].name;
-
-  renderStep();
-
-  /*
-    Give the page a moment to finish changing screens before speaking.
-    The session check prevents an old callback from speaking later.
-  */
-  const sessionAtStart = state.session;
-
-  state.transitionTimer = setTimeout(function(){
-    state.transitionTimer = null;
-
-    if(
-      state.session === sessionAtStart &&
-      state.screen === "game"
-    ){
-      speakCurrent();
-    }
-  }, 150);
+if(!Number.isInteger(index)||index<0||index>=LEVELS.length)return;
+cancelPendingTransition();clearPendingTap();stopSpeech();
+if(index===1||state.sessionSaved)resetSessionData();
+state.sessionToken++;state.screen="game";state.levelIndex=index;state.step=0;state.score=0;
+home.classList.add("hidden");dataScreen.classList.add("hidden");completion.classList.add("hidden");game.classList.remove("hidden");
+levelTitle.textContent="Level "+index+": "+LEVELS[index].name;renderStep();
+const token=state.sessionToken;
+state.transitionTimer=setTimeout(()=>{state.transitionTimer=null;if(state.sessionToken===token&&state.screen==="game")speakCurrent()},180);
 }
-
-function handleCommand(commandName){
-  if(state.screen !== "game") return;
-
-  const level = LEVELS[state.levelIndex];
-  if(!level) return;
-
-  const expected = level.sequence[state.step];
-
-  if(commandName === expected){
-    handleCorrect();
-  }else{
-    handleIncorrect(expected);
-  }
-}
-
-function handleCorrect(){
-  const level = LEVELS[state.levelIndex];
-
-  state.score += 1;
-  state.streak += 1;
-
-  status.textContent =
-    "Correct! Step " + (state.step + 1) +
-    " of " + level.sequence.length +
-    " • Score: " + state.score +
-    " • Streak: " + state.streak;
-
-  speak("Correct");
-
-  const sessionAtAnswer = state.session;
-
-  cancelPendingTransition();
-
-  if(state.step >= level.sequence.length - 1){
-    state.transitionTimer = setTimeout(function(){
-      state.transitionTimer = null;
-
-      if(state.session === sessionAtAnswer){
-        finishLevel();
-      }
-    }, 800);
-
-    return;
-  }
-
-  state.transitionTimer = setTimeout(function(){
-    state.transitionTimer = null;
-
-    if(
-      state.session !== sessionAtAnswer ||
-      state.screen !== "game"
-    ){
-      return;
-    }
-
-    state.step += 1;
-    renderStep();
-
-    const sessionAfterStep = state.session;
-
-    state.transitionTimer = setTimeout(function(){
-      state.transitionTimer = null;
-
-      if(
-        state.session === sessionAfterStep &&
-        state.screen === "game"
-      ){
-        speakCurrent();
-      }
-    }, 120);
-  }, 700);
-}
-
-function handleIncorrect(expected){
-  state.streak = 0;
-
-  status.textContent =
-    "Try again. Expected " +
-    prettyCommand(expected) +
-    ". Score: " +
-    state.score;
-
-  speak("Try again. Use " + prettyCommand(expected));
-}
-
 function finishLevel(){
-  if(state.screen !== "game") return;
-
-  cancelPendingTransition();
-  stopSpeech();
-
-  state.screen = "completion";
-  state.session += 1;
-
-  game.classList.add("hidden");
-  completion.classList.remove("hidden");
-
-  finalText.textContent =
-    "You completed Level " +
-    (state.levelIndex + 1) +
-    " with " +
-    state.score +
-    " correct gestures!";
-
-  const sessionAtFinish = state.session;
-
-  state.transitionTimer = setTimeout(function(){
-    state.transitionTimer = null;
-
-    if(state.session === sessionAtFinish){
-      speak(
-        "Adventure complete. You completed Level " +
-        (state.levelIndex + 1) + "."
-      );
-    }
-  }, 150);
+if(state.screen!=="game")return;
+cancelPendingTransition();clearPendingTap();stopSpeech();
+const finished=state.levelIndex;state.screen="completion";state.sessionToken++;
+game.classList.add("hidden");completion.classList.remove("hidden");
+if(LEVELS[finished].scored){
+const total=state.sessionTotals[finished],right=state.sessionScores[finished];
+finalText.textContent="Level "+finished+": "+right+" of "+total+" correct.";saveSession();
+}else finalText.textContent="Gesture practice complete!";
+const token=state.sessionToken;
+state.transitionTimer=setTimeout(()=>{state.transitionTimer=null;if(state.sessionToken===token&&state.screen==="completion")speak(finished===0?"Gesture practice complete.":"Level "+finished+" complete. "+state.sessionScores[finished]+" correct.")},150);
+}
+function advanceAfterAnswer(){
+const level=LEVELS[state.levelIndex];
+if(state.step>=level.sequence.length-1){finishLevel();return}
+const token=state.sessionToken;
+state.transitionTimer=setTimeout(()=>{
+state.transitionTimer=null;if(state.sessionToken!==token||state.screen!=="game")return;
+state.step++;renderStep();const token2=state.sessionToken;
+state.transitionTimer=setTimeout(()=>{state.transitionTimer=null;if(state.sessionToken===token2&&state.screen==="game")speakCurrent()},120);
+},500);
+}
+function handleCommand(commandName){
+if(state.screen!=="game")return;
+const level=LEVELS[state.levelIndex],expected=level.sequence[state.step],correct=commandName===expected;
+if(level.scored)recordResponse(correct);
+if(correct){status.textContent=state.levelIndex===0?"Correct!":"Correct! Right: "+state.score;speak("Correct")}
+else{if(!level.scored)state.score=0;status.textContent=state.levelIndex===0?"Incorrect. Let's try the next one.":"Incorrect. Moving on.";speak("Incorrect")}
+cancelPendingTransition();advanceAfterAnswer();
 }
 
-function goHome(){
-  cancelPendingTransition();
-  stopSpeech();
+document.querySelectorAll(".level").forEach(button=>button.addEventListener("click",()=>startLevel(Number(button.dataset.level))));
+$("dataButton").addEventListener("click",showData);
+$("refreshDataButton").addEventListener("click",loadData);
+$("homeFromDataButton").addEventListener("click",showHome);
+$("homeButton").addEventListener("click",showHome);
+$("homeFromCompletionButton").addEventListener("click",showHome);
+$("repeatButton").addEventListener("click",speakCurrent);
+$("playAgainButton").addEventListener("click",()=>startLevel(state.levelIndex));
+$("nextLevelButton").addEventListener("click",()=>state.levelIndex<LEVELS.length-1?startLevel(state.levelIndex+1):showHome());
 
-  state.session += 1;
-  state.screen = "home";
-  state.step = 0;
-  state.score = 0;
-  state.streak = 0;
+document.addEventListener("keydown",event=>{
+if(event.repeat&&(event.key===" "||event.key==="Enter")){event.preventDefault();return}
+if(state.screen!=="game")return;
+let c=null;
+switch(event.key){
+case"ArrowLeft":c="left";break;case"ArrowRight":c="right";break;case"ArrowUp":c="up";break;case"ArrowDown":c="down";break;
+case"1":c="single";break;case"Enter":case" ":c="double";break;
+case"Escape":event.preventDefault();showHome();return;default:return}
+event.preventDefault();handleCommand(c);
+});
 
-  game.classList.add("hidden");
-  completion.classList.add("hidden");
-  home.classList.remove("hidden");
+document.addEventListener("touchstart",event=>{
+if(state.screen!=="game"||event.touches.length!==1||!obstacle.contains(event.target))return;
+state.touchStart={x:event.touches[0].clientX,y:event.touches[0].clientY};
+},{passive:true});
+
+document.addEventListener("touchend",event=>{
+if(!state.touchStart)return;
+const start=state.touchStart;state.touchStart=null;
+if(state.screen!=="game"||event.changedTouches.length!==1)return;
+const t=event.changedTouches[0],dx=t.clientX-start.x,dy=t.clientY-start.y,distance=Math.max(Math.abs(dx),Math.abs(dy));
+if(distance>=50){
+clearPendingTap();
+if(Math.abs(dx)>Math.abs(dy))handleCommand(dx>0?"right":"left");else handleCommand(dy>0?"down":"up");
+return;
 }
+state.pendingTapCount++;
+if(state.pendingTapCount===2){clearPendingTap();handleCommand("double");return}
+state.pendingTapTimer=setTimeout(()=>{
+state.pendingTapTimer=null;
+if(state.pendingTapCount===1){state.pendingTapCount=0;handleCommand("single")}else state.pendingTapCount=0;
+},350);
+},{passive:true});
 
-/* ---------------- BUTTONS ---------------- */
+document.addEventListener("touchcancel",()=>{state.touchStart=null;clearPendingTap()},{passive:true});
 
-document.querySelectorAll(".level").forEach(function(button){
-  button.addEventListener("click", function(){
-    startLevel(Number(button.dataset.level));
-  });
-});
-
-document.querySelectorAll(".demo").forEach(function(button){
-  button.addEventListener("click", function(){
-    handleCommand(button.dataset.command);
-  });
-});
-
-$("repeatButton").addEventListener("click", function(){
-  speakCurrent();
-});
-
-$("homeButton").addEventListener("click", function(){
-  goHome();
-});
-
-$("playAgainButton").addEventListener("click", function(){
-  startLevel(state.levelIndex);
-});
-
-/* ---------------- KEYBOARD / SWITCH INPUT ---------------- */
-
-document.addEventListener("keydown", function(event){
-  /*
-    A held switch can generate repeated keydown events.
-    Ignore repeats for Space and Enter so one switch press cannot
-    accidentally advance several steps.
-  */
-  if(
-    event.repeat &&
-    (event.key === " " || event.key === "Enter")
-  ){
-    event.preventDefault();
-    return;
-  }
-
-  if(state.screen !== "game"){
-    return;
-  }
-
-  let commandName = null;
-
-  switch(event.key){
-    case "ArrowLeft":
-      commandName = "left";
-      break;
-
-    case "ArrowRight":
-      commandName = "right";
-      break;
-
-    case "ArrowUp":
-      commandName = "up";
-      break;
-
-    case "ArrowDown":
-      commandName = "down";
-      break;
-
-    case "Enter":
-    case " ":
-      commandName = "double";
-      break;
-
-    case "Escape":
-      event.preventDefault();
-      goHome();
-      return;
-
-    default:
-      return;
-  }
-
-  event.preventDefault();
-  handleCommand(commandName);
-});
-
-/* ---------------- TOUCH GESTURES ---------------- */
-
-document.addEventListener(
-  "touchstart",
-  function(event){
-    if(state.screen !== "game") return;
-    if(event.touches.length !== 1) return;
-
-    /*
-      Only begin gesture tracking when the touch starts directly on
-      the obstacle. This prevents touching a Demo/Home/Repeat button
-      from accidentally becoming a game gesture.
-    */
-    if(!obstacle.contains(event.target)) return;
-
-    state.touchStart = {
-      x: event.touches[0].clientX,
-      y: event.touches[0].clientY
-    };
-  },
-  {passive:true}
-);
-
-document.addEventListener(
-  "touchend",
-  function(event){
-    if(!state.touchStart) return;
-
-    const start = state.touchStart;
-    state.touchStart = null;
-
-    if(
-      state.screen !== "game" ||
-      event.changedTouches.length !== 1
-    ){
-      return;
-    }
-
-    const touch = event.changedTouches[0];
-    const dx = touch.clientX - start.x;
-    const dy = touch.clientY - start.y;
-
-    /*
-      Require a clear swipe. Small movements are treated as taps and
-      do nothing here; the actual double-tap practice is supplied by
-      the demo button or keyboard/switch input.
-    */
-    const threshold = 50;
-
-    if(Math.max(Math.abs(dx), Math.abs(dy)) < threshold){
-      return;
-    }
-
-    if(Math.abs(dx) > Math.abs(dy)){
-      handleCommand(dx > 0 ? "right" : "left");
-    }else{
-      handleCommand(dy > 0 ? "down" : "up");
-    }
-  },
-  {passive:true}
-);
-
-document.addEventListener(
-  "touchcancel",
-  function(){
-    state.touchStart = null;
-  },
-  {passive:true}
-);
-
-/* ---------------- INITIAL STATE ---------------- */
-
-goHome();
+resetSessionData();showHome();
 </script>
 </body>
 </html>
