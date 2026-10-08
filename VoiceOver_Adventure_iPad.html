@@ -2,60 +2,702 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VoiceOver Adventure – iPad</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#111827;color:#fff;min-height:100vh}
-button{font:inherit;cursor:pointer;border:0;border-radius:14px;padding:14px 20px;background:#2563eb;color:#fff}
-button:focus{outline:4px solid #facc15;outline-offset:3px}.wrap{max-width:1000px;margin:auto;padding:24px}
-.card{background:#1f2937;border-radius:20px;padding:24px;margin:18px 0}.hidden{display:none}
-.levels{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
-.level{background:#374151;text-align:left;min-height:120px}.level strong{display:block;font-size:1.2rem;margin-bottom:8px}
-.obstacle{font-size:5rem;text-align:center;min-height:130px;padding:20px}.command{font-size:2.2rem;font-weight:bold;text-align:center;padding:12px}
-.status{text-align:center;font-size:1.3rem;margin:12px 0}.controls{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
-.demo{background:#4b5563}.small{font-size:.95rem;color:#d1d5db}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#111827;
+  color:#fff;
+  min-height:100vh;
+}
+button{
+  font:inherit;
+  cursor:pointer;
+  border:0;
+  border-radius:14px;
+  padding:14px 20px;
+  background:#2563eb;
+  color:#fff;
+}
+button:focus{
+  outline:4px solid #facc15;
+  outline-offset:3px;
+}
+.wrap{
+  width:min(1000px,100%);
+  margin:auto;
+  padding:24px;
+}
+.card{
+  background:#1f2937;
+  border-radius:20px;
+  padding:24px;
+  margin:18px 0;
+}
+.hidden{display:none!important}
+h1,h2{margin-top:0}
+.levels{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
+}
+.level{
+  background:#374151;
+  text-align:left;
+  min-height:120px;
+}
+.level strong{
+  display:block;
+  font-size:1.2rem;
+  margin-bottom:8px;
+}
+.obstacle{
+  font-size:5rem;
+  text-align:center;
+  min-height:150px;
+  padding:20px;
+  border-radius:16px;
+  background:#374151;
+}
+.obstacle:focus{
+  outline:4px solid #facc15;
+  outline-offset:4px;
+}
+.obstacle-name{
+  font-size:1.2rem;
+  margin-top:6px;
+}
+.command{
+  font-size:2.2rem;
+  font-weight:bold;
+  text-align:center;
+  padding:16px 12px;
+}
+.status{
+  text-align:center;
+  font-size:1.3rem;
+  margin:12px 0;
+  min-height:32px;
+}
+.controls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  justify-content:center;
+}
+.demo{background:#4b5563}
+.small{
+  font-size:.95rem;
+  color:#d1d5db;
+}
+.note{
+  background:#111827;
+  border-left:5px solid #facc15;
+  padding:14px 16px;
+  border-radius:8px;
+  margin:16px 0;
+}
 #completion{text-align:center}
-</style></head>
-<body><main class="wrap">
-<section id="home" class="card"><h1>VoiceOver Adventure</h1>
-<p>Practice VoiceOver gestures by moving past silly obstacles. Use VoiceOver on your iPad or use the demo buttons.</p>
-<div class="levels">
-<button class="level" onclick="startLevel(0)"><strong>Level 1</strong>LEFT AND RIGHT<br><span class="small">Move VoiceOver focus left and right.</span></button>
-<button class="level" onclick="startLevel(1)"><strong>Level 2</strong>UP AND DOWN<br><span class="small">Practice scrolling up and down.</span></button>
-<button class="level" onclick="startLevel(2)"><strong>Level 3</strong>DOUBLE TAP<br><span class="small">Practice activating the focused object.</span></button>
-<button class="level" onclick="startLevel(3)"><strong>Level 4</strong>MIX IT UP<br><span class="small">Combine all four gesture types.</span></button>
-</div></section>
+</style>
+</head>
+
+<body>
+<main class="wrap">
+
+<section id="home" class="card">
+  <h1>VoiceOver Adventure</h1>
+  <p>
+    Practice VoiceOver gestures by moving past silly obstacles.
+    On an iPad, practice the gesture described on screen. The demo buttons
+    and keyboard controls let a teacher or student simulate the gestures when
+    VoiceOver is not being used.
+  </p>
+
+  <div class="note">
+    <strong>iPad note:</strong>
+    A normal webpage cannot directly detect VoiceOver focus swipes.
+    The game therefore gives you the gesture to practice and provides
+    optional demo controls to record the correct response.
+  </div>
+
+  <div class="levels">
+    <button class="level" data-level="0">
+      <strong>Level 1</strong>
+      LEFT AND RIGHT<br>
+      <span class="small">Move VoiceOver focus left and right.</span>
+    </button>
+
+    <button class="level" data-level="1">
+      <strong>Level 2</strong>
+      UP AND DOWN<br>
+      <span class="small">Practice scrolling up and down.</span>
+    </button>
+
+    <button class="level" data-level="2">
+      <strong>Level 3</strong>
+      DOUBLE TAP<br>
+      <span class="small">Practice activating the focused object.</span>
+    </button>
+
+    <button class="level" data-level="3">
+      <strong>Level 4</strong>
+      MIX IT UP<br>
+      <span class="small">Combine all four gesture types.</span>
+    </button>
+  </div>
+</section>
+
 <section id="game" class="card hidden" aria-live="polite">
-<h2 id="levelTitle"></h2><div id="obstacle" class="obstacle" tabindex="0"></div>
-<div id="command" class="command"></div><div id="status" class="status"></div><p id="instruction" class="small"></p>
-<div class="controls">
-<button class="demo" onclick="demo('left')">Demo Left</button><button class="demo" onclick="demo('right')">Demo Right</button>
-<button class="demo" onclick="demo('up')">Demo Up</button><button class="demo" onclick="demo('down')">Demo Down</button>
-<button class="demo" onclick="demo('double')">Demo Double Tap</button><button onclick="speakCurrent()">Repeat</button><button onclick="goHome()">Home</button>
-</div></section>
-<section id="completion" class="card hidden"><h2>Adventure Complete!</h2><p id="finalText"></p><button onclick="goHome()">Play Again</button></section>
+  <h2 id="levelTitle"></h2>
+
+  <div
+    id="obstacle"
+    class="obstacle"
+    tabindex="0"
+    aria-label="Current obstacle"
+  ></div>
+
+  <div id="command" class="command" aria-live="assertive"></div>
+  <div id="status" class="status"></div>
+  <p id="instruction" class="small"></p>
+
+  <div class="controls">
+    <button class="demo" data-command="left">Demo Left</button>
+    <button class="demo" data-command="right">Demo Right</button>
+    <button class="demo" data-command="up">Demo Up</button>
+    <button class="demo" data-command="down">Demo Down</button>
+    <button class="demo" data-command="double">Demo Double Tap</button>
+    <button id="repeatButton">Repeat</button>
+    <button id="homeButton">Home</button>
+  </div>
+</section>
+
+<section id="completion" class="card hidden" aria-live="polite">
+  <h2>Adventure Complete!</h2>
+  <p id="finalText"></p>
+  <button id="playAgainButton">Play Again</button>
+</section>
+
 </main>
+
 <script>
-const levels=[
-{name:"LEFT AND RIGHT",seq:["right","left","right","left","right","left","right","left"]},
-{name:"UP AND DOWN",seq:["down","up","down","up","down","up","down","up"]},
-{name:"DOUBLE TAP",seq:["double","double","double","double","double","double","double","double"]},
-{name:"MIX IT UP",seq:["right","down","left","up","double","right","up","double","left","down"]}];
-const obstacles={right:["🐔","Rubber chicken"],left:["🥒","Giant pickle"],up:["🥞","Flying pancake"],down:["🥔","Grumpy potato"],double:["👀","Googly-eye treasure chest"]};
-let levelIndex=0,step=0,score=0,streak=0;
-const $=id=>document.getElementById(id);
-function startLevel(i){levelIndex=i;step=0;score=0;streak=0;$("home").classList.add("hidden");$("completion").classList.add("hidden");$("game").classList.remove("hidden");$("levelTitle").textContent="Level "+(i+1)+": "+levels[i].name;loadStep()}
-function loadStep(){const c=levels[levelIndex].seq[step],o=obstacles[c];$("obstacle").innerHTML=o[0]+"<div style='font-size:1.15rem'>"+o[1]+"</div>";$("command").textContent="Expected: "+pretty(c);$("status").textContent="Step "+(step+1)+" of "+levels[levelIndex].seq.length+" • Score: "+score+" • Streak: "+streak;$("instruction").textContent=instruction(c);$("obstacle").focus();speakCurrent()}
-function pretty(c){return c==="double"?"DOUBLE TAP":c.toUpperCase()}
-function instruction(c){if(c==="left"||c==="right")return"Move VoiceOver focus "+c+".";if(c==="up"||c==="down")return"Scroll "+c+".";return"Double tap to activate the focused obstacle."}
-function speak(t){if("speechSynthesis"in window){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(t))}}
-function speakCurrent(){const c=levels[levelIndex].seq[step];speak("Level "+(levelIndex+1)+". "+pretty(c)+". "+obstacles[c][1])}
-function demo(c){handleCommand(c)}
-function handleCommand(c){const e=levels[levelIndex].seq[step];if(c===e){score++;streak++;$("status").textContent="Correct! Step "+(step+1)+" of "+levels[levelIndex].seq.length+" • Score: "+score+" • Streak: "+streak;speak("Correct");if(step<levels[levelIndex].seq.length-1)setTimeout(()=>{step++;loadStep()},700);else setTimeout(finishLevel,800)}else{streak=0;$("status").textContent="Try again. Expected "+pretty(e)+". Score: "+score;speak("Try again. Use "+pretty(e))}}
-function finishLevel(){$("game").classList.add("hidden");$("completion").classList.remove("hidden");$("finalText").textContent="You completed Level "+(levelIndex+1)+" with "+score+" correct gestures!";speak("Adventure complete. You completed Level "+(levelIndex+1)+".")}
-function goHome(){$("game").classList.add("hidden");$("completion").classList.add("hidden");$("home").classList.remove("hidden")}
-document.addEventListener("keydown",e=>{if(e.repeat&&(e.key===" "||e.key==="Enter"))return;if(e.key==="ArrowLeft")handleCommand("left");else if(e.key==="ArrowRight")handleCommand("right");else if(e.key==="ArrowUp")handleCommand("up");else if(e.key==="ArrowDown")handleCommand("down");else if(e.key==="Enter"||e.key===" ")handleCommand("double")});
-let touchStartY=null;
-document.addEventListener("touchstart",e=>{if(e.touches.length)touchStartY=e.touches[0].clientY},{passive:true});
-document.addEventListener("touchend",e=>{if(touchStartY===null)return;const dy=e.changedTouches[0].clientY-touchStartY;touchStartY=null;if(Math.abs(dy)>50)handleCommand(dy<0?"up":"down")});
-</script></body></html>
+"use strict";
+
+/* ---------------- DATA ---------------- */
+
+const LEVELS = [
+  {
+    name: "LEFT AND RIGHT",
+    sequence: [
+      "right","left","right","left",
+      "right","left","right","left"
+    ]
+  },
+  {
+    name: "UP AND DOWN",
+    sequence: [
+      "down","up","down","up",
+      "down","up","down","up"
+    ]
+  },
+  {
+    name: "DOUBLE TAP",
+    sequence: [
+      "double","double","double","double",
+      "double","double","double","double"
+    ]
+  },
+  {
+    name: "MIX IT UP",
+    sequence: [
+      "right","down","left","up","double",
+      "right","up","double","left","down"
+    ]
+  }
+];
+
+const OBSTACLES = {
+  right:  {emoji:"🐔", name:"Rubber chicken"},
+  left:   {emoji:"🥒", name:"Giant pickle"},
+  up:     {emoji:"🥞", name:"Flying pancake"},
+  down:   {emoji:"🥔", name:"Grumpy potato"},
+  double: {emoji:"👀", name:"Googly-eye treasure chest"}
+};
+
+/* ---------------- DOM ---------------- */
+
+const $ = id => document.getElementById(id);
+
+const home = $("home");
+const game = $("game");
+const completion = $("completion");
+const levelTitle = $("levelTitle");
+const obstacle = $("obstacle");
+const command = $("command");
+const status = $("status");
+const instructionText = $("instruction");
+const finalText = $("finalText");
+
+/* ---------------- GAME STATE ---------------- */
+
+const state = {
+  screen: "home",
+  levelIndex: 0,
+  step: 0,
+  score: 0,
+  streak: 0,
+  transitionTimer: null,
+  session: 0,
+  touchStart: null
+};
+
+/* ---------------- SPEECH ---------------- */
+
+function stopSpeech(){
+  if("speechSynthesis" in window){
+    window.speechSynthesis.cancel();
+  }
+}
+
+function speak(text){
+  if(!("speechSynthesis" in window)) return;
+
+  stopSpeech();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 0.9;
+  utterance.pitch = 1;
+  window.speechSynthesis.speak(utterance);
+}
+
+function speakCurrent(){
+  if(state.screen !== "game") return;
+
+  const level = LEVELS[state.levelIndex];
+  const expected = level.sequence[state.step];
+  const obstacleData = OBSTACLES[expected];
+
+  speak(
+    "Level " + (state.levelIndex + 1) +
+    ". " + prettyCommand(expected) +
+    ". " + obstacleData.name
+  );
+}
+
+/* ---------------- DISPLAY HELPERS ---------------- */
+
+function prettyCommand(commandName){
+  if(commandName === "double") return "DOUBLE TAP";
+  return commandName.toUpperCase();
+}
+
+function instructionFor(commandName){
+  if(commandName === "left" || commandName === "right"){
+    return "Move VoiceOver focus " + commandName + ".";
+  }
+
+  if(commandName === "up" || commandName === "down"){
+    return "Scroll " + commandName + ".";
+  }
+
+  return "Double tap to activate the focused obstacle.";
+}
+
+function renderStep(){
+  if(state.screen !== "game") return;
+
+  const level = LEVELS[state.levelIndex];
+
+  if(
+    !level ||
+    state.step < 0 ||
+    state.step >= level.sequence.length
+  ){
+    finishLevel();
+    return;
+  }
+
+  const expected = level.sequence[state.step];
+  const obstacleData = OBSTACLES[expected];
+
+  obstacle.innerHTML =
+    "<div>" + obstacleData.emoji + "</div>" +
+    "<div class="obstacle-name">" +
+    obstacleData.name +
+    "</div>";
+
+  obstacle.setAttribute(
+    "aria-label",
+    obstacleData.name + ". " +
+    prettyCommand(expected) + " required."
+  );
+
+  command.textContent = "Expected: " + prettyCommand(expected);
+
+  status.textContent =
+    "Step " + (state.step + 1) +
+    " of " + level.sequence.length +
+    " • Score: " + state.score +
+    " • Streak: " + state.streak;
+
+  instructionText.textContent = instructionFor(expected);
+
+  /*
+    Focus the obstacle so that VoiceOver users have a real object
+    to explore. Do not treat the focus event itself as a completed
+    gesture; JavaScript cannot reliably distinguish a VoiceOver swipe
+    from other focus movement.
+  */
+  requestAnimationFrame(function(){
+    if(state.screen === "game"){
+      obstacle.focus({preventScroll:true});
+    }
+  });
+}
+
+/* ---------------- GAME FLOW ---------------- */
+
+function cancelPendingTransition(){
+  if(state.transitionTimer !== null){
+    clearTimeout(state.transitionTimer);
+    state.transitionTimer = null;
+  }
+}
+
+function startLevel(index){
+  if(!Number.isInteger(index) || index < 0 || index >= LEVELS.length){
+    return;
+  }
+
+  cancelPendingTransition();
+  stopSpeech();
+
+  state.session += 1;
+  state.screen = "game";
+  state.levelIndex = index;
+  state.step = 0;
+  state.score = 0;
+  state.streak = 0;
+
+  home.classList.add("hidden");
+  completion.classList.add("hidden");
+  game.classList.remove("hidden");
+
+  levelTitle.textContent =
+    "Level " + (index + 1) + ": " + LEVELS[index].name;
+
+  renderStep();
+
+  /*
+    Give the page a moment to finish changing screens before speaking.
+    The session check prevents an old callback from speaking later.
+  */
+  const sessionAtStart = state.session;
+
+  state.transitionTimer = setTimeout(function(){
+    state.transitionTimer = null;
+
+    if(
+      state.session === sessionAtStart &&
+      state.screen === "game"
+    ){
+      speakCurrent();
+    }
+  }, 150);
+}
+
+function handleCommand(commandName){
+  if(state.screen !== "game") return;
+
+  const level = LEVELS[state.levelIndex];
+  if(!level) return;
+
+  const expected = level.sequence[state.step];
+
+  if(commandName === expected){
+    handleCorrect();
+  }else{
+    handleIncorrect(expected);
+  }
+}
+
+function handleCorrect(){
+  const level = LEVELS[state.levelIndex];
+
+  state.score += 1;
+  state.streak += 1;
+
+  status.textContent =
+    "Correct! Step " + (state.step + 1) +
+    " of " + level.sequence.length +
+    " • Score: " + state.score +
+    " • Streak: " + state.streak;
+
+  speak("Correct");
+
+  const sessionAtAnswer = state.session;
+
+  cancelPendingTransition();
+
+  if(state.step >= level.sequence.length - 1){
+    state.transitionTimer = setTimeout(function(){
+      state.transitionTimer = null;
+
+      if(state.session === sessionAtAnswer){
+        finishLevel();
+      }
+    }, 800);
+
+    return;
+  }
+
+  state.transitionTimer = setTimeout(function(){
+    state.transitionTimer = null;
+
+    if(
+      state.session !== sessionAtAnswer ||
+      state.screen !== "game"
+    ){
+      return;
+    }
+
+    state.step += 1;
+    renderStep();
+
+    const sessionAfterStep = state.session;
+
+    state.transitionTimer = setTimeout(function(){
+      state.transitionTimer = null;
+
+      if(
+        state.session === sessionAfterStep &&
+        state.screen === "game"
+      ){
+        speakCurrent();
+      }
+    }, 120);
+  }, 700);
+}
+
+function handleIncorrect(expected){
+  state.streak = 0;
+
+  status.textContent =
+    "Try again. Expected " +
+    prettyCommand(expected) +
+    ". Score: " +
+    state.score;
+
+  speak("Try again. Use " + prettyCommand(expected));
+}
+
+function finishLevel(){
+  if(state.screen !== "game") return;
+
+  cancelPendingTransition();
+  stopSpeech();
+
+  state.screen = "completion";
+  state.session += 1;
+
+  game.classList.add("hidden");
+  completion.classList.remove("hidden");
+
+  finalText.textContent =
+    "You completed Level " +
+    (state.levelIndex + 1) +
+    " with " +
+    state.score +
+    " correct gestures!";
+
+  const sessionAtFinish = state.session;
+
+  state.transitionTimer = setTimeout(function(){
+    state.transitionTimer = null;
+
+    if(state.session === sessionAtFinish){
+      speak(
+        "Adventure complete. You completed Level " +
+        (state.levelIndex + 1) + "."
+      );
+    }
+  }, 150);
+}
+
+function goHome(){
+  cancelPendingTransition();
+  stopSpeech();
+
+  state.session += 1;
+  state.screen = "home";
+  state.step = 0;
+  state.score = 0;
+  state.streak = 0;
+
+  game.classList.add("hidden");
+  completion.classList.add("hidden");
+  home.classList.remove("hidden");
+}
+
+/* ---------------- BUTTONS ---------------- */
+
+document.querySelectorAll(".level").forEach(function(button){
+  button.addEventListener("click", function(){
+    startLevel(Number(button.dataset.level));
+  });
+});
+
+document.querySelectorAll(".demo").forEach(function(button){
+  button.addEventListener("click", function(){
+    handleCommand(button.dataset.command);
+  });
+});
+
+$("repeatButton").addEventListener("click", function(){
+  speakCurrent();
+});
+
+$("homeButton").addEventListener("click", function(){
+  goHome();
+});
+
+$("playAgainButton").addEventListener("click", function(){
+  startLevel(state.levelIndex);
+});
+
+/* ---------------- KEYBOARD / SWITCH INPUT ---------------- */
+
+document.addEventListener("keydown", function(event){
+  /*
+    A held switch can generate repeated keydown events.
+    Ignore repeats for Space and Enter so one switch press cannot
+    accidentally advance several steps.
+  */
+  if(
+    event.repeat &&
+    (event.key === " " || event.key === "Enter")
+  ){
+    event.preventDefault();
+    return;
+  }
+
+  if(state.screen !== "game"){
+    return;
+  }
+
+  let commandName = null;
+
+  switch(event.key){
+    case "ArrowLeft":
+      commandName = "left";
+      break;
+
+    case "ArrowRight":
+      commandName = "right";
+      break;
+
+    case "ArrowUp":
+      commandName = "up";
+      break;
+
+    case "ArrowDown":
+      commandName = "down";
+      break;
+
+    case "Enter":
+    case " ":
+      commandName = "double";
+      break;
+
+    case "Escape":
+      event.preventDefault();
+      goHome();
+      return;
+
+    default:
+      return;
+  }
+
+  event.preventDefault();
+  handleCommand(commandName);
+});
+
+/* ---------------- TOUCH GESTURES ---------------- */
+
+document.addEventListener(
+  "touchstart",
+  function(event){
+    if(state.screen !== "game") return;
+    if(event.touches.length !== 1) return;
+
+    /*
+      Only begin gesture tracking when the touch starts directly on
+      the obstacle. This prevents touching a Demo/Home/Repeat button
+      from accidentally becoming a game gesture.
+    */
+    if(!obstacle.contains(event.target)) return;
+
+    state.touchStart = {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY
+    };
+  },
+  {passive:true}
+);
+
+document.addEventListener(
+  "touchend",
+  function(event){
+    if(!state.touchStart) return;
+
+    const start = state.touchStart;
+    state.touchStart = null;
+
+    if(
+      state.screen !== "game" ||
+      event.changedTouches.length !== 1
+    ){
+      return;
+    }
+
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+
+    /*
+      Require a clear swipe. Small movements are treated as taps and
+      do nothing here; the actual double-tap practice is supplied by
+      the demo button or keyboard/switch input.
+    */
+    const threshold = 50;
+
+    if(Math.max(Math.abs(dx), Math.abs(dy)) < threshold){
+      return;
+    }
+
+    if(Math.abs(dx) > Math.abs(dy)){
+      handleCommand(dx > 0 ? "right" : "left");
+    }else{
+      handleCommand(dy > 0 ? "down" : "up");
+    }
+  },
+  {passive:true}
+);
+
+document.addEventListener(
+  "touchcancel",
+  function(){
+    state.touchStart = null;
+  },
+  {passive:true}
+);
+
+/* ---------------- INITIAL STATE ---------------- */
+
+goHome();
+</script>
+</body>
+</html>
