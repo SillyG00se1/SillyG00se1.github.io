@@ -19,10 +19,10 @@ h1{font-size:38px;margin:12px 0 8px}h2{font-size:34px;margin:10px 0}.subtitle{fo
 .grid{display:grid;gap:10px;width:100%}.student-grid{grid-template-columns:repeat(2,minmax(220px,1fr));max-width:1100px}
 .lesson-grid{grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(5,minmax(0,1fr));width:100%;height:calc(100vh - 182px);max-width:none;flex:0 0 auto}.lesson-grid button{min-height:0;height:100%;font-size:22px;padding:7px 8px}.games-cell{height:100%;min-height:0}.games-cell button{width:100%;height:100%;font-size:18px;padding:7px 8px;background:#18204F;border:2px solid #B9C7FF}.games-cell button:hover,.games-cell button:focus{background:#28356F}.level-grid{grid-template-columns:repeat(4,1fr);max-width:1450px}.level-grid button{min-height:125px}
 .bottom{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:16px 0}.prompt-title,.typing-title{font-size:30px;margin:8px 0}
-.prompt{font-size:30px;line-height:1.5;display:flex;flex-wrap:wrap;gap:2px 1px;max-height:260px;overflow:auto;padding:12px 0}.char{display:inline-block;padding:3px;min-width:22px;text-align:center}
+.prompt{font-size:38px;line-height:1.35;display:flex;flex-direction:column;max-height:260px;overflow:auto;padding:12px 0}.prompt-row{display:flex;flex-wrap:nowrap;gap:0}.char{display:inline-block;padding:1px 0;min-width:0;text-align:center}
 .char.current{background:var(--current);color:#fff}.char.correct{background:var(--correct);color:#fff}.char.error{background:var(--error);color:#fff}.char.corrected{background:var(--corrected);color:#fff}
 textarea{width:100%;min-height:230px;resize:vertical;background:var(--panel);color:#fff;border:2px solid #666;border-radius:6px;font:30px 'Trebuchet MS';padding:12px}
-.timer{font-size:22px;text-align:center;margin:8px}.results{font-size:42px;line-height:1.45;white-space:pre-line;text-align:center;font-weight:700;max-width:1200px}.typing-wrap{display:flex;flex-direction:column;min-height:100vh}
+.timer{font-size:22px;text-align:center;margin:8px}.results{font-size:38px;line-height:1.35;white-space:pre-line;text-align:center;font-weight:700;max-width:1200px}.typing-wrap{display:flex;flex-direction:column;min-height:100vh}
 .data-wrap{width:100%;overflow:auto;flex:1}table{border-collapse:collapse;width:100%;font-size:15px;background:#111}th,td{border:1px solid #555;padding:8px;text-align:left;vertical-align:top}th{background:#333;position:sticky;top:0}
 .notice{font-size:20px;max-width:900px;text-align:center;line-height:1.4}
 @media(max-width:900px){.lesson-grid,.level-grid{grid-template-columns:repeat(2,1fr)}}
@@ -152,7 +152,7 @@ function startLesson(n,lvl){
  timerStarted=false;startTime=0;submitted=false;characterStatus=Array.from(prompt,()=> "untyped");showTypingScreen()
 }
 function showTypingScreen(){
- let chars=prompt.split("").map((c,i)=>`<span id="c${i}" class="char">${c===" "?"\u00a0":esc(c)}</span>`).join("");
+ let chars="";for(let start=0;start<prompt.length;start+=50){let row=prompt.slice(start,start+50).split("").map((c,j)=>{let i=start+j;return `<span id="c${i}" class="char">${c===" "?"\u00a0":esc(c)}</span>`}).join("");chars+=`<div class="prompt-row">${row}</div>`;}
  screen(`<div class="typing-wrap"><h2>Lesson ${lessonNumber} • Level ${levelNumber}: ${LEVEL_NAMES[levelNumber-1]}</h2><div style="font-size:20px;margin-bottom:8px">${esc(studentName)}</div>
  <div class="prompt-title">Type the following:</div><div id="prompt" class="prompt">${chars}</div><div class="typing-title">Your typing:</div>
  <textarea id="typingArea" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea><div id="timer" class="timer">Time: 0.0 seconds</div>
