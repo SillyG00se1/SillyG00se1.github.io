@@ -207,28 +207,117 @@ function buildFaceMenu(){
   </button>`).join("");
 }
 
+let activeScan = null;
+
 function stopScan(){
-  if(scanTimer){clearInterval(scanTimer);scanTimer=null}
-  document.querySelectorAll(".scan-choice").forEach(x=>x.classList.remove("scanning"));
+  if(scanTimer !== null){
+    clearInterval(scanTimer);
+    scanTimer = null;
+  }
+  document.querySelectorAll(".scan-choice").forEach(x => {
+    x.classList.remove("scanning");
+  });
+  activeScan = null;
 }
-function startScan(gridId,items,onSelect){
+
+function startMenuScan(screenId, choices, onSelect){
   stopScan();
-  scanItems=items;scanIndex=0;
-  const choices=[...document.querySelectorAll("#"+gridId+" .scan-choice")];
-  if(!choices.length)return;
-  choices.forEach((choice,i)=>{choice.addEventListener("click",()=>{scanIndex=i;stopScan();onSelect(scanItems[i])})});
-  const highlight=()=>{
-    choices.forEach((x,i)=>x.classList.toggle("scanning",i===scanIndex));
-  };
-  highlight();
-  scanTimer=setInterval(()=>{
-    scanIndex=(scanIndex+1)%choices.length;
-    highlight();
-  },1400);
-  window.currentScanSelect=()=>{
+
+  show(screenId);
+
+  const buttons = [...document.querySelectorAll("#" + screenId.replace("Screen","Grid") + " .scan-choice")];
+  if(!buttons.length) return;
+
+  scanIndex = 0;
+
+  function highlight(){
+    buttons.forEach((button,index) => {
+      button.classList.toggle("scanning", index === scanIndex);
+    });
+  }
+
+  function selectCurrent(){
+    if(activeScan === null) return;
+    const index = scanIndex;
+    if(index < 0 || index >= choices.length) return;
     stopScan();
-    onSelect(scanItems[scanIndex]);
-  };
+    onSelect(choices[index]);
+  }
+
+  activeScan = selectCurrent;
+
+  buttons.forEach((button,index) => {
+    button.onclick = function(event){
+      event.preventDefault();
+      scanIndex = index;
+      selectCurrent();
+    };
+  });
+
+  highlight();
+
+  scanTimer = setInterval(function(){
+    if(activeScan !== selectCurrent){
+      clearInterval(scanTimer);
+      scanTimer = null;
+      return;
+    }
+    scanIndex = (scanIndex + 1) % buttons.length;
+    highlight();
+  }, 1400);
+}
+
+function chooseInflationMode(newMode){
+  if(!["hold","tap","either"].includes(newMode)) return;
+
+  mode = newMode;
+  selectedColor = null;
+  selectedFace = null;
+
+  if(returnTimer){
+    clearTimeout(returnTimer);
+    returnTimer = null;
+  }
+
+  cancelAnimationFrame(animationId);
+  stopScan();
+
+  gameSession++;
+  held = false;
+  popped = false;
+  tapCount = 0;
+  balloonSize = .28;
+
+  clearEffects();
+
+  const balloonEl = document.getElementById("balloon");
+  balloonEl.style.display = "block";
+  balloonEl.style.visibility = "visible";
+  balloonEl.style.opacity = "1";
+
+  startColorScan();
+}
+
+function startColorScan(){
+  startMenuScan(
+    "colorScreen",
+    COLORS,
+    function(chosen){
+      selectedColor = chosen;
+      startFaceScan();
+    }
+  );
+}
+
+function startFaceScan(){
+  startMenuScan(
+    "faceScreen",
+    FACES,
+    function(chosen){
+      selectedFace = chosen;
+      startGame();
+    }
+  );
 }
 
 function chooseInflationMode(newMode){
@@ -514,39 +603,79 @@ function setupSelect(){
   chooseInflationMode(buttons[setupIndex].dataset.mode);
 }
 
-window.addEventListener("keydown",e=>{
-  if(e.key==="Escape"){
+window.addEventListener("keydown", function(e){
+  if(e.key === "Escape"){
     e.preventDefault();
+
     cancelAnimationFrame(animationId);
-    if(returnTimer){clearTimeout(returnTimer);returnTimer=null}
+
+    if(returnTimer){
+      clearTimeout(returnTimer);
+      returnTimer = null;
+    }
+
     gameSession++;
-    popped=false;held=false;
-    stopScan();
+    popped = false;
+    held = false;
+
     if(!document.getElementById("gameScreen").classList.contains("hidden")){
+      stopScan();
       startFaceScan();
     }else if(!document.getElementById("faceScreen").classList.contains("hidden")){
+      stopScan();
       startColorScan();
     }else if(!document.getElementById("colorScreen").classList.contains("hidden")){
+      stopScan();
       show("setupScreen");
     }else{
       show("setupScreen");
     }
+
     return;
   }
-  if(e.code!=="Space")return;
+
+  if(e.code !== "Space") return;
+
   e.preventDefault();
-  if(e.repeat)return;
-  if(!document.getElementById("setupScreen").classList.contains("hidden")){
-    setupSelect();
+
+  // One physical switch press = one selection/action.
+  if(e.repeat) return;
+
+  const setupVisible =
+    !document.getElementById("setupScreen").classList.contains("hidden");
+
+  const colorVisible =
+    !document.getElementById("colorScreen").classList.contains("hidden");
+
+  const faceVisible =
+    !document.getElementById("faceScreen").classList.contains("hidden");
+
+  const gameVisible =
+    !document.getElementById("gameScreen").classList.contains("hidden");
+
+  if(setupVisible){
+    const buttons = [...document.querySelectorAll(".setup-btn")];
+    if(buttons.length){
+      // Space on the setup screen chooses the first currently highlighted mode.
+      // Setup buttons are also directly clickable.
+      buttons.forEach((button,index)=>{
+        button.classList.toggle("scanning", index === setupIndex);
+      });
+      chooseInflationMode(buttons[setupIndex].dataset.mode);
+    }
     return;
   }
-  if(!document.getElementById("colorScreen").classList.contains("hidden") ||
-     !document.getElementById("faceScreen").classList.contains("hidden")){
-    if(typeof window.currentScanSelect==="function")window.currentScanSelect();
+
+  if((colorVisible || faceVisible) && typeof activeScan === "function"){
+    activeScan();
     return;
   }
-  if(!document.getElementById("gameScreen").classList.contains("hidden"))activateSwitch();
+
+  if(gameVisible){
+    activateSwitch();
+  }
 });
+
 window.addEventListener("keyup",e=>{
   if(e.code!=="Space")return;
   e.preventDefault();
