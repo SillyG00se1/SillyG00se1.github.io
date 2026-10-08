@@ -58,24 +58,13 @@ linear-gradient(25deg,transparent 0 42%,#111 43% 50%,transparent 51%) 84px 0/48p
 .game-top{position:absolute;left:20px;right:20px;top:15px;display:flex;justify-content:space-between;align-items:center;font-size:clamp(20px,2vw,28px);font-weight:bold;z-index:10}
 .cloud{position:absolute;background:rgba(255,255,255,.88);border-radius:50%;z-index:0}.cloud:before,.cloud:after{content:"";position:absolute;background:inherit;border-radius:50%}.cloud1{width:180px;height:55px;top:16%;left:10%}.cloud1:before{width:80px;height:80px;left:28px;top:-38px}.cloud1:after{width:95px;height:95px;left:82px;top:-52px}.cloud2{width:210px;height:62px;top:29%;right:8%}.cloud2:before{width:90px;height:90px;left:35px;top:-44px}.cloud2:after{width:105px;height:105px;left:105px;top:-58px}.cloud3{width:140px;height:45px;top:9%;left:60%}.cloud3:before{width:62px;height:62px;left:20px;top:-30px}.cloud3:after{width:72px;height:72px;left:65px;top:-38px}
 #gameArea{position:absolute;inset:70px 0 0 0;overflow:hidden}
-#cactus{position:absolute;left:22%;top:31%;width:230px;height:300px;z-index:3;filter:drop-shadow(0 8px 6px rgba(0,0,0,.2))}
-#cactus .cactus-body{position:absolute;left:58px;bottom:0;width:72px;height:235px;background:linear-gradient(90deg,#176f2d 0%,#38a94b 32%,#238b39 68%,#125d25 100%);border:4px solid #145b27;border-radius:38px 38px 25px 25px}
-#cactus .cactus-body:before{content:"";position:absolute;left:-82px;top:62px;width:92px;height:135px;background:linear-gradient(90deg,#155f28,#3bad4e 45%,#237d35);border:4px solid #145b27;border-right:0;border-radius:38px 0 0 38px}
-#cactus .cactus-body:after{content:"";position:absolute;right:-82px;top:92px;width:92px;height:110px;background:linear-gradient(90deg,#238338,#3bad4e 55%,#176f2d);border:4px solid #145b27;border-left:0;border-radius:0 38px 38px 0}
-#cactus .spikes{position:absolute;inset:0;z-index:4;pointer-events:none;background:
-radial-gradient(ellipse at 73px 32px,#fff 0 2px,transparent 3px),
-radial-gradient(ellipse at 73px 72px,#fff 0 2px,transparent 3px),
-radial-gradient(ellipse at 73px 112px,#fff 0 2px,transparent 3px),
-radial-gradient(ellipse at 73px 152px,#fff 0 2px,transparent 3px),
-radial-gradient(ellipse at 73px 192px,#fff 0 2px,transparent 3px),
-radial-gradient(ellipse at 118px 82px,#fff 0 2px,transparent 3px),
-radial-gradient(ellipse at 118px 122px,#fff 0 2px,transparent 3px),
-radial-gradient(ellipse at 118px 162px,#fff 0 2px,transparent 3px),
-radial-gradient(ellipse at 52px 112px,#fff 0 2px,transparent 3px),
-radial-gradient(ellipse at 52px 152px,#fff 0 2px,transparent 3px)}
-#cactus .spikes:after{content:"";position:absolute;left:48px;top:18px;width:92px;height:218px;background:
-linear-gradient(25deg,transparent 0 42%,#fff 43% 52%,transparent 53%) 0 0/24px 30px repeat-y,
-linear-gradient(-25deg,transparent 0 42%,#fff 43% 52%,transparent 53%) 8px 15px/24px 30px repeat-y;opacity:.98}
+#cactus{position:absolute;left:24.5%;top:30%;width:270px;height:310px;z-index:3;filter:drop-shadow(0 8px 6px rgba(0,0,0,.2))}
+#cactus .cactus-body{position:absolute;left:82px;bottom:0;width:86px;height:250px;background:linear-gradient(90deg,#176f2d 0%,#35a947 30%,#238b39 66%,#125d25 100%);border:4px solid #145b27;border-radius:44px 44px 28px 28px;box-shadow:inset 8px 0 8px rgba(255,255,255,.08),inset -9px 0 10px rgba(0,0,0,.12)}
+#cactus .cactus-body:before{content:"";position:absolute;left:-88px;top:72px;width:96px;height:132px;background:linear-gradient(90deg,#155f28,#3bad4e 45%,#237d35);border:4px solid #145b27;border-right:0;border-radius:42px 0 0 42px;box-shadow:inset 7px 0 8px rgba(255,255,255,.07)}
+#cactus .cactus-body:after{content:"";position:absolute;right:-88px;top:103px;width:96px;height:112px;background:linear-gradient(90deg,#238338,#3bad4e 55%,#176f2d);border:4px solid #145b27;border-left:0;border-radius:0 42px 42px 0;box-shadow:inset -7px 0 8px rgba(0,0,0,.08)}
+#cactus .spikes{position:absolute;inset:0;z-index:4;pointer-events:none}
+#cactus .spike{position:absolute;width:24px;height:4px;background:#fff;border-radius:4px;box-shadow:0 0 2px rgba(0,0,0,.15);transform-origin:center}
+#cactus .spike.center{width:18px;height:3px}
 #balloon{position:absolute;left:50%;top:66%;width:190px;height:240px;transform:translate(-50%,-50%) scale(.28);transform-origin:center center;border-radius:50% 50% 47% 47%;z-index:2;box-shadow:inset -24px -20px 34px rgba(0,0,0,.16),inset 18px 15px 25px rgba(255,255,255,.42),0 12px 18px rgba(0,0,0,.18);transition:background .2s}
 #balloon:before{content:"";position:absolute;left:50%;bottom:-23px;transform:translateX(-50%);width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-top:25px solid var(--balloon-color)}
 #balloon:after{content:"";position:absolute;left:50%;bottom:-130px;transform:translateX(-50%);width:4px;height:110px;background:#555}
@@ -158,7 +147,7 @@ linear-gradient(25deg,transparent 0 42%,#111 43% 50%,transparent 51%) 42px 0/30p
     <span id="gameInstruction"></span>
   </div>
   <div class="cloud cloud1"></div><div class="cloud cloud2"></div><div class="cloud cloud3"></div><div id="gameArea">
-    <div id="cactus"><div class="cactus-body"></div><div class="spikes"></div></div>
+    <div id="cactus"><div class="cactus-body"></div><div class="spikes"><span class="spike" style="left:-2px;top:88px;transform:rotate(-35deg)"></span><span class="spike" style="left:-4px;top:132px;transform:rotate(-25deg)"></span><span class="spike" style="left:-1px;top:174px;transform:rotate(-35deg)"></span><span class="spike" style="left:20px;top:70px;transform:rotate(-25deg)"></span><span class="spike" style="left:24px;top:112px;transform:rotate(-35deg)"></span><span class="spike" style="left:24px;top:157px;transform:rotate(-25deg)"></span><span class="spike" style="left:25px;top:195px;transform:rotate(-35deg)"></span><span class="spike center" style="left:78px;top:45px;transform:rotate(-25deg)"></span><span class="spike center" style="left:77px;top:92px;transform:rotate(25deg)"></span><span class="spike center" style="left:79px;top:142px;transform:rotate(-30deg)"></span><span class="spike center" style="left:79px;top:192px;transform:rotate(25deg)"></span><span class="spike center" style="left:80px;top:225px;transform:rotate(-25deg)"></span><span class="spike center" style="left:142px;top:67px;transform:rotate(25deg)"></span><span class="spike center" style="left:143px;top:111px;transform:rotate(-25deg)"></span><span class="spike center" style="left:143px;top:157px;transform:rotate(25deg)"></span><span class="spike center" style="left:144px;top:202px;transform:rotate(-25deg)"></span><span class="spike" style="left:157px;top:91px;transform:rotate(35deg)"></span><span class="spike" style="left:158px;top:177px;transform:rotate(35deg)"></span><span class="spike" style="left:196px;top:121px;transform:rotate(25deg)"></span><span class="spike" style="left:199px;top:158px;transform:rotate(-25deg)"></span><span class="spike" style="left:200px;top:194px;transform:rotate(25deg)"></span><span class="spike" style="left:229px;top:139px;transform:rotate(-35deg)"></span><span class="spike" style="left:230px;top:180px;transform:rotate(25deg)"></span><span class="spike center" style="left:104px;top:64px;transform:rotate(-25deg)"></span><span class="spike center" style="left:111px;top:121px;transform:rotate(25deg)"></span><span class="spike center" style="left:104px;top:176px;transform:rotate(-25deg)"></span></div></div>
     <div id="balloon"><div id="faceOnBalloon" class="face-on-balloon"></div></div>
     <div id="tapCount"></div>
     <div id="modeHint"></div>
@@ -311,8 +300,8 @@ function gameLoop(now){
     const br=balloon.getBoundingClientRect();
     const cr=cactus.getBoundingClientRect();
     // Pop when the balloon reaches the cactus's right-side spike zone.
-    const spikeEdge=cr.right+4;
-    const verticalOverlap=br.bottom>cr.top+35 && br.top<cr.bottom-30;
+    const spikeEdge=cr.right-2;
+    const verticalOverlap=br.bottom>cr.top+35 && br.top<cr.bottom-35;
     if(br.left<=spikeEdge && verticalOverlap) popBalloon();
   }
   if(!popped) animationId=requestAnimationFrame(gameLoop);
