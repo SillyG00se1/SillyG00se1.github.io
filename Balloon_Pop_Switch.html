@@ -257,6 +257,25 @@ function startColorScan(){
   scanIndex=0;
   const choices=[...document.querySelectorAll("#colorGrid .scan-choice")];
   if(!choices.length)return;
+
+  const selectColor=()=>{
+    const index=scanIndex;
+    const chosen=COLORS[index];
+    if(!chosen)return;
+    selectedColor=chosen;
+    stopScan();
+    startFaceScan();
+  };
+
+  choices.forEach((choice,i)=>{
+    choice.onclick=()=>{
+      scanIndex=i;
+      selectColor();
+    };
+  });
+
+  window.currentScanSelect=selectColor;
+
   const highlight=()=>{
     choices.forEach((x,i)=>x.classList.toggle("scanning",i===scanIndex));
   };
@@ -274,6 +293,25 @@ function startFaceScan(){
   scanIndex=0;
   const choices=[...document.querySelectorAll("#faceGrid .scan-choice")];
   if(!choices.length)return;
+
+  const selectFace=()=>{
+    const index=scanIndex;
+    const chosen=FACES[index];
+    if(!chosen)return;
+    selectedFace=chosen;
+    stopScan();
+    startGame();
+  };
+
+  choices.forEach((choice,i)=>{
+    choice.onclick=()=>{
+      scanIndex=i;
+      selectFace();
+    };
+  });
+
+  window.currentScanSelect=selectFace;
+
   const highlight=()=>{
     choices.forEach((x,i)=>x.classList.toggle("scanning",i===scanIndex));
   };
