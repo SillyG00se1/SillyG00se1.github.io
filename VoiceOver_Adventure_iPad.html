@@ -16,10 +16,10 @@ h1,h2{margin-top:0}
 .levels{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
 .level{background:#374151;text-align:left;min-height:120px}
 .level strong{display:block;font-size:1.2rem;margin-bottom:8px}
-.obstacle{font-size:5rem;text-align:center;min-height:170px;padding:20px;border-radius:16px;background:#374151;touch-action:none}
+.obstacle{font-size:4rem;text-align:center;min-height:320px;padding:45px 25px;border-radius:20px;background:#374151;touch-action:none;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px}
 .obstacle:focus{outline:4px solid #facc15;outline-offset:4px}
-.obstacle-name{font-size:1.2rem;margin-top:6px}
-.command{font-size:2.2rem;font-weight:bold;text-align:center;padding:16px 12px}
+.obstacle-name{font-size:2.1rem;font-weight:bold;margin-top:6px}
+.command{font-size:2rem;font-weight:bold;text-align:center;padding:0;min-height:0}
 .status{text-align:center;font-size:1.3rem;margin:12px 0;min-height:32px}
 .controls{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
 .secondary{background:#4b5563}
@@ -42,11 +42,11 @@ th{background:#111827}
 <section id="home" class="card">
 <h1>VoiceOver Adventure</h1>
 <div class="levels">
-<button class="level practice" data-level="0"><strong>Level 0 — Gesture Practice</strong>Practice left, right, up, down, single tap, and double tap.</button>
-<button class="level" data-level="1"><strong>Level 1 — Left &amp; Right</strong>Move VoiceOver focus left and right.</button>
-<button class="level" data-level="2"><strong>Level 2 — Up &amp; Down</strong>Practice scrolling up and down.</button>
-<button class="level" data-level="3"><strong>Level 3 — Taps</strong>Practice single tap and double tap.</button>
-<button class="level" data-level="4"><strong>Level 4 — Mix It Up</strong>Combine swipes, single taps, and double taps.</button>
+<button class="level practice" data-level="0">Level 0 Practice</button>
+<button class="level" data-level="1">Level 1 Swipe Left and Right</button>
+<button class="level" data-level="2">Level 2 Swipe Up and Down</button>
+<button class="level" data-level="3">Level 3 Single and Double Tap</button>
+<button class="level" data-level="4">Level 4 Mix It Up</button>
 </div>
 <div class="controls" style="margin-top:18px"><button id="dataButton" class="secondary">DATA</button></div>
 </section>
@@ -66,7 +66,7 @@ th{background:#111827}
 
 <section id="game" class="card hidden" aria-live="polite">
 <h2 id="levelTitle"></h2>
-<div id="obstacle"/> class="obstacle" tabindex="0" aria-label="Current obstacle"></div>
+<div id="obstacle" class="obstacle" tabindex="0" aria-label="Current obstacle"></div>
 <div id="command" class="command" aria-live="assertive"></div>
 <div id="status" class="status"></div>
 <div class="controls"><button id="repeatButton" class="secondary">Repeat</button><button id="homeButton" class="secondary">Home</button></div>
@@ -135,10 +135,10 @@ return"Tap the focused object twice quickly.";
 function renderStep(){
 if(state.screen!=="game")return;
 const level=LEVELS[state.levelIndex],expected=level.sequence[state.step],item=OBSTACLES[expected];
-obstacle.innerHTML="<div>"+item.emoji+"</div><div class=\"obstacle-name\">"+item.name+"</div>";
+obstacle.innerHTML="<div>"+item.emoji+"</div><div class=\"obstacle-name\">"+item.name+" — "+(expected==="single"?"single tap":expected==="double"?"double tap":"swipe "+expected)+"</div>";
 obstacle.setAttribute("aria-label",item.name+". "+prettyCommand(expected)+" required.");
-command.textContent=prettyCommand(expected);
-status.textContent="Item "+(state.step+1)+" of "+level.sequence.length+(level.scored?" • Right: "+state.score:"");
+command.textContent="";
+status.textContent="";
 instructionText.textContent="";
 requestAnimationFrame(()=>{if(state.screen==="game")obstacle.focus({preventScroll:true})});
 }
