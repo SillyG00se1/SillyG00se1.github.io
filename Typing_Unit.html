@@ -21,7 +21,7 @@ h1{font-size:38px;margin:12px 0 8px}h2{font-size:34px;margin:10px 0}.subtitle{fo
 .bottom{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:16px 0}.prompt-title,.typing-title{font-size:30px;margin:8px 0}
 .prompt{font-size:38px;line-height:1.35;display:flex;flex-direction:column;max-height:260px;overflow:auto;padding:12px 0}.prompt-row{display:flex;flex-wrap:nowrap;gap:0}.char{display:inline-block;padding:1px 0;min-width:0;text-align:center}
 .char.current{background:var(--current);color:#fff}.char.correct{background:var(--correct);color:#fff}.char.error{background:var(--error);color:#fff}.char.corrected{background:var(--corrected);color:#fff}
-textarea{width:100%;min-height:230px;resize:vertical;background:var(--panel);color:#fff;border:2px solid #666;border-radius:6px;font:30px 'Trebuchet MS';padding:12px}
+textarea{width:100%;min-height:230px;resize:vertical;background:var(--panel);color:#fff;border:2px solid #666;border-radius:6px;font:38px 'Trebuchet MS';line-height:1.35;padding:12px;white-space:pre-wrap;overflow-wrap:break-word}
 .timer{font-size:22px;text-align:center;margin:8px}.results{font-size:38px;line-height:1.35;white-space:pre-line;text-align:center;font-weight:700;max-width:1200px}.typing-wrap{display:flex;flex-direction:column;min-height:100vh}
 .data-wrap{width:100%;overflow:auto;flex:1}table{border-collapse:collapse;width:100%;font-size:15px;background:#111}th,td{border:1px solid #555;padding:8px;text-align:left;vertical-align:top}th{background:#333;position:sticky;top:0}
 .notice{font-size:20px;max-width:900px;text-align:center;line-height:1.4}
@@ -32,7 +32,7 @@ const LEVEL_NAMES=["Letter Combinations","Words","Sentences"];
 const STUDENTS_KEY="typingUnitStudents",DATA_KEY="typingUnitData";
 let students=loadJSON(STUDENTS_KEY,[]),data=loadJSON(DATA_KEY,[]),remoteReady=false;
 let studentName="",lessonNumber=null,levelNumber=null,prompt="";
-let currentPosition=0,correctCount=0,errorCount=0,correctedErrorCount=0;
+let currentPosition=0,correctCount=0,errorCount=0,correctedErrorCount=0,typedText="";
 let characterStatus=[],timerStarted=false,startTime=0,submitted=false,timerId=null;
 
 function loadJSON(k,f){try{let v=JSON.parse(localStorage.getItem(k));return v??f}catch(e){return f}}
@@ -150,10 +150,10 @@ function showGamesMenu(groupEnd){
 }
 function startLesson(n,lvl){
  lessonNumber=n;levelNumber=lvl;prompt=LESSONS[n].levels[lvl-1];currentPosition=0;correctCount=0;errorCount=0;correctedErrorCount=0;
- timerStarted=false;startTime=0;submitted=false;characterStatus=Array.from(prompt,()=> "untyped");showTypingScreen()
+ timerStarted=false;startTime=0;submitted=false;characterStatus=Array.from(prompt,()=> "untyped");typedText="";showTypingScreen()
 }
 function showTypingScreen(){
- let chars="";for(let start=0;start<prompt.length;start+=50){let row=prompt.slice(start,start+50).split("").map((c,j)=>{let i=start+j;return `<span id="c${i}" class="char">${c===" "?"\u00a0":esc(c)}</span>`}).join("");chars+=`<div class="prompt-row">${row}</div>`;}
+ let chars="";for(let start=0;start<prompt.length;start+=75){let row=prompt.slice(start,start+50).split("").map((c,j)=>{let i=start+j;return `<span id="c${i}" class="char">${c===" "?"\u00a0":esc(c)}</span>`}).join("");chars+=`<div class="prompt-row">${row}</div>`;}
  screen(`<div class="typing-wrap"><h2>Lesson ${lessonNumber} • Level ${levelNumber}: ${LEVEL_NAMES[levelNumber-1]}</h2><div style="font-size:20px;margin-bottom:8px">${esc(studentName)}</div>
  <div id="prompt" class="prompt">${chars}</div>
  <textarea id="typingArea" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea><div id="timer" class="timer">Time: 0.0 seconds</div>
@@ -162,19 +162,19 @@ function showTypingScreen(){
 }
 function startTimer(){if(!timerStarted){timerStarted=true;startTime=performance.now()}}
 function updateTimer(){let e=document.getElementById("timer");if(!e)return;e.textContent=`Time: ${timerStarted?((performance.now()-startTime)/1000).toFixed(1):"0.0"} seconds`;timerId=requestAnimationFrame(updateTimer)}
-function updatePromptColors(){characterStatus.forEach((s,i)=>{let e=document.getElementById("c"+i);if(!e)return;e.className="char";if(i===currentPosition)e.classList.add("current");else if(s==="correct")e.classList.add("correct");else if(s==="error")e.classList.add("error");else if(s==="corrected")e.classList.add("corrected")})}
+function renderTypingArea(){let a=document.getElementById("typingArea");if(!a)return;let rows=[];for(let i=0;i<typedText.length;i+=75)rows.push(typedText.slice(i,i+75));a.value=rows.join("\n")}\nfunction updatePromptColors(){characterStatus.forEach((s,i)=>{let e=document.getElementById("c"+i);if(!e)return;e.className="char";if(i===currentPosition)e.classList.add("current");else if(s==="correct")e.classList.add("correct");else if(s==="error")e.classList.add("error");else if(s==="corrected")e.classList.add("corrected")})}
 function handleKey(e){
  if(["Shift","Control","Alt","Meta","CapsLock"].includes(e.key)||(/^F\d+$/.test(e.key)&&e.key.startsWith("F"))){e.preventDefault();return}
  if(e.key==="Backspace"){e.preventDefault();handleBackspace();return}if(e.key==="Enter"){e.preventDefault();submitTest();return}
  if(submitted||currentPosition>=prompt.length||e.key.length!==1){e.preventDefault();return}
  startTimer();let expected=prompt[currentPosition],idx=currentPosition;
- if(e.key===expected){if(characterStatus[idx]==="error"||characterStatus[idx]==="retry"){characterStatus[idx]="corrected";correctedErrorCount++}else characterStatus[idx]="correct";correctCount++;currentPosition++;document.getElementById("typingArea").value+=e.key}
- else{errorCount++;characterStatus[idx]="error";currentPosition++;document.getElementById("typingArea").value+=e.key}
+ if(e.key===expected){if(characterStatus[idx]==="error"||characterStatus[idx]==="retry"){characterStatus[idx]="corrected";correctedErrorCount++}else characterStatus[idx]="correct";correctCount++;currentPosition++;typedText+=e.key;renderTypingArea()}
+ else{errorCount++;characterStatus[idx]="error";currentPosition++;typedText+=e.key;renderTypingArea()}
  updatePromptColors();e.preventDefault()
 }
 function handleBackspace(){
- if(currentPosition<=0||submitted)return;let idx=currentPosition-1,s=characterStatus[idx],a=document.getElementById("typingArea");
- if(a.value.length)a.value=a.value.slice(0,-1);currentPosition--;
+ if(currentPosition<=0||submitted)return;let idx=currentPosition-1,s=characterStatus[idx];
+ if(typedText.length)typedText=typedText.slice(0,-1);currentPosition--;renderTypingArea();
  if(s==="error"||s==="retry")characterStatus[idx]="retry";
  else if(s==="correct"||s==="corrected"){if(correctCount>0)correctCount--;if(s==="corrected"&&correctedErrorCount>0)correctedErrorCount--;characterStatus[idx]="untyped"}
  updatePromptColors()
