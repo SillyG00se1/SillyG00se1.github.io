@@ -295,7 +295,7 @@ function gameLoop(now){
     // Use a fixed collision point instead of the PNG's box.
     // This point is positioned at the visible cactus/spike area.
     const gameArea=document.getElementById("gameArea").getBoundingClientRect();
-    const collisionX=gameArea.left + gameArea.width*0.425;
+    const collisionX=gameArea.left + gameArea.width*0.425 - 3;
     const collisionY=gameArea.top + gameArea.height*0.44;
     const pointSize=10;
     const balloonTouchesPoint =
