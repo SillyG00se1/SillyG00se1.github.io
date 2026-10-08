@@ -42,7 +42,7 @@ let W=1200,H=760,dpr=1,screen="menu",level=1,running=false,last=0,raf=0;
 let score=0,correct=0,wrong=0,typed="",word="",wordIndex=0,startTime=0,combo=0;
 let zombies=[],splats=[],particles=[],clouds=[],shake=0,spawnTimer=0,round=0;
 const LEVELS={
-  1:{name:"LESSONS 1-3",words:["ask","sad","dad","fall","jag","lag","glass","flash","all","flag","add","lass","flask","salad","dash","half","gall","had","has","glad"],speed:300},
+  1:{name:"LESSONS 1-3",words:["ask","sad","dad","fall","jag","lag","glass","flash","all","flag","add","lass","flask","salad","dash","half","gall","had","has","glad"],speed:180},
   2:{name:"LESSONS 4-6",words:["fire","ride","rule","fish","free","here","red","there","they","that","this","your","try","stay","write","work","word","world","show","how"],speed:220},
   3:{name:"LESSONS 7-9",words:["quick","quiet","queen","paper","people","quite","come","same","time","music","make","home","have","very","brave","blue","five","above","movie","move"],speed:260},
   4:{name:"LESSONS 10-12",words:["next","name","mix","nine","nice","new","box","zip","zero","size","zone","zoo","lazy","amazing","class","last","less","pass","because","small"],speed:300},
@@ -59,7 +59,7 @@ function showMenu(){
  draw();
 }
 function startGame(n){
- level=n;screen="game";running=true;score=correct=wrong=0;typed="";combo=0;round=0;spawnTimer=0;shake=0;startTime=performance.now();
+ level=Number(n)||1;currentScene=level;screen="game";running=true;score=correct=wrong=0;typed="";combo=0;round=0;spawnTimer=0;shake=0;startTime=performance.now();
  zombies=[];splats=[];particles=[];clouds=[];
  for(let i=0;i<5;i++)clouds.push({x:Math.random()*W,y:80+Math.random()*170,s:35+Math.random()*70,v:8+Math.random()*12});
  document.getElementById("hud").hidden=false;document.getElementById("word").hidden=false;document.getElementById("typed").hidden=false;
@@ -176,7 +176,7 @@ function drawPlayer(){
  ctx.fillStyle="#e0a14a";ctx.beginPath();ctx.arc(x+76,y-26,8,0,7);ctx.fill();
 }
 function draw(){
- ctx.clearRect(0,0,W,H);drawSky();if(level===1)drawHospital();else if(level===2)drawOffice();else if(level===3)drawPark();else if(level===4)drawSkatePark();else drawPumpkinPatch();
+ ctx.clearRect(0,0,W,H);drawSky();switch(currentScene){case 1:drawHospital();break;case 2:drawOffice();break;case 3:drawPark();break;case 4:drawSkatePark();break;case 5:drawPumpkinPatch();break;default:drawHospital();}
  if(screen==="game"){drawPlayer();for(let z of zombies)zombie(z);drawEffects();return}
 }
 function drawEffects(){
