@@ -6,14 +6,14 @@
 <title>Fruit Ninja Switch Edition</title>
 <style>
   html, body { margin:0; width:100%; height:100%; overflow:hidden; background:#BDEBFF; }
-  body { font-family:Arial,Helvetica,sans-serif; user-select:none; }
+  body { font-family:'Trebuchet MS',Verdana,sans-serif; user-select:none; }
   #gameCanvas { display:block; width:100vw; height:100vh; background:#BDEBFF; }
   #loading { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:#BDEBFF; color:#000; font-size:clamp(28px,3vw,48px); font-weight:bold; z-index:5; }
   #assetStatus { position:fixed; left:12px; bottom:8px; font-size:12px; color:rgba(0,0,0,.35); pointer-events:none; }
 </style>
 </head>
 <body>
-<canvas id="gameCanvas" tabindex="0" aria-label="Fruit Ninja Switch Edition"></canvas>
+<canvas id="gameCanvas" tabindex="0" aria-label="Fruit Ninja Switch Edition"></canvas><button id="nextKQ" style="display:none;position:fixed;left:50%;top:calc(50% + 145px);transform:translateX(-50%);z-index:10;font:700 30px 'Trebuchet MS',Verdana,sans-serif;padding:14px 30px;border:4px solid #fff;border-radius:12px;background:#4b3fa6;color:#fff;cursor:pointer">NEXT → KEYBOARD QUEST</button>
 <div id="loading">Loading Fruit Ninja...</div>
 <div id="assetStatus"></div>
 <script>
@@ -22,7 +22,7 @@
 /* Assets are in the GitHub repository's capital-F "Fruit" folder. */
 const FRUIT_SPEED=6, ROT_SPEED=3, SWITCH_LOCKOUT=500, FRUIT_SIZE=150, BOMB_SIZE=160;
 
-const canvas=document.getElementById("gameCanvas"), ctx=canvas.getContext("2d");
+const canvas=document.getElementById("gameCanvas"), ctx=canvas.getContext("2d");\nconst nextKQ=document.getElementById("nextKQ");\nconst kqLevel=Math.max(1,Math.min(5,Number(new URLSearchParams(location.search).get("level"))||1));
 const loading=document.getElementById("loading"), assetStatus=document.getElementById("assetStatus");
 
 const IMAGE_PATHS={
@@ -194,7 +194,7 @@ function update(){
   if(!state.gameOver&&!state.active&&now>=state.nextSpawnAt)spawnFruit();
   updateParticles();
 }
-function render(now){drawBackground();drawFruit();drawParticles();drawUI(now);drawGameOver();}
+function render(now){drawBackground();drawFruit();drawParticles();drawUI(now);drawGameOver();nextKQ.style.display=state.gameOver?"block":"none";}
 function loop(now){update();render(now);requestAnimationFrame(loop);}
 
 function handleSpace(event){
@@ -207,7 +207,7 @@ function handleSpace(event){
   sliceFruit();
 }
 window.addEventListener("keydown",handleSpace,{passive:false});
-window.addEventListener("resize",resizeCanvas);
+nextKQ.addEventListener("click",()=>{window.location.href="Keyboard_Quest.html?level="+kqLevel;});\nwindow.addEventListener("resize",resizeCanvas);
 
 async function init(){
   resizeCanvas();prepareSounds();await loadImages();loading.style.display="none";
