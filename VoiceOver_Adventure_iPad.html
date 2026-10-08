@@ -112,7 +112,7 @@ const home=$("home"),dataScreen=$("dataScreen"),game=$("game"),completion=$("com
 const levelTitle=$("levelTitle"),obstacle=$("obstacle"),command=$("command"),status=$("status");
 const finalText=$("finalText");
 const state={
-screen:"home",levelIndex:0,step:0,score:0,transitionTimer:null,sessionToken:0,
+screen:"home",levelIndex:0,step:0,score:0,transitionTimer:null,sessionToken:0,currentSequence:[],
 touchStart:null,pendingTapTimer:null,pendingTapCount:0,
 sessionScores:[0,0,0,0,0],sessionTotals:[0,0,0,0,0],sessionSaved:false
 };
@@ -132,9 +132,17 @@ if(name==="left"||name==="right"||name==="up"||name==="down")return"Swipe with o
 if(name==="single")return"Tap the focused object once.";
 return"Tap the focused object twice quickly.";
 }
+function shuffleSequence(sequence){
+const copy=[...sequence];
+for(let i=copy.length-1;i>0;i--){
+const j=Math.floor(Math.random()*(i+1));
+[copy[i],copy[j]]=[copy[j],copy[i]];
+}
+return copy;
+}
 function renderStep(){
 if(state.screen!=="game")return;
-const level=LEVELS[state.levelIndex],expected=level.sequence[state.step],item=OBSTACLES[expected];
+const expected=state.currentSequence[state.step],item=OBSTACLES[expected];
 obstacle.innerHTML="<div>"+item.emoji+"</div><div class=\"obstacle-name\">"+item.name+", "+(expected==="single"?"single tap":expected==="double"?"double tap":"swipe "+expected)+"</div>";
 obstacle.setAttribute("aria-label",item.name+". "+prettyCommand(expected)+" required.");
 command.textContent="";
@@ -143,7 +151,7 @@ requestAnimationFrame(()=>{if(state.screen==="game")obstacle.focus({preventScrol
 }
 function speakCurrent(){
 if(state.screen!=="game")return;
-const expected=LEVELS[state.levelIndex].sequence[state.step];
+const expected=state.currentSequence[state.step];
 speak(OBSTACLES[expected].phrase);
 }
 function cancelPendingTransition(){
@@ -252,7 +260,7 @@ function startLevel(index){
 if(!Number.isInteger(index)||index<0||index>=LEVELS.length)return;
 cancelPendingTransition();clearPendingTap();stopSpeech();
 if(index===1||state.sessionSaved)resetSessionData();
-state.sessionToken++;state.screen="game";state.levelIndex=index;state.step=0;state.score=0;
+state.sessionToken++;state.screen="game";state.levelIndex=index;state.step=0;state.score=0;state.currentSequence=shuffleSequence(LEVELS[index].sequence);
 home.classList.add("hidden");dataScreen.classList.add("hidden");completion.classList.add("hidden");game.classList.remove("hidden");
 levelTitle.textContent="Level "+index+": "+LEVELS[index].name;renderStep();
 const token=state.sessionToken;
@@ -272,7 +280,7 @@ state.transitionTimer=setTimeout(()=>{state.transitionTimer=null;if(state.sessio
 }
 function advanceAfterAnswer(){
 const level=LEVELS[state.levelIndex];
-if(state.step>=level.sequence.length-1){finishLevel();return}
+if(state.step>=state.currentSequence.length-1){finishLevel();return}
 const token=state.sessionToken;
 state.transitionTimer=setTimeout(()=>{
 state.transitionTimer=null;if(state.sessionToken!==token||state.screen!=="game")return;
@@ -282,7 +290,7 @@ state.transitionTimer=setTimeout(()=>{state.transitionTimer=null;if(state.sessio
 }
 function handleCommand(commandName){
 if(state.screen!=="game")return;
-const level=LEVELS[state.levelIndex],expected=level.sequence[state.step],correct=commandName===expected;
+const level=LEVELS[state.levelIndex],expected=state.currentSequence[state.step],correct=commandName===expected;
 if(level.scored)recordResponse(correct);
 if(correct){status.textContent=state.levelIndex===0?"Correct!":"Correct! Right: "+state.score;speak("Correct")}
 else{if(!level.scored)state.score=0;status.textContent=state.levelIndex===0?"Incorrect. Let's try the next one.":"Incorrect. Moving on.";speak("Incorrect")}
