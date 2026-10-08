@@ -41,8 +41,6 @@ th{background:#111827}
 
 <section id="home" class="card">
 <h1>VoiceOver Adventure</h1>
-<p>Practice VoiceOver gestures with memorable, silly objects. Listen for the object and the gesture, then perform the gesture.</p>
-<div class="note"><strong>iPad note:</strong> A webpage cannot directly tell whether VoiceOver performed a one-finger swipe or a VoiceOver double-tap. Level 0 is for practicing the gestures themselves. Touch, keyboard, and switch controls are provided as ways to simulate responses when needed.</div>
 <div class="levels">
 <button class="level practice" data-level="0"><strong>Level 0 — Gesture Practice</strong>Practice left, right, up, down, single tap, and double tap.</button>
 <button class="level" data-level="1"><strong>Level 1 — Left &amp; Right</strong>Move VoiceOver focus left and right.</button>
@@ -55,7 +53,6 @@ th{background:#111827}
 
 <section id="dataScreen" class="card hidden" aria-live="polite">
 <h2>Session Data</h2>
-<p class="small">Data shows correct responses from Levels 1–4. Level 0 is practice and is not included in the score.</p>
 <div class="data-grid">
 <div class="data-cell"><div class="small">Level 1</div><div id="dataL1" class="data-number">0</div></div>
 <div class="data-cell"><div class="small">Level 2</div><div id="dataL2" class="data-number">0</div></div>
@@ -64,15 +61,14 @@ th{background:#111827}
 </div>
 <div id="dataStatus" class="data-status" aria-live="polite"></div>
 <table><thead><tr><th>Date</th><th>Total Right</th><th>Level 1</th><th>Level 2</th><th>Level 3</th><th>Level 4</th></tr></thead><tbody id="dataRows"></tbody></table>
-<div class="controls" style="margin-top:18px"><button id="refreshDataButton">Refresh Data</button><button id="clearDataButton" class="secondary">CLEAR DATA</button><button id="homeFromDataButton" class="secondary">Home</button></div>
+<div class="controls" style="margin-top:18px"><button id="refreshDataButton">Refresh</button><button id="clearDataButton" class="secondary">Clear Data</button><button id="homeFromDataButton" class="secondary">Home</button></div>
 </section>
 
 <section id="game" class="card hidden" aria-live="polite">
 <h2 id="levelTitle"></h2>
-<div id="obstacle" class="obstacle" tabindex="0" aria-label="Current obstacle"></div>
+<div id="obstacle"/> class="obstacle" tabindex="0" aria-label="Current obstacle"></div>
 <div id="command" class="command" aria-live="assertive"></div>
 <div id="status" class="status"></div>
-<p id="instruction" class="small"></p>
 <div class="controls"><button id="repeatButton" class="secondary">Repeat</button><button id="homeButton" class="secondary">Home</button></div>
 </section>
 
@@ -143,7 +139,7 @@ obstacle.innerHTML="<div>"+item.emoji+"</div><div class=\"obstacle-name\">"+item
 obstacle.setAttribute("aria-label",item.name+". "+prettyCommand(expected)+" required.");
 command.textContent=prettyCommand(expected);
 status.textContent="Item "+(state.step+1)+" of "+level.sequence.length+(level.scored?" • Right: "+state.score:"");
-instructionText.textContent=instructionFor(expected);
+instructionText.textContent="";
 requestAnimationFrame(()=>{if(state.screen==="game")obstacle.focus({preventScroll:true})});
 }
 function speakCurrent(){
