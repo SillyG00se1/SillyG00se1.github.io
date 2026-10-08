@@ -58,7 +58,7 @@ linear-gradient(25deg,transparent 0 42%,#111 43% 50%,transparent 51%) 84px 0/48p
 .game-top{position:absolute;left:20px;right:20px;top:15px;display:flex;justify-content:space-between;align-items:center;font-size:clamp(20px,2vw,28px);font-weight:bold;z-index:10}
 .cloud{position:absolute;background:rgba(255,255,255,.88);border-radius:50%;z-index:0}.cloud:before,.cloud:after{content:"";position:absolute;background:inherit;border-radius:50%}.cloud1{width:180px;height:55px;top:16%;left:10%}.cloud1:before{width:80px;height:80px;left:28px;top:-38px}.cloud1:after{width:95px;height:95px;left:82px;top:-52px}.cloud2{width:210px;height:62px;top:29%;right:8%}.cloud2:before{width:90px;height:90px;left:35px;top:-44px}.cloud2:after{width:105px;height:105px;left:105px;top:-58px}.cloud3{width:140px;height:45px;top:9%;left:60%}.cloud3:before{width:62px;height:62px;left:20px;top:-30px}.cloud3:after{width:72px;height:72px;left:65px;top:-38px}
 #gameArea{position:absolute;inset:70px 0 0 0;overflow:hidden}
-#cactus{position:absolute;left:24.5%;top:28%;width:300px;height:340px;z-index:3;filter:drop-shadow(0 8px 6px rgba(0,0,0,.2));display:flex;align-items:center;justify-content:center;pointer-events:none}
+#cactus{position:absolute;left:28%;top:28%;width:300px;height:340px;z-index:3;filter:drop-shadow(0 8px 6px rgba(0,0,0,.2));display:flex;align-items:center;justify-content:center;pointer-events:none}
 #cactus img{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom}
 #balloon{position:absolute;left:50%;top:66%;width:190px;height:240px;transform:translate(-50%,-50%) scale(.28);transform-origin:center center;border-radius:50% 50% 47% 47%;z-index:2;box-shadow:inset -24px -20px 34px rgba(0,0,0,.16),inset 18px 15px 25px rgba(255,255,255,.42),0 12px 18px rgba(0,0,0,.18);transition:background .2s}
 #balloon:before{content:"";position:absolute;left:50%;bottom:-23px;transform:translateX(-50%);width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-top:25px solid var(--balloon-color)}
@@ -295,7 +295,7 @@ function gameLoop(now){
     const br=balloon.getBoundingClientRect();
     const cr=cactus.getBoundingClientRect();
     // Pop when the balloon reaches the visible cactus image.
-    const spikeEdge=cr.right-8;
+    const spikeEdge=cr.right-18;
     const verticalOverlap=br.bottom>cr.top+55 && br.top<cr.bottom-45;
     if(br.left<=spikeEdge && verticalOverlap) popBalloon();
   }
