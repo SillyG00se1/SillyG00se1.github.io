@@ -141,19 +141,32 @@ function highlight(){[...choices.children].forEach((el,i)=>el.classList.toggle("
 function startScan(){clearInterval(timer);highlight();timer=setInterval(()=>{index=(index+1)%videos.length;highlight()},scanMs)}
 function stopScan(){clearInterval(timer);timer=null;if("speechSynthesis" in window)window.speechSynthesis.cancel()}
 function startGame(){videos=[];for(let i=0;i<Number(choiceCount.value);i++){const val=document.getElementById("video"+i).value.trim(),title=document.getElementById("videoTitle"+i).value.trim();if(!val){alert("Please enter a YouTube link for choice "+(i+1)+".");return}if(!title){alert("Please enter a video title for choice "+(i+1)+" so it can be read aloud.");document.getElementById("videoTitle"+i).focus();return}const v=makeVideo(val,i,title);if(!v.id){alert("Choice "+(i+1)+" does not look like a valid YouTube video link.");return}videos.push(v)}scanMs=Number(scanTime.value);index=0;scanLabel.textContent="Scan: "+(scanMs/1000).toFixed(1)+" sec";home.style.display="none";playerScreen.style.display="none";activity.style.display="flex";renderChoices();startScan()}
-function returnToScanner(){player.src="";playerScreen.style.display="none";activity.style.display="flex";index=0;startScan()}
+function returnToScanner(){stopYouTubeWatcher();player.src="";playerScreen.style.display="none";activity.style.display="flex";index=0;startScan()}
 function selectCurrent(){if(!videos.length)return;stopScan();const v=videos[index];playerTitle.textContent=v.title;player.src="https://www.youtube.com/embed/"+encodeURIComponent(v.id)+"?autoplay=1&rel=0&enablejsapi=1";activity.style.display="none";playerScreen.style.display="flex"}
-function goHome(){stopScan();player.src="";playerScreen.style.display="none";activity.style.display="none";home.style.display="flex";refreshSavedSets();buildLinkInputs()}
+function goHome(){stopScan();stopYouTubeWatcher();player.src="";playerScreen.style.display="none";activity.style.display="none";home.style.display="flex";refreshSavedSets();buildLinkInputs()}
 
 let ytReady=false;
+let ytPlayer=null;
+let ytWatchToken=0;
 function onYouTubeIframeAPIReady(){ytReady=true}
 const ytTag=document.createElement("script");ytTag.src="https://www.youtube.com/iframe_api";document.head.appendChild(ytTag);
 
-let ytPlayer=null;
-function watchForVideoEnd(){
+function stopYouTubeWatcher(){
+  ytWatchToken++;
   if(ytPlayer){try{ytPlayer.destroy()}catch(e){}ytPlayer=null}
-  if(!window.YT||!YT.Player){setTimeout(watchForVideoEnd,250);return}
-  ytPlayer=new YT.Player("player",{events:{onStateChange:function(event){if(event.data===YT.PlayerState.ENDED)returnToScanner()}}});
+}
+function watchForVideoEnd(){
+  const token=++ytWatchToken;
+  if(ytPlayer){try{ytPlayer.destroy()}catch(e){}ytPlayer=null}
+  function waitForAPI(){
+    if(token!==ytWatchToken||playerScreen.style.display==="none")return;
+    if(!window.YT||!YT.Player){setTimeout(waitForAPI,250);return}
+    ytPlayer=new YT.Player("player",{events:{onStateChange:function(event){
+      if(token!==ytWatchToken)return;
+      if(event.data===YT.PlayerState.ENDED)returnToScanner();
+    }}});
+  }
+  waitForAPI();
 }
 document.getElementById("start").onclick=startGame;
 document.getElementById("homeBtn").onclick=goHome;
