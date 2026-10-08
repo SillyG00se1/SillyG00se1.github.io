@@ -42,11 +42,11 @@ let W=1200,H=760,dpr=1,screen="menu",level=1,running=false,last=0,raf=0;
 let score=0,correct=0,wrong=0,typed="",word="",wordIndex=0,startTime=0,combo=0;
 let zombies=[],splats=[],particles=[],clouds=[],shake=0,spawnTimer=0,round=0;
 const LEVELS={
-  1:{name:"LESSONS 1-3",words:["ask","sad","dad","fall","jag","lag","glass","flash","all","flag","add","lass","flask","salad","dash","half","gall","had","has","glad","he","she","his"],speed:105},
-  2:{name:"LESSONS 4-6",words:["fire","ride","rule","fish","free","here","red","there","they","that","this","your","try","stay","write","work","word","world","show","how","now","two","who","we"],speed:130},
-  3:{name:"LESSONS 7-9",words:["quick","quiet","queen","paper","people","quite","come","same","time","music","make","home","have","very","brave","blue","five","above","movie","move","camp","vacuum"],speed:155},
-  4:{name:"LESSONS 10-12",words:["next","name","mix","nine","nice","new","box","zip","zero","size","zone","zoo","lazy","amazing","class","last","less","pass","because","small","know","comma","taxi","quiz"],speed:180},
-  5:{name:"LESSONS 13-15",words:["hospital","defender","computer","student","excellent","challenge","practice","adventure","keyboard","zombies","pumpkin","patch","skateboard","office","park","building","paintball","accuracy","strength","everything","question","typing","friend","school","faster","accurate"],speed:205}
+  1:{name:"LESSONS 1-3",words:["ask","sad","dad","fall","jag","lag","glass","flash","all","flag","add","lass","flask","salad","dash","half","gall","had","has","glad"],speed:105},
+  2:{name:"LESSONS 4-6",words:["fire","ride","rule","fish","free","here","red","there","they","that","this","your","try","stay","write","work","word","world","show","how"],speed:130},
+  3:{name:"LESSONS 7-9",words:["quick","quiet","queen","paper","people","quite","come","same","time","music","make","home","have","very","brave","blue","five","above","movie","move"],speed:155},
+  4:{name:"LESSONS 10-12",words:["next","name","mix","nine","nice","new","box","zip","zero","size","zone","zoo","lazy","amazing","class","last","less","pass","because","small"],speed:180},
+  5:{name:"LESSONS 13-15",words:["hospital","defender","computer","student","excellent","challenge","practice","adventure","keyboard","zombies","pumpkin","patch","skateboard","office","park","building","paintball","accuracy","strength","everything"],speed:205}
 };
 function resize(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);draw()}
 addEventListener("resize",resize);
