@@ -58,6 +58,7 @@ function stopTimer(){if(timerId)cancelAnimationFrame(timerId);timerId=null;timer
 
 function showStudentMenu(){
  stopTimer();
+ sessionStorage.removeItem("typingUnitReturn");sessionStorage.removeItem("typingUnitStudent");sessionStorage.removeItem("typingUnitNextLesson");
  let list=students.length?`<div class="grid student-grid">${students.map(n=>button(esc(n),`selectStudent(${JSON.stringify(n).replace(/"/g,"&quot;")})`)).join("")}</div>`:`<div class="notice">No student profiles yet.</div>`;
  screen(`<div class="center"><h1>Touch Typing Unit</h1><div class="subtitle">Choose a student profile</div>${list}<div class="bottom">
  ${button("ADD STUDENT","addStudent()")}${button("DELETE STUDENT","deleteStudent()")}${button("VIEW ALL DATA","viewData()")}</div></div>`)
@@ -236,5 +237,5 @@ async function clearAllData(){
    viewData(false);
  }catch(e){console.error(e);alert("The shared typing data could not be cleared. Please add the Supabase DELETE policy.");}
 }
-function bootTypingUnit(){const returning=sessionStorage.getItem("typingUnitReturn")==="1";const savedStudent=sessionStorage.getItem("typingUnitStudent")||"";const params=new URLSearchParams(location.search);const nextLesson=Number(params.get("lesson")||0);const nextLevel=Number(params.get("level")||1);if(returning&&savedStudent){studentName=savedStudent;sessionStorage.removeItem("typingUnitReturn");if(nextLesson>=1&&nextLesson<=15&&nextLevel>=1&&nextLevel<=3)startLesson(nextLesson,nextLevel);else showLessonMenu();}else showStudentMenu();}loadSharedData().finally(bootTypingUnit);
+function bootTypingUnit(){const returning=sessionStorage.getItem("typingUnitReturn")==="1";const savedStudent=sessionStorage.getItem("typingUnitStudent")||"";const params=new URLSearchParams(location.search);const nextLesson=Number(params.get("lesson")||0);const nextLevel=Number(params.get("level")||1);if(returning&&savedStudent){studentName=savedStudent;sessionStorage.removeItem("typingUnitReturn");sessionStorage.removeItem("typingUnitStudent");if(nextLesson>=1&&nextLesson<=15&&nextLevel>=1&&nextLevel<=3){sessionStorage.removeItem("typingUnitNextLesson");startLesson(nextLesson,nextLevel)}else{sessionStorage.removeItem("typingUnitNextLesson");showLessonMenu()}}else showStudentMenu();}loadSharedData().finally(bootTypingUnit);
 </script></body></html>
