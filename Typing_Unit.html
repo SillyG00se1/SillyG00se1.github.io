@@ -162,7 +162,8 @@ function showTypingScreen(){
 }
 function startTimer(){if(!timerStarted){timerStarted=true;startTime=performance.now()}}
 function updateTimer(){let e=document.getElementById("timer");if(!e)return;e.textContent=`Time: ${timerStarted?((performance.now()-startTime)/1000).toFixed(1):"0.0"} seconds`;timerId=requestAnimationFrame(updateTimer)}
-function renderTypingArea(){let a=document.getElementById("typingArea");if(!a)return;let rows=[];for(let i=0;i<typedText.length;i+=75)rows.push(typedText.slice(i,i+75));a.value=rows.join("\n")}\nfunction updatePromptColors(){characterStatus.forEach((s,i)=>{let e=document.getElementById("c"+i);if(!e)return;e.className="char";if(i===currentPosition)e.classList.add("current");else if(s==="correct")e.classList.add("correct");else if(s==="error")e.classList.add("error");else if(s==="corrected")e.classList.add("corrected")})}
+function renderTypingArea(){let a=document.getElementById("typingArea");if(!a)return;let rows=[];for(let i=0;i<typedText.length;i+=75)rows.push(typedText.slice(i,i+75));a.value=rows.join("\n")}
+function updatePromptColors(){characterStatus.forEach((s,i)=>{let e=document.getElementById("c"+i);if(!e)return;e.className="char";if(i===currentPosition)e.classList.add("current");else if(s==="correct")e.classList.add("correct");else if(s==="error")e.classList.add("error");else if(s==="corrected")e.classList.add("corrected")})}
 function handleKey(e){
  if(["Shift","Control","Alt","Meta","CapsLock"].includes(e.key)||(/^F\d+$/.test(e.key)&&e.key.startsWith("F"))){e.preventDefault();return}
  if(e.key==="Backspace"){e.preventDefault();handleBackspace();return}if(e.key==="Enter"){e.preventDefault();submitTest();return}
