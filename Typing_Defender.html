@@ -23,7 +23,7 @@ p{font-size:24px;line-height:1.4}
 #hud .score{color:#ffd166}#hud .acc{color:#68d7ff}#hud .wpm{color:#6df0a8}#hud .paint{color:#ff7aa8}
 #word{position:absolute;left:50%;top:78%;transform:translate(-50%,-50%);z-index:4;font:700 clamp(40px,5vw,72px) "Trebuchet MS",Arial,sans-serif;letter-spacing:4px;color:#fff;text-shadow:0 4px 14px #000;background:rgba(8,16,21,.75);border:4px solid #fff;border-radius:14px;padding:10px 26px;min-width:240px}
 #typed{position:absolute;left:50%;top:86%;transform:translateX(-50%);z-index:4;font:700 30px Arial;color:#8fe7ff;text-shadow:0 2px 5px #000}
-</style>
+ .board{width:min(760px,88vw);margin:12px auto 20px;text-align:left}.board h3{font-size:30px;margin:0 0 8px;color:#ffd166}.board-row{display:grid;grid-template-columns:50px 1fr 120px;gap:12px;padding:7px 12px;border-bottom:1px solid #47606d;font-size:21px}.board-row.head{color:#8fe7ff;font-size:17px;border-bottom:2px solid #68d7ff}.namebox{width:min(360px,80vw);margin:8px auto 14px}</style>
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -38,7 +38,7 @@ p{font-size:24px;line-height:1.4}
 <div id="ui"></div>
 <script>
 const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
-let W=1200,H=760,dpr=1,screen="menu",level=1,running=false,last=0,raf=0;
+let W=1200,H=760,dpr=1,screen="menu",level=1,currentScene=1,running=false,last=0,raf=0;
 let score=0,correct=0,wrong=0,typed="",word="",wordIndex=0,startTime=0,combo=0;
 let zombies=[],splats=[],particles=[],clouds=[],shake=0,spawnTimer=0,round=0;
 const LEVELS={
@@ -206,11 +206,16 @@ function loop(now){
  raf=requestAnimationFrame(loop);
 }
 function stats(){let sec=Math.max(.1,(performance.now()-startTime)/1000);return {acc:correct/Math.max(1,correct+wrong)*100,wpm:(correct/5)/(sec/60)}}
-function endGame(title="Level Complete"){
- running=false;cancelAnimationFrame(raf);screen="over";document.getElementById("hud").hidden=true;document.getElementById("word").hidden=true;document.getElementById("typed").hidden=true;
- let s=stats();ui('<div class="overlay"><div class="panel"><h1>Paintball Defender</h1><h2>'+title+'</h2><p>SCORE: <b>'+score+'</b></p><p>ACCURACY: <b>'+s.acc.toFixed(0)+'%</b> &nbsp; WPM: <b>'+s.wpm.toFixed(0)+'</b></p><div class="levels"><button onclick="startGame('+level+')">PLAY AGAIN</button><button onclick="showMenu()">LEVELS</button></div></div></div>');
- draw();
-}
+const LEADERBOARD_KEY="typingDefenderLeaderboard";
+function getScores(){try{return JSON.parse(localStorage.getItem(LEADERBOARD_KEY)||"[]")}catch(e){return[]}}
+function isTopScore(v){let a=getScores().filter(x=>x.level===level);return a.length<10||a.some(x=>v>x.score)}
+function saveScore(name,st){let a=getScores();a.push({name:name||"Player",score,level,accuracy:Math.round(st.acc),wpm:Math.round(st.wpm)});a.sort((x,y)=>y.score-x.score);localStorage.setItem(LEADERBOARD_KEY,JSON.stringify(a.slice(0,50)))}
+function showLeaderboard(){let a=getScores(),h='<div class="overlay"><div class="panel"><h1>LEADERBOARD</h1>';for(let lv=1;lv<=5;lv++){let b=a.filter(x=>x.level===lv).slice(0,10);h+='<div class="board"><h3>LEVEL '+lv+' , '+LEVELS[lv].name+'</h3><div class="board-row head"><span>#</span><span>NAME</span><span>SCORE</span></div>';if(!b.length)h+='<div class="board-row"><span>-</span><span>No scores yet</span><span>-</span></div>';b.forEach((x,i)=>h+='<div class="board-row"><span>'+(i+1)+'</span><span>'+esc(x.name)+'</span><span>'+x.score+'</span></div>');h+='</div>'}h+='<div class="levels"><button onclick="showMenu()">LEVELS</button><button onclick="clearLeaderboard()">CLEAR SCORES</button></div></div></div>';screen="leaderboard";ui(h);draw()}
+function clearLeaderboard(){if(confirm("Clear all leaderboard scores?")){localStorage.removeItem(LEADERBOARD_KEY);showLeaderboard()}}
+let lastStats={acc:0,wpm:0};
+function submitScore(){let n=document.getElementById("scoreName").value.trim();if(!n){alert("Please enter a name.");return}saveScore(n,lastStats);showLeaderboard()}
+function endGame(title="Level Complete"){running=false;cancelAnimationFrame(raf);screen="over";document.getElementById("hud").hidden=true;document.getElementById("word").hidden=true;document.getElementById("typed").hidden=true;lastStats=stats();if(isTopScore(score)){ui('<div class="overlay"><div class="panel"><h1>NEW HIGH SCORE!</h1><h2>'+score+' points</h2><input id="scoreName" class="namebox" maxlength="18" placeholder="Enter name" autofocus><div class="levels"><button onclick="submitScore()">SAVE SCORE</button></div></div></div>');draw();return}ui('<div class="overlay"><div class="panel"><h1>Paintball Defender</h1><h2>'+title+'</h2><p>SCORE: <b>'+score+'</b></p><p>ACCURACY: <b>'+lastStats.acc.toFixed(0)+'%</b> &nbsp; WPM: <b>'+lastStats.wpm.toFixed(0)+'</b></p><div class="levels"><button onclick="startGame('+level+')">PLAY AGAIN</button><button onclick="showLeaderboard()">LEADERBOARD</button><button onclick="showMenu()">LEVELS</button></div></div></div>');draw()}
+
 addEventListener("keydown",e=>{
  if(e.key==="Escape"){e.preventDefault();let p=new URLSearchParams(location.search).get("return");if(p||sessionStorage.getItem("typingUnitReturn")==="1")location.href="Typing_Unit.html";else showMenu();return}
  if(e.target&&["INPUT","TEXTAREA"].includes(e.target.tagName))return;
