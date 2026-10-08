@@ -88,10 +88,10 @@ function setMessage(text,duration=0){
 function drawBackground(){ctx.fillStyle="#BDEBFF";ctx.fillRect(0,0,W(),H());}
 
 function drawUI(now){
-  ctx.textBaseline="middle"; ctx.fillStyle="#000"; ctx.font="bold 42px Arial";
+  ctx.textBaseline="middle"; ctx.fillStyle="#000"; ctx.font="bold 42px 'Trebuchet MS',Verdana,sans-serif";
   ctx.textAlign="left"; ctx.fillText("Score: "+state.score,220,60);
   ctx.fillStyle="#d40000"; ctx.textAlign="right";
-  ctx.fillText("X ".repeat(state.lives).trim(),W()-220,60);
+  ctx.fillStyle="#d00000";ctx.font="bold 58px 'Trebuchet MS',Verdana,sans-serif";ctx.fillText("X ".repeat(state.lives).trim(),W()-220,60);
   if(state.messageUntil&&now>state.messageUntil){state.message="PRESS SPACE";state.messageUntil=0;}
   ctx.fillStyle="#000";ctx.font="bold 32px Arial";ctx.textAlign="center";
   ctx.fillText(state.message,W()/2,60);
