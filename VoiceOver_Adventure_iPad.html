@@ -99,9 +99,9 @@ const LEVELS = [
 ];
 
 const OBSTACLES = {
-right:{emoji:"🐔",name:"Rubber chicken",phrase:"Rubber chicken, right"},
-left:{emoji:"🥔",name:"Lazy potato",phrase:"Lazy potato, left"},
-up:{emoji:"☂️",name:"Upside-down umbrella",phrase:"Upside-down umbrella, up"},
+right:{emoji:"🐔",name:"Rustic rooster",phrase:"Rustic rooster, swipe right"},
+left:{emoji:"🥔",name:"Lucky lizard",phrase:"Lucky lizard, swipe left"},
+up:{emoji:"☂️",name:"Useful umbrella",phrase:"Useful umbrella, swipe up"},
 down:{emoji:"🍩",name:"Drowsy donut",phrase:"Drowsy donut, down"},
 single:{emoji:"🥪",name:"Silly sandwich",phrase:"Silly sandwich, single tap"},
 double:{emoji:"🥁",name:"Dizzy drum",phrase:"Dizzy drum, double tap"}
@@ -110,7 +110,7 @@ double:{emoji:"🥁",name:"Dizzy drum",phrase:"Dizzy drum, double tap"}
 const $=id=>document.getElementById(id);
 const home=$("home"),dataScreen=$("dataScreen"),game=$("game"),completion=$("completion");
 const levelTitle=$("levelTitle"),obstacle=$("obstacle"),command=$("command"),status=$("status");
-const instructionText=$("instruction"),finalText=$("finalText");
+const finalText=$("finalText");
 const state={
 screen:"home",levelIndex:0,step:0,score:0,transitionTimer:null,sessionToken:0,
 touchStart:null,pendingTapTimer:null,pendingTapCount:0,
@@ -135,7 +135,7 @@ return"Tap the focused object twice quickly.";
 function renderStep(){
 if(state.screen!=="game")return;
 const level=LEVELS[state.levelIndex],expected=level.sequence[state.step],item=OBSTACLES[expected];
-obstacle.innerHTML="<div>"+item.emoji+"</div><div class=\"obstacle-name\">"+item.name+" — "+(expected==="single"?"single tap":expected==="double"?"double tap":"swipe "+expected)+"</div>";
+obstacle.innerHTML="<div>"+item.emoji+"</div><div class=\"obstacle-name\">"+item.name+", "+(expected==="single"?"single tap":expected==="double"?"double tap":"swipe "+expected)+"</div>";
 obstacle.setAttribute("aria-label",item.name+". "+prettyCommand(expected)+" required.");
 command.textContent="";
 status.textContent="";
