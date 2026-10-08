@@ -17,6 +17,7 @@ h2{font-size:clamp(28px,3vw,42px);margin:0 0 18px;text-align:center}
 .setup-options{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:22px 0}
 .setup-btn{min-height:145px;border:5px solid #777;border-radius:18px;background:#ddd;padding:18px;font-size:30px}
 .setup-btn:hover,.setup-btn:focus{outline:5px solid #111;background:#fff}
+.setup-btn.scanning{outline:6px solid #ffd400;box-shadow:0 0 0 8px #ffd400 inset,0 0 24px 8px #ffd400;transform:scale(1.02)}
 .setup-btn small{display:block;font-size:19px;margin-top:12px;font-weight:600}
 .scan-header{flex:0 0 auto;text-align:center}
 .scan-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);gap:22px;padding:12px 18px;overflow:visible}
@@ -558,6 +559,7 @@ window.addEventListener("keydown", function(e){
     }else if(!document.getElementById("colorScreen").classList.contains("hidden")){
       stopScan();
       show("setupScreen");
+      startSetupScan();
     }else{
       show("setupScreen");
       startSetupScan();
