@@ -233,5 +233,5 @@ async function clearAllData(){
    viewData(false);
  }catch(e){console.error(e);alert("The shared typing data could not be cleared. Please add the Supabase DELETE policy.");}
 }
-function bootTypingUnit(){const returning=sessionStorage.getItem("typingUnitReturn")==="1";const savedStudent=sessionStorage.getItem("typingUnitStudent")||"";if(returning&&savedStudent){studentName=savedStudent;sessionStorage.removeItem("typingUnitReturn");showLessonMenu();}else showStudentMenu();}loadSharedData().finally(bootTypingUnit);
+function bootTypingUnit(){const returning=sessionStorage.getItem("typingUnitReturn")==="1";const savedStudent=sessionStorage.getItem("typingUnitStudent")||"";const params=new URLSearchParams(location.search);const nextLesson=Number(params.get("lesson")||0);const nextLevel=Number(params.get("level")||1);if(returning&&savedStudent){studentName=savedStudent;sessionStorage.removeItem("typingUnitReturn");if(nextLesson>=1&&nextLesson<=15&&nextLevel>=1&&nextLevel<=3)startLesson(nextLesson,nextLevel);else showLessonMenu();}else showStudentMenu();}loadSharedData().finally(bootTypingUnit);
 </script></body></html>
