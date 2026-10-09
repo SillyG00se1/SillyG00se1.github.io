@@ -71,7 +71,7 @@ function pickWord(){let a=LEVELS[level].words;return a[Math.floor(Math.random()*
 function newZombie(){
  word=pickWord();wordIndex=0;typed="";
  let lane=Math.floor(Math.random()*3);
- zombies=[{x:W+100,lane,scale:.86+Math.random()*.16,flash:0,paint:[],speed:LEVELS[level].speed*(.9+Math.random()*.2)}];
+ zombies=[{x:W+100,lane,scale:.86+Math.random()*.16,flash:0,paint:[],speed:LEVELS[level].speed*(.9+Math.random()*.2),walkTime:Math.random()*2.9}];
  round++;
  updateWord();
 }
@@ -110,29 +110,62 @@ function drawHospital(){
  ctx.fillStyle="#287d91";ctx.font="700 26px Arial";ctx.textAlign="center";ctx.fillText("HOSPITAL",W*.50,105);ctx.textAlign="left";
 }
 function zombie(z){
- let base=H*.53+z.lane*H*.12,scale=z.scale,p=z.x,body=100*scale,head=48*scale;
- ctx.save();ctx.translate(p,base);ctx.scale(scale,scale);
- // shadow
- ctx.fillStyle="rgba(0,0,0,.25)";ctx.beginPath();ctx.ellipse(0,8,58,13,0,0,7);ctx.fill();
- // legs
- ctx.strokeStyle="#26323a";ctx.lineWidth=18;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(-18,-8);ctx.lineTo(-30,65);ctx.moveTo(18,-8);ctx.lineTo(30,65);ctx.stroke();
- // body and torn jacket
- ctx.fillStyle="#596a62";ctx.beginPath();ctx.roundRect(-48,-105,96,105,16);ctx.fill();ctx.fillStyle="#35423e";ctx.fillRect(-48,-75,96,10);
- ctx.fillStyle="#708078";ctx.beginPath();ctx.moveTo(-42,-98);ctx.lineTo(-5,-55);ctx.lineTo(-18,-10);ctx.lineTo(-48,-20);ctx.closePath();ctx.fill();
- // arms
- ctx.strokeStyle="#63756d";ctx.lineWidth=20;ctx.beginPath();ctx.moveTo(-38,-82);ctx.lineTo(-72,-30);ctx.lineTo(-92,-5);ctx.moveTo(38,-82);ctx.lineTo(70,-38);ctx.lineTo(95,-50);ctx.stroke();
- // neck
- ctx.fillStyle="#70867a";ctx.fillRect(-13,-119,26,20);
- // head
- ctx.fillStyle="#70867a";ctx.beginPath();ctx.ellipse(0,-145,head,head*1.12,0,0,7);ctx.fill();
- ctx.fillStyle="#4c5c54";ctx.beginPath();ctx.arc(-17,-171,18,0,Math.PI);ctx.arc(12,-174,20,0,Math.PI);ctx.fill();
- // face
- ctx.fillStyle="#27322e";ctx.beginPath();ctx.arc(-16,-147,5,0,7);ctx.arc(16,-147,5,0,7);ctx.fill();
- ctx.strokeStyle="#33433d";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-15,-128);ctx.lineTo(14,-130);ctx.stroke();
- // shirt badge
- ctx.fillStyle="#e6edf0";ctx.fillRect(-13,-82,26,30);ctx.fillStyle="#d95a62";ctx.font="700 17px Arial";ctx.textAlign="center";ctx.fillText("Z",0,-61);
- // paint spots
- for(let s of z.paint){ctx.fillStyle=s.c;ctx.globalAlpha=.9;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,7);ctx.fill();ctx.globalAlpha=1}
+ let base=H*.53+z.lane*H*.12,s=z.scale,p=z.x;
+ const looks=[
+ {skin:"#788b78",shade:"#46584a",light:"#a2ae91",shirt:"#d6d8c8",trim:"#89968a",pants:"#4b5751",shoe:"#242d30",hair:"#353a35",eye:"#e4dfc6",face:"long"},
+ {skin:"#858b88",shade:"#505957",light:"#b0b2a8",shirt:"#c5c9c6",trim:"#5e6d71",pants:"#3f4a50",shoe:"#252c32",hair:"#34383b",eye:"#e8e1cf",face:"angular"},
+ {skin:"#788766",shade:"#46523b",light:"#a3a783",shirt:"#6f7754",trim:"#b4a27c",pants:"#514b3c",shoe:"#342f27",hair:"#3e3c2e",eye:"#e3ddbd",face:"weathered"},
+ {skin:"#718b98",shade:"#40545f",light:"#9db0b5",shirt:"#424e65",trim:"#bd5d4f",pants:"#353b49",shoe:"#242a34",hair:"#30353c",eye:"#e2e5db",face:"angular"},
+ {skin:"#927b60",shade:"#584734",light:"#b59b75",shirt:"#6d4d3a",trim:"#bd8752",pants:"#51412f",shoe:"#30291f",hair:"#403225",eye:"#e1d7bc",face:"long"}
+ ][currentScene-1],c=looks,gait=(z.walkTime||0)%2.9,swing=gait<.72?Math.sin(gait/.72*Math.PI*2)*7:0;
+ ctx.save();ctx.translate(p,base);ctx.scale(s,s);
+ ctx.fillStyle="rgba(0,0,0,.25)";ctx.beginPath();ctx.ellipse(0,8,38,10,0,0,Math.PI*2);ctx.fill();
+ // Legs and shoes in a side-on walking stance
+ ctx.lineCap="round";ctx.strokeStyle=c.pants;ctx.lineWidth=15;
+ ctx.beginPath();ctx.moveTo(-8,-16);ctx.lineTo(-18,26);ctx.lineTo(-25,58);ctx.stroke();
+ ctx.fillStyle=c.shoe;ctx.beginPath();ctx.roundRect(-39,51,26,10,4);ctx.fill();
+ ctx.strokeStyle=c.pants;ctx.beginPath();ctx.moveTo(8,-16);ctx.lineTo(14,25);ctx.lineTo(25,58);ctx.stroke();
+ ctx.fillStyle=c.shoe;ctx.beginPath();ctx.roundRect(13,52,29,10,4);ctx.fill();
+ // Hunched torso
+ ctx.fillStyle=c.shirt;ctx.beginPath();ctx.moveTo(-19,-111);ctx.quadraticCurveTo(2,-120,18,-105);ctx.lineTo(22,-25);ctx.quadraticCurveTo(2,-15,-17,-24);ctx.closePath();ctx.fill();
+ ctx.fillStyle=c.trim;ctx.beginPath();ctx.moveTo(-17,-103);ctx.lineTo(1,-94);ctx.lineTo(-5,-40);ctx.lineTo(-17,-31);ctx.closePath();ctx.fill();
+ if(currentScene===1){
+  ctx.strokeStyle="#a7aaa0";ctx.lineWidth=3;for(let yy=-85;yy<-35;yy+=13){ctx.beginPath();ctx.moveTo(-12,yy);ctx.lineTo(14,yy+2);ctx.stroke()}
+  ctx.fillStyle="#e8e6d8";ctx.fillRect(3,-88,12,17);ctx.fillStyle="#8e5d5d";ctx.fillRect(5,-84,8,8);
+ }else if(currentScene===2){
+  ctx.fillStyle="#d8d8d1";ctx.beginPath();ctx.moveTo(-10,-108);ctx.lineTo(4,-99);ctx.lineTo(0,-60);ctx.lineTo(-7,-72);ctx.closePath();ctx.fill();
+  ctx.fillStyle=c.trim;ctx.beginPath();ctx.moveTo(0,-98);ctx.lineTo(9,-94);ctx.lineTo(4,-65);ctx.lineTo(-1,-73);ctx.closePath();ctx.fill();
+ }else if(currentScene===3){
+  ctx.strokeStyle="#353f30";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-15,-88);ctx.lineTo(14,-78);ctx.stroke();
+  ctx.fillStyle="#544b3b";ctx.beginPath();ctx.moveTo(-16,-24);ctx.lineTo(-7,-36);ctx.lineTo(1,-25);ctx.fill();
+ }else if(currentScene===4){
+  ctx.fillStyle="#343c50";ctx.beginPath();ctx.moveTo(-20,-106);ctx.quadraticCurveTo(0,-127,19,-105);ctx.lineTo(16,-91);ctx.lineTo(-16,-91);ctx.closePath();ctx.fill();
+  ctx.strokeStyle=c.trim;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-12,-85);ctx.lineTo(12,-65);ctx.stroke();
+ }else{
+  ctx.strokeStyle="#3c3026";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-16,-92);ctx.lineTo(17,-92);ctx.moveTo(-14,-72);ctx.lineTo(18,-72);ctx.stroke();
+  ctx.fillStyle="#a18a5f";ctx.fillRect(-4,-105,6,78);ctx.fillStyle="#d0b27b";ctx.fillRect(-3,-77,4,4);
+ }
+ // Arms: brief, gentle shuffle followed by a long pause
+ ctx.strokeStyle=c.shade;ctx.lineWidth=13;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(-13,-99);ctx.lineTo(-25,-72);ctx.lineTo(-31+swing*.35,-52);ctx.stroke();
+ ctx.strokeStyle=c.skin;ctx.lineWidth=15;ctx.beginPath();ctx.moveTo(13,-99);ctx.lineTo(27,-77);ctx.lineTo(25+swing,-54);ctx.stroke();
+ ctx.fillStyle=c.light;ctx.beginPath();ctx.ellipse(25+swing,-51,6,8,-.2,0,Math.PI*2);ctx.fill();
+ // Head faces left in profile, with a projecting nose and one visible eye
+ ctx.fillStyle=c.skin;ctx.fillRect(-5,-128,17,20);
+ ctx.fillStyle=c.shade;ctx.beginPath();ctx.moveTo(-9,-155);ctx.quadraticCurveTo(-12,-178,8,-178);ctx.quadraticCurveTo(29,-175,27,-153);ctx.lineTo(22,-138);ctx.lineTo(10,-127);ctx.lineTo(-4,-132);ctx.lineTo(-8,-143);ctx.closePath();ctx.fill();
+ ctx.fillStyle=c.skin;ctx.beginPath();
+ if(c.face==="angular"){ctx.moveTo(-8,-159);ctx.lineTo(-22,-151);ctx.lineTo(-9,-146);ctx.lineTo(-7,-136);ctx.lineTo(7,-129);ctx.lineTo(20,-140);ctx.lineTo(22,-160);ctx.quadraticCurveTo(9,-176,-3,-169);ctx.closePath()}
+ else{ctx.moveTo(-8,-160);ctx.quadraticCurveTo(-16,-153,-23,-150);ctx.lineTo(-10,-145);ctx.lineTo(-8,-137);ctx.lineTo(4,-129);ctx.lineTo(18,-139);ctx.lineTo(21,-159);ctx.quadraticCurveTo(8,-174,-4,-169);ctx.closePath()}
+ ctx.fill();
+ ctx.fillStyle=c.shade;ctx.beginPath();ctx.ellipse(-4,-153,8,5,-.1,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle=c.eye;ctx.beginPath();ctx.ellipse(-6,-153,3,2.5,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#202826";ctx.beginPath();ctx.arc(-7,-153,1.7,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle=c.shade;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-12,-161);ctx.lineTo(-1,-159);ctx.stroke();
+ ctx.strokeStyle="#322f2a";ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(-17,-143);ctx.lineTo(-5,-140);ctx.lineTo(5,-142);ctx.stroke();
+ ctx.fillStyle=c.light;ctx.beginPath();ctx.arc(-12,-137,3,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle=c.hair;ctx.beginPath();ctx.moveTo(-7,-160);ctx.lineTo(-12,-170);ctx.lineTo(-3,-174);ctx.lineTo(0,-181);ctx.lineTo(8,-174);ctx.lineTo(19,-171);ctx.lineTo(22,-160);ctx.lineTo(12,-165);ctx.lineTo(2,-164);ctx.closePath();ctx.fill();
+ if(currentScene===1){ctx.fillStyle="#c4c9bd";ctx.fillRect(9,-122,10,3)}
+ if(currentScene===4){ctx.fillStyle="#c85e51";ctx.fillRect(13,-119,5,4)}
+ for(let spot of z.paint){ctx.fillStyle=spot.c;ctx.globalAlpha=.9;ctx.beginPath();ctx.arc(spot.x,spot.y,spot.r,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1}
  ctx.restore();
 }
 function drawOffice(){
@@ -149,11 +182,20 @@ function drawPark(){
  ctx.fillStyle="#dce8ed";ctx.fillRect(W*.08,H*.27,180,20);ctx.fillStyle="#64777d";ctx.fillRect(W*.12,H*.27+20,20,95);ctx.fillRect(W*.23,H*.27+20,20,95);
  ctx.fillStyle="#fff";ctx.fillRect(W*.43,55,170,48);ctx.fillStyle="#303b40";ctx.font="700 25px Arial";ctx.textAlign="center";ctx.fillText("PARK",W*.515,88);ctx.textAlign="left";
 }
+function drawSkateboard(x,y,angle,deck){
+ ctx.save();ctx.translate(x,y);ctx.rotate(angle);
+ ctx.fillStyle=deck;ctx.beginPath();ctx.roundRect(-43,-7,86,14,7);ctx.fill();
+ ctx.strokeStyle="#d7dadd";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-25,1);ctx.lineTo(25,1);ctx.stroke();
+ ctx.fillStyle="#24282b";
+ for(let wx of [-27,27]){ctx.beginPath();ctx.arc(wx,10,7,0,Math.PI*2);ctx.fill();ctx.fillStyle="#aeb5b8";ctx.beginPath();ctx.arc(wx,10,3,0,Math.PI*2);ctx.fill();ctx.fillStyle="#24282b"}
+ ctx.restore();
+}
 function drawSkatePark(){
  ctx.fillStyle="#89b8d2";ctx.fillRect(0,0,W,H*.52);ctx.fillStyle="#9a9b9d";ctx.fillRect(0,H*.52,W,H*.48);
  ctx.fillStyle="#77797b";ctx.beginPath();ctx.moveTo(W*.05,H);ctx.quadraticCurveTo(W*.13,H*.47,W*.22,H);ctx.fill();
  ctx.fillStyle="#c5c7c8";ctx.beginPath();ctx.moveTo(W*.32,H*.9);ctx.quadraticCurveTo(W*.4,H*.5,W*.48,H*.9);ctx.lineTo(W*.48,H);ctx.lineTo(W*.32,H);ctx.fill();
  ctx.strokeStyle="#55585b";ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(W*.62,H*.78);ctx.lineTo(W*.82,H*.78);ctx.stroke();ctx.fillStyle="#55585b";ctx.fillRect(W*.69,H*.78,8,90);ctx.fillRect(W*.79,H*.78,8,90);
+ drawSkateboard(W*.20,H*.84,-.10,"#d65c4e");drawSkateboard(W*.48,H*.90,.12,"#3e8fb1");drawSkateboard(W*.83,H*.86,-.18,"#e2bd4c");
  ctx.fillStyle="#fff";ctx.fillRect(W*.43,55,210,48);ctx.fillStyle="#303b40";ctx.font="700 25px Arial";ctx.textAlign="center";ctx.fillText("SKATE PARK",W*.535,88);ctx.textAlign="left";
 }
 function drawPumpkinPatch(){
@@ -188,7 +230,7 @@ function paintball(){
  let y=H*.53+z.lane*H*.12-120;
  splats.push({x:z.x,y:y-20,r:28,c:["#ff4b72","#4db8ff","#ffd447","#64d66f","#b66cff"][round%5],life:1.1,d:Array.from({length:10},()=>({x:(Math.random()-.5)*75,y:(Math.random()-.5)*75,r:3+Math.random()*8}))});
  for(let i=0;i<24;i++){let a=Math.random()*Math.PI*2,v=80+Math.random()*240;particles.push({x:z.x,y:y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:.35+.35*Math.random(),c:["#ff4b72","#4db8ff","#ffd447","#64d66f","#b66cff"][round%5]})}
- score+=150+combo*25;combo++;correct++;shake=8;zombies=[];typed="";if(round>=10){setTimeout(()=>{if(running)endGame()},260)}else setTimeout(()=>{if(running)newZombie()},260);
+ score+=150+combo*25;combo++;correct++;shake=8;zombies=[];typed="";if(round>=20){setTimeout(()=>{if(running)endGame("Level Complete")},260)}else setTimeout(()=>{if(running)newZombie()},260);
 }
 function wrongKey(){wrong++;combo=0;shake=4}
 function updateHUD(){
@@ -197,7 +239,7 @@ function updateHUD(){
 function loop(now){
  if(!running)return;let dt=Math.min(.04,(now-last)/1000);last=now;
  for(let c of clouds){c.x-=c.v*dt;if(c.x<-200)c.x=W+100}
- for(let z of zombies){z.x-=z.speed*dt;if(z.x<W*.26){z.x=W*.26;shake=2;endGame("Too Close!");return}}
+ for(let z of zombies){z.x-=z.speed*dt;z.walkTime=(z.walkTime||0)+dt;if(z.x<W*.26){z.x=W*.26;shake=2;endGame("Too Close!");return}}
  for(let s of splats)s.life-=dt; splats=splats.filter(s=>s.life>0);
  for(let p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=420*dt;p.life-=dt}particles=particles.filter(p=>p.life>0);
  if(!zombies.length){spawnTimer+=dt;if(spawnTimer>.5){spawnTimer=0;newZombie()}}
@@ -210,14 +252,29 @@ const LEADERBOARD_KEY="typingDefenderLeaderboard";
 function getScores(){try{return JSON.parse(localStorage.getItem(LEADERBOARD_KEY)||"[]")}catch(e){return[]}}
 function isTopScore(v){let a=getScores().filter(x=>x.level===level);return a.length<10||a.some(x=>v>x.score)}
 function saveScore(name,st){let a=getScores();a.push({name:name||"Player",score,level,accuracy:Math.round(st.acc),wpm:Math.round(st.wpm)});a.sort((x,y)=>y.score-x.score);localStorage.setItem(LEADERBOARD_KEY,JSON.stringify(a.slice(0,50)))}
-function showLeaderboard(){let a=getScores(),h='<div class="overlay"><div class="panel"><h1>LEADERBOARD</h1>';for(let lv=1;lv<=5;lv++){let b=a.filter(x=>x.level===lv).slice(0,10);h+='<div class="board"><h3>LEVEL '+lv+' , '+LEVELS[lv].name+'</h3><div class="board-row head"><span>#</span><span>NAME</span><span>SCORE</span></div>';if(!b.length)h+='<div class="board-row"><span>-</span><span>No scores yet</span><span>-</span></div>';b.forEach((x,i)=>h+='<div class="board-row"><span>'+(i+1)+'</span><span>'+esc(x.name)+'</span><span>'+x.score+'</span></div>');h+='</div>'}h+='<div class="levels"><button onclick="showMenu()">LEVELS</button><button onclick="clearLeaderboard()">CLEAR SCORES</button></div></div></div>';screen="leaderboard";ui(h);draw()}
+function showLeaderboard(levelOnly=null){
+ let a=getScores(),levels=levelOnly===null?[1,2,3,4,5]:[levelOnly];
+ let title=levelOnly===null?"ALL LEADERBOARDS":"LEVEL "+levelOnly+" LEADERBOARD";
+ let h='<div class="overlay"><div class="panel"><h1>'+title+'</h1>';
+ for(let lv of levels){
+  let b=a.filter(x=>x.level===lv).sort((x,y)=>y.score-x.score).slice(0,10);
+  h+='<div class="board"><h3>LEVEL '+lv+' — '+LEVELS[lv].name+'</h3><div class="board-row head"><span>#</span><span>NAME</span><span>SCORE</span></div>';
+  if(!b.length)h+='<div class="board-row"><span>-</span><span>No scores yet</span><span>-</span></div>';
+  b.forEach((x,i)=>h+='<div class="board-row"><span>'+(i+1)+'</span><span>'+esc(x.name)+'</span><span>'+x.score+'</span></div>');
+  h+='</div>';
+ }
+ h+='<div class="levels"><button onclick="showMenu()">LEVELS</button>';
+ if(levelOnly!==null)h+='<button onclick="showLeaderboard()">ALL LEADERBOARDS</button>';
+ h+='<button onclick="clearLeaderboard()">CLEAR SCORES</button></div></div></div>';
+ screen="leaderboard";ui(h);draw()
+}
 function clearLeaderboard(){if(confirm("Clear all leaderboard scores?")){localStorage.removeItem(LEADERBOARD_KEY);showLeaderboard()}}
 let lastStats={acc:0,wpm:0};
-function submitScore(){let n=document.getElementById("scoreName").value.trim();if(!n){alert("Please enter a name.");return}saveScore(n,lastStats);showLeaderboard()}
-function endGame(title="Level Complete"){running=false;cancelAnimationFrame(raf);screen="over";document.getElementById("hud").hidden=true;document.getElementById("word").hidden=true;document.getElementById("typed").hidden=true;lastStats=stats();if(isTopScore(score)){ui('<div class="overlay"><div class="panel"><h1>NEW HIGH SCORE!</h1><h2>'+score+' points</h2><input id="scoreName" class="namebox" maxlength="18" placeholder="Enter name" autofocus><div class="levels"><button onclick="submitScore()">SAVE SCORE</button></div></div></div>');draw();return}ui('<div class="overlay"><div class="panel"><h1>Paintball Defender</h1><h2>'+title+'</h2><p>SCORE: <b>'+score+'</b></p><p>ACCURACY: <b>'+lastStats.acc.toFixed(0)+'%</b> &nbsp; WPM: <b>'+lastStats.wpm.toFixed(0)+'</b></p><div class="levels"><button onclick="startGame('+level+')">PLAY AGAIN</button><button onclick="showLeaderboard()">LEADERBOARD</button><button onclick="showMenu()">LEVELS</button></div></div></div>');draw()}
+function submitScore(){let n=document.getElementById("scoreName").value.trim();if(!n){alert("Please enter a name.");return}saveScore(n,lastStats);showLeaderboard(level)}
+function endGame(title="Level Complete"){running=false;cancelAnimationFrame(raf);screen="over";document.getElementById("hud").hidden=true;document.getElementById("word").hidden=true;document.getElementById("typed").hidden=true;lastStats=stats();if(isTopScore(score)){ui('<div class="overlay"><div class="panel"><h1>NEW HIGH SCORE!</h1><h2>'+score+' points</h2><input id="scoreName" class="namebox" maxlength="18" placeholder="Enter name" autofocus><div class="levels"><button onclick="submitScore()">SAVE SCORE</button></div></div></div>');draw();return}ui('<div class="overlay"><div class="panel"><h1>Paintball Defender</h1><h2>'+title+'</h2><p>SCORE: <b>'+score+'</b></p><p>ACCURACY: <b>'+lastStats.acc.toFixed(0)+'%</b> &nbsp; WPM: <b>'+lastStats.wpm.toFixed(0)+'</b></p><div class="levels"><button onclick="startGame('+level+')">PLAY AGAIN</button><button onclick="showLeaderboard(level)">THIS LEVEL LEADERBOARD</button><button onclick="showMenu()">LEVELS</button></div></div></div>');draw()}
 
 addEventListener("keydown",e=>{
- if(e.key==="Escape"){e.preventDefault();let p=new URLSearchParams(location.search).get("return");if(p||sessionStorage.getItem("typingUnitReturn")==="1")location.href="Typing_Unit.html";else showMenu();return}
+ if(e.key==="Escape"){e.preventDefault();showMenu();return}
  if(e.target&&["INPUT","TEXTAREA"].includes(e.target.tagName))return;
  if(!running||screen!=="game")return;
  if(e.key==="Enter"){e.preventDefault();return}
