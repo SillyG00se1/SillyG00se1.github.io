@@ -48,6 +48,17 @@ const LEVELS={
   4:{name:"LESSONS 10-12",words:["next","name","mix","nine","nice","new","box","zip","zero","size","zone","zoo","lazy","amazing","class","last","less","pass","because","small","extra","exact","exist","expect","excuse","example","explain","expand","explore","express","fix","fox","fuzzy","lizard","maximum","mixes","mixed","pixel","relax","six","sixteen","sixty","taxi","text","vex","wax","wizard","xylophone","zebra","zeroes","zigzag","zinc","zipper","zippy","zombie","zoom","zesty","freeze","frozen","boxes","sizes","puzzle","puzzles","exam","exams","exit","exits","index","oxygen","syntax","complex","excellent","exactly","anxiety"],speed:300},
   5:{name:"LESSONS 13-15",words:["hospital","defender","computer","student","excellent","challenge","practice","adventure","keyboard","zombies","pumpkin","patch","skateboard","office","park","building","paintball","accuracy","strength","everything","animation","attention","beautiful","character","characters","classroom","community","creature","different","education","environment","fantastic","friendship","important","information","incredible","instruction","intelligent","interesting","invention","journey","knowledge","language","learning","lightning","materials","mystery","neighborhood","observation","opportunity","paragraph","performance","photograph","playground","population","prediction","preparation","presentation","pronunciation","remember","responsible","scientific","something","sometimes","surprising","technology","temperature","understand","university","wonderful","yesterday","yourself"],speed:340}
 };
+const LEVEL_CHARACTERS={
+  1:new Set("asdfghjkl"),
+  2:new Set("asdfghjkle iortuwy".replace(/ /g,"")),
+  3:new Set("asdfghjkle iortuwybcmnpqv".replace(/ /g,"")),
+  4:new Set("asdfghjkle iortuwybcmnpqvxz".replace(/ /g,"")),
+  5:new Set("abcdefghijklmnopqrstuvwxyz")
+};
+for(const n of Object.keys(LEVELS)){
+ const allowed=LEVEL_CHARACTERS[n];
+ LEVELS[n].words=[...new Set(LEVELS[n].words.filter(w=>[...w].every(ch=>allowed.has(ch))))];
+}
 function resize(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);draw()}
 addEventListener("resize",resize);
 function esc(s){return s.replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]))}
