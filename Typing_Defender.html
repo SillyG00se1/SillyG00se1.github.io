@@ -131,17 +131,17 @@ function drawLevelOneCartoonZombie(z,drawHead=true){
  // Walking legs overlap at the knees; the leading knee bends toward the left.
  ctx.fillStyle="rgba(0,0,0,.2)";ctx.beginPath();ctx.ellipse(0,5,42,9,0,0,7);ctx.fill();
  ctx.strokeStyle=I;ctx.lineWidth=17;ctx.beginPath();
- ctx.moveTo(-9,-39);ctx.lineTo(-19+w,-17);ctx.lineTo(-34+w,1);ctx.lineTo(-39+w,27);
- ctx.moveTo(8,-39);ctx.lineTo(17-w,-17);ctx.lineTo(8-w,2);ctx.lineTo(20-w,28);ctx.stroke();
+ ctx.moveTo(-9,-39);ctx.lineTo(-27+w,-8);ctx.lineTo(-39+w,27);
+ ctx.moveTo(8,-39);ctx.lineTo(13-w,-8);ctx.lineTo(20-w,28);ctx.stroke();
  ctx.strokeStyle=S;ctx.lineWidth=10;ctx.beginPath();
- ctx.moveTo(-9,-39);ctx.lineTo(-19+w,-17);ctx.lineTo(-34+w,1);ctx.lineTo(-39+w,25);
- ctx.moveTo(8,-39);ctx.lineTo(17-w,-17);ctx.lineTo(8-w,2);ctx.lineTo(20-w,26);ctx.stroke();
+ ctx.moveTo(-9,-39);ctx.lineTo(-27+w,-8);ctx.lineTo(-39+w,25);
+ ctx.moveTo(8,-39);ctx.lineTo(13-w,-8);ctx.lineTo(20-w,26);ctx.stroke();
  ctx.fillStyle=I;ctx.beginPath();ctx.ellipse(-43+w,32,18,8,-.08,0,7);ctx.ellipse(25-w,33,18,8,.08,0,7);ctx.fill();
  // Pants are behind the longer shirt; each leg has only one angular bend.
  if(currentScene!==1){
   ctx.fillStyle=currentScene===2?"#26343e":currentScene===3?"#294f83":currentScene===4?"#34313b":"#4d4c4a";
-  ctx.beginPath();ctx.moveTo(-18,-69);ctx.lineTo(-2,-69);ctx.lineTo(-8,-39);ctx.lineTo(-16,-39);ctx.closePath();ctx.fill();
-  ctx.beginPath();ctx.moveTo(0,-69);ctx.lineTo(16,-69);ctx.lineTo(16,-39);ctx.lineTo(8,-39);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(-18,-69);ctx.lineTo(-2,-69);ctx.lineTo(-10,-39);ctx.lineTo(-18,-39);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(0,-69);ctx.lineTo(16,-69);ctx.lineTo(20,-39);ctx.lineTo(12,-39);ctx.closePath();ctx.fill();
   ctx.strokeStyle="#101820";ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-1,-68);ctx.lineTo(-1,-40);ctx.stroke();
  }
  // Neck and body.
@@ -195,10 +195,11 @@ function zombie(z){
  if(level!==2){
   ctx.fillStyle="#273a32";
   if(level===4){
-   // Long, loose hair trailing behind the skater's head.
-   ctx.beginPath();ctx.moveTo(-20,-176);ctx.quadraticCurveTo(-30,-181,-28,-164);ctx.lineTo(-25,-146);ctx.quadraticCurveTo(-20,-151,-18,-164);ctx.lineTo(-13,-174);ctx.quadraticCurveTo(-5,-177,7,-176);ctx.quadraticCurveTo(22,-176,27,-177);ctx.quadraticCurveTo(24,-190,9,-188);ctx.quadraticCurveTo(0,-197,-11,-188);ctx.quadraticCurveTo(-25,-188,-20,-176);ctx.closePath();
+   // Long hair covers the rear scalp and hangs down behind the ear/neck.
+   ctx.beginPath();ctx.moveTo(-18,-179);ctx.quadraticCurveTo(-31,-185,-30,-168);ctx.lineTo(-29,-143);ctx.quadraticCurveTo(-27,-137,-23,-145);ctx.lineTo(-20,-157);ctx.quadraticCurveTo(-18,-166,-12,-173);ctx.quadraticCurveTo(-4,-180,7,-177);ctx.quadraticCurveTo(22,-176,27,-177);ctx.quadraticCurveTo(24,-190,9,-188);ctx.quadraticCurveTo(0,-197,-11,-188);ctx.quadraticCurveTo(-25,-190,-18,-179);ctx.closePath();
   }else{
-   ctx.beginPath();ctx.moveTo(-23,-176);ctx.quadraticCurveTo(-31,-190,-16,-191);ctx.quadraticCurveTo(-4,-198,7,-189);ctx.quadraticCurveTo(22,-191,27,-178);ctx.quadraticCurveTo(12,-181,2,-178);ctx.quadraticCurveTo(-10,-174,-23,-176);ctx.closePath();
+   // A swept-back cap wraps down over the rear curve instead of sitting like a toupee.
+   ctx.beginPath();ctx.moveTo(-22,-173);ctx.quadraticCurveTo(-29,-179,-28,-166);ctx.lineTo(-25,-157);ctx.quadraticCurveTo(-23,-153,-19,-160);ctx.lineTo(-15,-174);ctx.quadraticCurveTo(-10,-180,-2,-180);ctx.quadraticCurveTo(10,-182,18,-178);ctx.quadraticCurveTo(26,-178,27,-177);ctx.quadraticCurveTo(24,-190,9,-188);ctx.quadraticCurveTo(0,-197,-11,-188);ctx.quadraticCurveTo(-25,-190,-22,-173);ctx.closePath();
   }
   ctx.fill();ctx.stroke();
  }
@@ -232,7 +233,14 @@ function zombie(z){
   ctx.fillStyle="#d65c4e";ctx.strokeStyle="#171c20";ctx.lineWidth=2;
   ctx.beginPath();ctx.roundRect(-5,-39,10,78,5);ctx.fill();ctx.stroke();
   ctx.fillStyle="#f1d6a2";ctx.fillRect(-3,-25,6,50);
-  for(let wy of [-25,25]){ctx.fillStyle="#202326";ctx.beginPath();ctx.arc(0,wy,4,0,Math.PI*2);ctx.fill();}
+  // Trucks and wheels are visible on both sides of the carried deck.
+  for(let wy of [-25,25]){
+   ctx.strokeStyle="#c5cbd0";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-7,wy);ctx.lineTo(7,wy);ctx.stroke();
+   for(let wx of [-7,7]){
+    ctx.fillStyle="#202326";ctx.beginPath();ctx.arc(wx,wy,4.5,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle="#aeb5b8";ctx.lineWidth=1;ctx.stroke();
+   }
+  }
   ctx.restore();
  }
  ctx.restore();ctx.restore();
