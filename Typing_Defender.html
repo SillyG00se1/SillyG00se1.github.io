@@ -126,22 +126,28 @@ function drawHospital(){
  for(let i=0;i<2;i++){let x=W*.32+i*250;ctx.fillStyle="#a9b5b8";ctx.fillRect(x,floor-150,150,150);ctx.fillStyle="#647378";ctx.fillRect(x+12,floor-138,126,126);ctx.fillStyle="#d9e3e5";ctx.fillRect(x+25,floor-120,88,65);ctx.fillStyle="#f5c94b";ctx.fillRect(x+115,floor-80,8,20)}
 }
 function drawLevelOneCartoonZombie(z,drawHead=true){
- const y=H*.53+z.lane*H*.12,s=z.scale,w=Math.sin((z.walkTime||0)*5)*6,I="#273a32",S="#9bc86c",B="#b9dfe0";
+ const y=H*.53+z.lane*H*.12,s=z.scale,phase=(z.walkTime||0)*5,w=Math.sin(phase)*.24,I="#273a32",S=({1:"#315b32",2:"#9bc86c",3:"#92999b",4:"#b2cf45",5:"#183b25"})[currentScene]||"#9bc86c",B="#b9dfe0";
  ctx.save();ctx.translate(z.x,y);ctx.scale(-s,s);ctx.lineCap="round";ctx.lineJoin="round";
- // Walking legs overlap at the knees; the leading knee bends toward the left.
+ // Walking legs pivot at the hips. Each leg keeps a single fixed knee bend that points left;
+ // only the whole leg swings from its hip, so the knee itself does not wobble independently.
  ctx.fillStyle="rgba(0,0,0,.2)";ctx.beginPath();ctx.ellipse(0,5,42,9,0,0,7);ctx.fill();
- ctx.strokeStyle=I;ctx.lineWidth=17;ctx.beginPath();
- ctx.moveTo(-9,-39);ctx.lineTo(-27+w,-8);ctx.lineTo(-39+w,27);
- ctx.moveTo(8,-39);ctx.lineTo(13-w,-8);ctx.lineTo(20-w,28);ctx.stroke();
- ctx.strokeStyle=S;ctx.lineWidth=10;ctx.beginPath();
- ctx.moveTo(-9,-39);ctx.lineTo(-27+w,-8);ctx.lineTo(-39+w,25);
- ctx.moveTo(8,-39);ctx.lineTo(13-w,-8);ctx.lineTo(20-w,26);ctx.stroke();
- ctx.fillStyle=I;ctx.beginPath();ctx.ellipse(-43+w,32,18,8,-.08,0,7);ctx.ellipse(25-w,33,18,8,.08,0,7);ctx.fill();
- // Pants are behind the longer shirt; each leg has only one angular bend.
+ const leg=(hipX,angle,front=false)=>{
+  ctx.save();ctx.translate(hipX,-39);ctx.rotate(angle);
+  ctx.strokeStyle=I;ctx.lineWidth=17;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-18,28);ctx.lineTo(-30,64);ctx.stroke();
+  ctx.strokeStyle=S;ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-18,28);ctx.lineTo(-30,62);ctx.stroke();
+  ctx.fillStyle=I;ctx.beginPath();ctx.ellipse(-34,68,18,8,-.08,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+ };
+ leg(-9,w);leg(8,-w);
+ // Pants follow the same hip-pivoted motion as the legs.
  if(currentScene!==1){
-  ctx.fillStyle=currentScene===2?"#26343e":currentScene===3?"#294f83":currentScene===4?"#34313b":"#4d4c4a";
-  ctx.beginPath();ctx.moveTo(-18,-69);ctx.lineTo(-2,-69);ctx.lineTo(-10,-39);ctx.lineTo(-18,-39);ctx.closePath();ctx.fill();
-  ctx.beginPath();ctx.moveTo(0,-69);ctx.lineTo(16,-69);ctx.lineTo(20,-39);ctx.lineTo(12,-39);ctx.closePath();ctx.fill();
+  const pants=currentScene===2?"#26343e":currentScene===3?"#555b60":currentScene===4?"#34313b":"#4d4c4a";
+  ctx.fillStyle=pants;
+  for(const p of [{x:-9,a:w},{x:8,a:-w}]){
+   ctx.save();ctx.translate(p.x,-69);ctx.rotate(p.a);
+   ctx.beginPath();ctx.moveTo(-8,0);ctx.lineTo(8,0);ctx.lineTo(9,29);ctx.lineTo(-9,29);ctx.closePath();ctx.fill();
+   ctx.restore();
+  }
   ctx.strokeStyle="#101820";ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-1,-68);ctx.lineTo(-1,-40);ctx.stroke();
  }
  // Neck and body.
@@ -185,7 +191,7 @@ function drawLevelOneCartoonZombie(z,drawHead=true){
 }
 function zombie(z){
  drawLevelOneCartoonZombie(z,false);
- const y=H*.53+z.lane*H*.12,s=z.scale,I="#000000",S="#9bc86c";
+ const y=H*.53+z.lane*H*.12,s=z.scale,I="#000000",S=({1:"#315b32",2:"#9bc86c",3:"#92999b",4:"#b2cf45",5:"#183b25"})[currentScene]||"#9bc86c";
  ctx.save();ctx.translate(z.x,y);ctx.scale(-s,s);
  // All levels share the same head size, limb-matching green, and fine 1 pt black contour.
  ctx.save();ctx.translate(0,-160);ctx.scale(1.05,1.05);ctx.translate(0,160);
