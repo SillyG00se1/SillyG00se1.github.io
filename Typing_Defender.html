@@ -117,10 +117,49 @@ function drawLevelOneCartoonZombie(z){
  ctx.fillStyle=I;ctx.beginPath();ctx.moveTo(-19,-112);ctx.quadraticCurveTo(-4,-126,11,-112);ctx.lineTo(23,-91);ctx.lineTo(19,-37);ctx.lineTo(11,-32);ctx.lineTo(4,-38);ctx.lineTo(-4,-32);ctx.lineTo(-12,-38);ctx.lineTo(-21,-33);ctx.lineTo(-24,-91);ctx.closePath();ctx.fill();ctx.fillStyle=B;ctx.beginPath();ctx.moveTo(-16,-110);ctx.quadraticCurveTo(-4,-120,8,-109);ctx.lineTo(18,-90);ctx.lineTo(15,-41);ctx.lineTo(10,-38);ctx.lineTo(4,-43);ctx.lineTo(-4,-37);ctx.lineTo(-12,-43);ctx.lineTo(-18,-38);ctx.lineTo(-20,-91);ctx.closePath();ctx.fill();
  ctx.strokeStyle="#639fa5";ctx.lineWidth=2;for(let yy=-99;yy<-48;yy+=14){ctx.beginPath();ctx.moveTo(-13,yy);ctx.lineTo(11,yy+4);ctx.stroke()}
  ctx.strokeStyle=I;ctx.lineWidth=16;ctx.beginPath();ctx.moveTo(-17,-104);ctx.lineTo(-29,-80);ctx.lineTo(-31,-58);ctx.moveTo(16,-103);ctx.lineTo(27,-79);ctx.lineTo(24,-58);ctx.stroke();ctx.strokeStyle=S;ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(-17,-104);ctx.lineTo(-29,-80);ctx.lineTo(-31,-58);ctx.moveTo(16,-103);ctx.lineTo(27,-79);ctx.lineTo(24,-58);ctx.stroke();
- ctx.fillStyle=I;ctx.beginPath();ctx.moveTo(-12,-153);ctx.quadraticCurveTo(-20,-178,3,-184);ctx.quadraticCurveTo(26,-188,32,-165);ctx.quadraticCurveTo(36,-151,26,-140);ctx.quadraticCurveTo(19,-130,7,-132);ctx.lineTo(-1,-137);ctx.lineTo(-12,-143);ctx.lineTo(-23,-147);ctx.closePath();ctx.fill();ctx.fillStyle=S;ctx.beginPath();ctx.moveTo(-9,-155);ctx.quadraticCurveTo(-15,-175,4,-180);ctx.quadraticCurveTo(24,-184,28,-164);ctx.quadraticCurveTo(32,-151,23,-142);ctx.quadraticCurveTo(17,-134,7,-135);ctx.lineTo(-2,-140);ctx.lineTo(-12,-146);ctx.lineTo(-22,-147);ctx.closePath();ctx.fill();
- ctx.fillStyle=I;ctx.beginPath();ctx.ellipse(-2,-158,8,10,0,0,7);ctx.fill();ctx.fillStyle="#fff3c4";ctx.beginPath();ctx.ellipse(-2,-158,5,7,0,0,7);ctx.fill();ctx.fillStyle=I;ctx.beginPath();ctx.arc(-1,-158,2.5,0,7);ctx.fill();
- ctx.fillStyle="#6f9c4b";ctx.beginPath();ctx.moveTo(-10,-151);ctx.lineTo(-24,-147);ctx.lineTo(-11,-142);ctx.fill();ctx.fillStyle=I;ctx.beginPath();ctx.moveTo(-20,-143);ctx.quadraticCurveTo(-9,-139,1,-142);ctx.lineTo(4,-137);ctx.quadraticCurveTo(-5,-130,-15,-136);ctx.closePath();ctx.fill();
- ctx.fillStyle=I;ctx.beginPath();ctx.moveTo(-11,-164);ctx.lineTo(-16,-177);ctx.lineTo(-7,-173);ctx.lineTo(-3,-188);ctx.lineTo(5,-178);ctx.lineTo(13,-184);ctx.lineTo(18,-175);ctx.lineTo(28,-172);ctx.lineTo(26,-161);ctx.lineTo(14,-169);ctx.lineTo(3,-167);ctx.closePath();ctx.fill();ctx.fillStyle="#f6e9bc";ctx.save();ctx.translate(16,-174);ctx.rotate(-.35);ctx.fillRect(-7,-3,14,6);ctx.fillStyle="#d5c99b";ctx.fillRect(-2,-2,4,4);ctx.restore();ctx.restore();
+ // Deliberately graphic, exaggerated cartoon head: angular brow, broad crooked jaw,
+ // lopsided ear, oversized eye and a blunt hooked snout (not a realistic oval/triangle).
+ ctx.fillStyle=I;ctx.beginPath();
+ ctx.moveTo(-15,-151);ctx.lineTo(-20,-164);ctx.lineTo(-13,-176);
+ ctx.lineTo(1,-182);ctx.lineTo(17,-178);ctx.lineTo(29,-165);
+ ctx.lineTo(30,-151);ctx.lineTo(23,-141);ctx.lineTo(12,-135);
+ ctx.lineTo(4,-132);ctx.lineTo(-8,-137);ctx.lineTo(-18,-144);ctx.closePath();ctx.fill();
+ ctx.fillStyle=S;ctx.beginPath();
+ ctx.moveTo(-12,-153);ctx.lineTo(-16,-164);ctx.lineTo(-9,-173);
+ ctx.lineTo(2,-178);ctx.lineTo(15,-174);ctx.lineTo(25,-163);
+ ctx.lineTo(25,-152);ctx.lineTo(19,-144);ctx.lineTo(10,-139);
+ ctx.lineTo(4,-137);ctx.lineTo(-6,-141);ctx.lineTo(-14,-147);ctx.closePath();ctx.fill();
+ // Big, uneven brow and eye for a readable comic-book expression.
+ ctx.fillStyle=I;ctx.beginPath();ctx.moveTo(-14,-165);ctx.lineTo(-8,-173);
+ ctx.lineTo(5,-170);ctx.lineTo(13,-164);ctx.lineTo(1,-166);ctx.closePath();ctx.fill();
+ ctx.fillStyle="#fff3c4";ctx.beginPath();ctx.ellipse(-1,-158,6,8,-.15,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle=I;ctx.beginPath();ctx.ellipse(1,-157,2.8,4,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#fff3c4";ctx.beginPath();ctx.arc(2,-159,1.1,0,Math.PI*2);ctx.fill();
+ // Crooked, blunt snout with nostril: intentionally not a simple triangle.
+ ctx.fillStyle=I;ctx.beginPath();ctx.moveTo(8,-155);ctx.lineTo(21,-153);
+ ctx.lineTo(26,-148);ctx.lineTo(22,-143);ctx.lineTo(12,-145);
+ ctx.lineTo(7,-149);ctx.closePath();ctx.fill();
+ ctx.fillStyle="#6f9c4b";ctx.beginPath();ctx.moveTo(10,-154);
+ ctx.lineTo(20,-151);ctx.lineTo(22,-148);ctx.lineTo(17,-147);
+ ctx.lineTo(11,-149);ctx.closePath();ctx.fill();
+ ctx.fillStyle=I;ctx.beginPath();ctx.ellipse(19,-150,1.8,1.2,-.2,0,Math.PI*2);ctx.fill();
+ // Crooked grin with a few uneven teeth.
+ ctx.fillStyle=I;ctx.beginPath();ctx.moveTo(-7,-145);ctx.quadraticCurveTo(2,-139,14,-144);
+ ctx.lineTo(12,-139);ctx.quadraticCurveTo(1,-134,-8,-141);ctx.closePath();ctx.fill();
+ ctx.fillStyle="#f6e9bc";ctx.beginPath();ctx.moveTo(-3,-142);ctx.lineTo(1,-141);
+ ctx.lineTo(0,-138);ctx.closePath();ctx.fill();ctx.beginPath();
+ ctx.moveTo(6,-141);ctx.lineTo(10,-142);ctx.lineTo(8,-139);ctx.closePath();ctx.fill();
+ // Spiky, messy hair silhouette with uneven tufts.
+ ctx.fillStyle=I;ctx.beginPath();ctx.moveTo(-16,-164);ctx.lineTo(-21,-177);
+ ctx.lineTo(-11,-173);ctx.lineTo(-7,-190);ctx.lineTo(2,-178);
+ ctx.lineTo(12,-188);ctx.lineTo(15,-176);ctx.lineTo(29,-174);
+ ctx.lineTo(25,-163);ctx.lineTo(14,-169);ctx.lineTo(2,-166);
+ ctx.lineTo(-5,-169);ctx.closePath();ctx.fill();
+ // Bandage on the hair, with two visible wrap marks.
+ ctx.save();ctx.translate(16,-176);ctx.rotate(-.35);
+ ctx.fillStyle="#f6e9bc";ctx.fillRect(-8,-3,16,7);
+ ctx.fillStyle="#c7b98e";ctx.fillRect(-3,-3,2,7);ctx.fillRect(3,-3,2,7);
+ ctx.restore();ctx.restore();
 }
 function zombie(z){drawLevelOneCartoonZombie(z)}
 function drawOffice(){
