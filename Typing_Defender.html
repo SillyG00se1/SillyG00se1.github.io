@@ -370,7 +370,9 @@ function showLeaderboard(levelOnly=null){
   b.forEach((x,i)=>h+='<div class="board-row"><span>'+(i+1)+'</span><span>'+esc(x.name)+'</span><span>'+x.score+'</span></div>');
   h+='</div>';
  }
- h+='<div class="levels"><button onclick="showMenu()">LEVELS</button>';
+ h+='<div class="levels">';
+ if(unitIntegrated&&nextLessonFromUnit>=1&&nextLessonFromUnit<=15)h+='<button onclick="continueToNextTypingLesson()">NEXT LESSON '+nextLessonFromUnit+' • LEVEL 1</button>';
+ h+='<button onclick="showMenu()">LEVELS</button>';
  if(levelOnly!==null)h+='<button onclick="showLeaderboard()">ALL LEADERBOARDS</button>';
  h+='<button onclick="clearLeaderboard()">CLEAR SCORES</button></div></div></div>';
  screen="leaderboard";ui(h);draw()
@@ -378,7 +380,18 @@ function showLeaderboard(levelOnly=null){
 function clearLeaderboard(){if(confirm("Clear all leaderboard scores?")){localStorage.removeItem(LEADERBOARD_KEY);showLeaderboard()}}
 let lastStats={acc:0,wpm:0};
 function submitScore(){let n=document.getElementById("scoreName").value.trim();if(!n){alert("Please enter a name.");return}saveScore(n,lastStats);showLeaderboard(level)}
-function endGame(title="Level Complete"){running=false;cancelAnimationFrame(raf);screen="over";document.getElementById("hud").hidden=true;document.getElementById("word").hidden=true;document.getElementById("typed").hidden=true;lastStats=stats();if(isTopScore(score)){ui('<div class="overlay"><div class="panel"><h1>NEW HIGH SCORE!</h1><h2>'+score+' points</h2><input id="scoreName" class="namebox" maxlength="18" placeholder="Enter name" autofocus><div class="levels"><button onclick="submitScore()">SAVE SCORE</button></div></div></div>');draw();return}ui('<div class="overlay"><div class="panel"><h1>Paintball Defender</h1><h2>'+title+'</h2><p>SCORE: <b>'+score+'</b></p><p>ACCURACY: <b>'+lastStats.acc.toFixed(0)+'%</b> &nbsp; WPM: <b>'+lastStats.wpm.toFixed(0)+'</b></p><div class="levels"><button onclick="startGame('+level+')">PLAY AGAIN</button><button onclick="showLeaderboard(level)">THIS LEVEL LEADERBOARD</button><button onclick="showMenu()">LEVELS</button></div></div></div>');draw()}
+const launchParams=new URLSearchParams(location.search);
+const unitIntegrated=launchParams.get("return")==="Typing_Unit.html";
+const nextLessonFromUnit=Number(launchParams.get("nextLesson")||0);
+function continueToNextTypingLesson(){
+ if(!unitIntegrated||nextLessonFromUnit<1||nextLessonFromUnit>15){showMenu();return}
+ sessionStorage.setItem("typingUnitReturn","1");
+ window.location.href="Typing_Unit.html?lesson="+encodeURIComponent(nextLessonFromUnit)+"&level=1";
+}
+function endGame(title="Level Complete"){running=false;cancelAnimationFrame(raf);screen="over";document.getElementById("hud").hidden=true;document.getElementById("word").hidden=true;document.getElementById("typed").hidden=true;lastStats=stats();
+ if(isTopScore(score)){ui('<div class="overlay"><div class="panel"><h1>NEW HIGH SCORE!</h1><h2>'+score+' points</h2><p>ACCURACY: <b>'+lastStats.acc.toFixed(0)+'%</b> &nbsp; WPM: <b>'+lastStats.wpm.toFixed(0)+'</b></p><input id="scoreName" class="namebox" maxlength="18" placeholder="Enter name" autofocus><div class="levels"><button onclick="submitScore()">SAVE SCORE & VIEW LEADERBOARD</button></div></div></div>');draw();return}
+ if(unitIntegrated){showLeaderboard(level);return}
+ ui('<div class="overlay"><div class="panel"><h1>Zombie Defender</h1><h2>'+title+'</h2><p>SCORE: <b>'+score+'</b></p><p>ACCURACY: <b>'+lastStats.acc.toFixed(0)+'%</b> &nbsp; WPM: <b>'+lastStats.wpm.toFixed(0)+'</b></p><div class="levels"><button onclick="startGame('+level+')">PLAY AGAIN</button><button onclick="showLeaderboard(level)">THIS LEVEL LEADERBOARD</button><button onclick="showMenu()">LEVELS</button></div></div></div>');draw()}
 
 addEventListener("keydown",e=>{
  if(e.key==="Escape"){e.preventDefault();showMenu();return}
