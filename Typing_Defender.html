@@ -221,14 +221,14 @@ function drawOffice(){
  for(let i=0;i<5;i++){let x=70+i*250;ctx.fillStyle="#496778";ctx.fillRect(x,145,190,220);ctx.strokeStyle="#dce4e7";ctx.lineWidth=8;ctx.strokeRect(x,145,190,220);ctx.beginPath();ctx.moveTo(x+95,145);ctx.lineTo(x+95,365);ctx.stroke()}
  for(let i=0;i<6;i++){let x=70+i*210;ctx.fillStyle="#f7f7f7";ctx.fillRect(x,70,130,18)}
  for(let i=0;i<4;i++){let x=80+i*290;ctx.fillStyle="#765f4c";ctx.fillRect(x,H*.49,170,25);ctx.fillStyle="#30383d";ctx.fillRect(x+15,H*.49-60,140,60)}
- ctx.fillStyle="#fff";ctx.fillRect(W*.43,55,170,48);ctx.fillStyle="#303b40";ctx.font="700 25px Arial";ctx.textAlign="center";ctx.fillText("OFFICE",W*.515,88);ctx.textAlign="left";
+
 }
 function drawPark(){
  ctx.fillStyle="#86c7e5";ctx.fillRect(0,0,W,H*.55);ctx.fillStyle="#69a94f";ctx.fillRect(0,H*.55,W,H*.45);
  ctx.fillStyle="#c9a56a";ctx.beginPath();ctx.moveTo(W*.36,H);ctx.quadraticCurveTo(W*.5,H*.62,W*.62,H*.55);ctx.quadraticCurveTo(W*.72,H*.75,W*.78,H);ctx.fill();
  for(let i=0;i<5;i++){let x=90+i*240,y=H*.43;ctx.fillStyle="#6b442c";ctx.fillRect(x,y,25,150);ctx.fillStyle="#3c7c3b";ctx.beginPath();ctx.arc(x+10,y-30,65,0,7);ctx.fill()}
  ctx.fillStyle="#dce8ed";ctx.fillRect(W*.08,H*.27,180,20);ctx.fillStyle="#64777d";ctx.fillRect(W*.12,H*.27+20,20,95);ctx.fillRect(W*.23,H*.27+20,20,95);
- ctx.fillStyle="#fff";ctx.fillRect(W*.43,55,170,48);ctx.fillStyle="#303b40";ctx.font="700 25px Arial";ctx.textAlign="center";ctx.fillText("PARK",W*.515,88);ctx.textAlign="left";
+
 }
 function drawSkateboard(x,y,angle,deck){
  ctx.save();ctx.translate(x,y);ctx.rotate(angle);
@@ -244,14 +244,14 @@ function drawSkatePark(){
  ctx.fillStyle="#c5c7c8";ctx.beginPath();ctx.moveTo(W*.32,H*.9);ctx.quadraticCurveTo(W*.4,H*.5,W*.48,H*.9);ctx.lineTo(W*.48,H);ctx.lineTo(W*.32,H);ctx.fill();
  ctx.strokeStyle="#55585b";ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(W*.62,H*.78);ctx.lineTo(W*.82,H*.78);ctx.stroke();ctx.fillStyle="#55585b";ctx.fillRect(W*.69,H*.78,8,90);ctx.fillRect(W*.79,H*.78,8,90);
  drawSkateboard(W*.20,H*.84,-.10,"#d65c4e");drawSkateboard(W*.48,H*.90,.12,"#3e8fb1");drawSkateboard(W*.83,H*.86,-.18,"#e2bd4c");
- ctx.fillStyle="#fff";ctx.fillRect(W*.43,55,210,48);ctx.fillStyle="#303b40";ctx.font="700 25px Arial";ctx.textAlign="center";ctx.fillText("SKATE PARK",W*.535,88);ctx.textAlign="left";
+
 }
 function drawPumpkinPatch(){
  ctx.fillStyle="#8bc6e4";ctx.fillRect(0,0,W,H*.5);ctx.fillStyle="#8b9f4e";ctx.fillRect(0,H*.5,W,H*.5);
  ctx.fillStyle="#6c813b";for(let y=H*.6;y<H;y+=55)ctx.fillRect(0,y,W,8);
  for(let i=0;i<24;i++){let x=40+(i*83)%W,y=H*.56+((i*47)%(H*.4));ctx.fillStyle=i%3?"#e87828":"#f28c28";ctx.beginPath();ctx.ellipse(x,y,22,18,0,0,7);ctx.ellipse(x+20,y,22,18,0,0,7);ctx.fill();ctx.fillStyle="#4d7034";ctx.fillRect(x+8,y-25,8,12)}
  ctx.fillStyle="#6f4a2e";ctx.fillRect(W*.73,H*.27,25,210);ctx.fillStyle="#4e7b3d";ctx.beginPath();ctx.arc(W*.74,H*.25,90,0,7);ctx.fill();
- ctx.fillStyle="#fff";ctx.fillRect(W*.39,55,240,48);ctx.fillStyle="#303b40";ctx.font="700 25px Arial";ctx.textAlign="center";ctx.fillText("PUMPKIN PATCH",W*.51,88);ctx.textAlign="left";
+
 }
 function drawPlayer(){
  let x=W*.15,y=H*.48;
