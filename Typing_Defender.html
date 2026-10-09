@@ -165,7 +165,8 @@ function zombie(z){
  ctx.fillStyle="#fff0a5";ctx.beginPath();ctx.ellipse(-1,-158,level===3?8:7,level===3?9:8,-.15,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#000";ctx.lineWidth=1.333;ctx.stroke();
  ctx.fillStyle="#000";ctx.beginPath();ctx.arc(level===4?0:1,-157,level===3?4:3,0,Math.PI*2);ctx.fill();
  // Consistent green nose and a readable crooked grin.
- ctx.fillStyle=S;ctx.beginPath();ctx.moveTo(7,-155);ctx.lineTo(21,-154);ctx.lineTo(28,-149);ctx.lineTo(26,-144);ctx.lineTo(18,-143);ctx.lineTo(10,-146);ctx.lineTo(6,-150);ctx.closePath();ctx.fill();ctx.strokeStyle="#000";ctx.lineWidth=1.333;ctx.stroke();
+ // No separate outlined nose: keep the profile smooth and integrated into the face.
+ ctx.fillStyle=S;ctx.beginPath();ctx.moveTo(8,-155);ctx.lineTo(20,-153);ctx.lineTo(25,-149);ctx.lineTo(22,-146);ctx.lineTo(14,-146);ctx.lineTo(8,-150);ctx.closePath();ctx.fill();
  ctx.fillStyle="#000";ctx.beginPath();
  if(level===2){ctx.moveTo(8,-151);ctx.lineTo(27,-153);ctx.lineTo(25,-143);ctx.lineTo(12,-141);ctx.closePath();}
  else if(level===3){ctx.moveTo(7,-151);ctx.lineTo(28,-151);ctx.lineTo(29,-146);ctx.lineTo(22,-139);ctx.lineTo(8,-141);ctx.closePath();}
