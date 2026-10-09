@@ -186,7 +186,7 @@ function handleBackspace(){
 }
 function submitTest(){
  if(submitted)return;submitted=true;let elapsed=timerStarted?(performance.now()-startTime)/1000:0;stopTimer();
- let wpm=elapsed>0?(correctCount/5)/(elapsed/60):0,attempts=correctCount+errorCount,accuracy=attempts>0?correctCount/attempts*100:0;
+ let creditedCorrect=correctCount-(correctedErrorCount*0.5),wpm=elapsed>0?(creditedCorrect/5)/(elapsed/60):0,attempts=correctCount+errorCount,accuracy=attempts>0?creditedCorrect/attempts*100:0;
  saveData(elapsed,wpm,accuracy);showResults(elapsed,wpm,accuracy)
 }
 async function saveSharedResult(row){
