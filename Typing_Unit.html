@@ -147,7 +147,7 @@ function showLevelMenu(n){
 }
 function showGamesMenu(groupEnd){
  const gameLevel={3:1,6:2,9:3,12:4,15:5}[groupEnd]||1;
- screen(`<div class="center"><h2>Games</h2><div class="subtitle">Lessons ${groupEnd-2}-${groupEnd}</div><div class="grid level-grid">${button("🍓 FRUIT NINJA<br>LEVEL "+gameLevel,`startNinjaReview(${groupEnd})`)}${button("⌨️ KEYBOARD QUEST<br>LEVEL "+gameLevel,`startKeyboardQuest(${gameLevel})`)}${button("🧟 ZOMBIE TYPING DEFENDER<br>LEVEL "+gameLevel,`startTypingDefender(${gameLevel},${groupEnd})`)}</div><div class="bottom">${button("BACK TO LESSONS","showLessonMenu()")}</div></div>`)
+ screen(`<div class="center"><h2>Games</h2><div class="subtitle">Lessons ${groupEnd-2}-${groupEnd}</div><div class="grid level-grid">${button("🍓 FRUIT NINJA<br>LEVEL "+gameLevel,`startNinjaReview(${groupEnd})`)}${button("⌨️ KEYBOARD QUEST<br>LEVEL "+gameLevel,`startKeyboardQuest(${gameLevel})`)}${button("🧟 ZOMBIE DEFENDER<br>LEVEL "+gameLevel,`startTypingDefender(${gameLevel},${groupEnd})`)}</div><div class="bottom">${button("BACK TO LESSONS","showLessonMenu()")}</div></div>`)
 }
 function startLesson(n,lvl){
  lessonNumber=n;levelNumber=lvl;prompt=LESSONS[n].levels[lvl-1];currentPosition=0;correctCount=0;errorCount=0;correctedErrorCount=0;
