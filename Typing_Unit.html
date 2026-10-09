@@ -88,7 +88,7 @@ function showLessonMenu(){
  for(let row=0;row<5;row++){
    for(let col=0;col<3;col++){
      const n=row*3+col+1,l=LESSONS[n],done=completedLevelCount(n);
-     const status=lessonMeetsAccuracy(n)?'<span style="color:#39ff14;font-size:25px;font-weight:900">✓ Complete</span>':`<span style="color:${["#bdbdbd","#b7e4c7","#98FB98","#9acd32"][done]};font-weight:900">${done}/3 Levels completed</span>`;
+     const status=lessonMeetsAccuracy(n)?'<span style="color:#39ff14;font-size:25px;font-weight:900">✓ Complete</span>':`<span style="color:${["#bdbdbd","#acd8a7","#72bf6a","#5bb450"][done]};font-weight:900">${done}/3 Levels completed</span>`;
      tiles.push(`<button onclick="showLevelMenu(${n})"><span style="display:block;margin-bottom:5px">Lesson ${n}: ${esc(l.title)}</span><span style="display:block;font-size:25px;line-height:1.08">${status}</span></button>`);
    }
    const groupEnd=(row+1)*3;
