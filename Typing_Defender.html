@@ -70,7 +70,7 @@ function ui(html){document.getElementById("ui").innerHTML=html}
 function showMenu(){
  running=false;cancelAnimationFrame(raf);screen="menu";document.getElementById("hud").hidden=true;
  document.getElementById("word").hidden=true;document.getElementById("typed").hidden=true;
- ui('<div class="overlay"><div class="panel"><h1>Typing Defender</h1><div class="levels">'+Object.keys(LEVELS).map(n=>'<button onclick="startGame('+n+')">LEVEL '+n+'<br><span style="font-size:17px">'+LEVELS[n].name+'</span></button>').join("")+'<button onclick="showLeaderboard()">LEADERBOARD</button></div></div></div>');
+ ui('<div class="overlay"><div class="panel"><h1>Zombie Defender</h1><div class="levels">'+Object.keys(LEVELS).map(n=>'<button onclick="startGame('+n+')">LEVEL '+n+'<br><span style="font-size:17px">'+LEVELS[n].name+'</span></button>').join("")+'<button onclick="showLeaderboard()">LEADERBOARD</button></div></div></div>');
  draw();
 }
 function startGame(n){
