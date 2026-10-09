@@ -126,7 +126,7 @@ function drawHospital(){
  for(let i=0;i<2;i++){let x=W*.32+i*250;ctx.fillStyle="#a9b5b8";ctx.fillRect(x,floor-150,150,150);ctx.fillStyle="#647378";ctx.fillRect(x+12,floor-138,126,126);ctx.fillStyle="#d9e3e5";ctx.fillRect(x+25,floor-120,88,65);ctx.fillStyle="#f5c94b";ctx.fillRect(x+115,floor-80,8,20)}
 }
 function drawLevelOneCartoonZombie(z,drawHead=true){
- const y=H*.53+z.lane*H*.12,s=z.scale,phase=(z.walkTime||0)*5,w=Math.sin(phase)*.24,I="#273a32",S=({1:"#315b32",2:"#9bc86c",3:"#92999b",4:"#b2cf45",5:"#183b25"})[currentScene]||"#9bc86c",B="#b9dfe0";
+ const y=H*.53+z.lane*H*.12,s=z.scale,phase=(z.walkTime||0)*5,w=Math.sin(phase)*.24,I="#273a32",S=({1:"#315b32",2:"#9bc86c",3:"#92999b",4:"#b2cf45",5:"#426b38"})[currentScene]||"#9bc86c",B="#b9dfe0";
  ctx.save();ctx.translate(z.x,y);ctx.scale(-s,s);ctx.lineCap="round";ctx.lineJoin="round";
  // Walking legs pivot at the hips. Each leg keeps a single fixed knee bend that points left;
  // only the whole leg swings from its hip, so the knee itself does not wobble independently.
@@ -193,7 +193,7 @@ function drawLevelOneCartoonZombie(z,drawHead=true){
 }
 function zombie(z){
  drawLevelOneCartoonZombie(z,false);
- const y=H*.53+z.lane*H*.12,s=z.scale,I="#000000",S=({1:"#315b32",2:"#9bc86c",3:"#92999b",4:"#b2cf45",5:"#183b25"})[currentScene]||"#9bc86c";
+ const y=H*.53+z.lane*H*.12,s=z.scale,I="#000000",S=({1:"#315b32",2:"#9bc86c",3:"#92999b",4:"#b2cf45",5:"#426b38"})[currentScene]||"#9bc86c";
  ctx.save();ctx.translate(z.x,y);ctx.scale(-s,s);
  // All levels share the same head size, limb-matching green, and fine 1 pt black contour.
  ctx.save();ctx.translate(0,-160);ctx.scale(1.05,1.05);ctx.translate(0,160);
@@ -235,7 +235,33 @@ function zombie(z){
  else {ctx.beginPath();ctx.moveTo(-3,-142);ctx.lineTo(2,-141);ctx.lineTo(1,-136);ctx.lineTo(-2,-137);ctx.closePath();ctx.fill();}
 
 
- // The skater carries a skateboard tucked diagonally along the outside of the body.
+ // Scene props carried in front of the body.
+  if(level===2){
+   ctx.save();ctx.translate(-30,-78);ctx.rotate(-.12);
+   ctx.fillStyle="#4b3024";ctx.strokeStyle="#171c20";ctx.lineWidth=2.5;
+   ctx.beginPath();ctx.roundRect(-17,-17,34,30,4);ctx.fill();ctx.stroke();
+   ctx.strokeStyle="#c49a56";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-7,-17);ctx.lineTo(-7,-23);ctx.quadraticCurveTo(0,-28,7,-23);ctx.lineTo(7,-17);ctx.stroke();
+   ctx.fillStyle="#d9b56b";ctx.fillRect(-3,-4,6,7);ctx.strokeStyle="#d9b56b";ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-17,-1);ctx.lineTo(17,-1);ctx.stroke();
+   ctx.restore();
+  }
+  if(level===3){
+   ctx.save();ctx.translate(-31,-73);ctx.rotate(-.10);
+   ctx.strokeStyle="#6c4225";ctx.lineWidth=4;ctx.beginPath();ctx.arc(0,-5,19,Math.PI,Math.PI*2);ctx.stroke();
+   ctx.fillStyle="#c58a45";ctx.strokeStyle="#69401f";ctx.lineWidth=2;
+   ctx.beginPath();ctx.roundRect(-20,-7,40,25,4);ctx.fill();ctx.stroke();
+   ctx.strokeStyle="#8d5b2d";ctx.lineWidth=2;for(let yy=0;yy<15;yy+=6){ctx.beginPath();ctx.moveTo(-18,yy);ctx.lineTo(18,yy);ctx.stroke()}
+   ctx.fillStyle="#d94c3d";ctx.beginPath();ctx.arc(-7,-8,6,0,Math.PI*2);ctx.fill();ctx.fillStyle="#f1d65b";ctx.beginPath();ctx.arc(6,-9,6,0,Math.PI*2);ctx.fill();ctx.fillStyle="#4b8b45";ctx.beginPath();ctx.ellipse(0,-15,7,3,-.4,0,Math.PI*2);ctx.fill();
+   ctx.restore();
+  }
+  if(level===5){
+   ctx.save();ctx.translate(-31,-78);ctx.rotate(-.10);
+   ctx.fillStyle="#f28a24";ctx.strokeStyle="#60351d";ctx.lineWidth=2;
+   ctx.beginPath();ctx.ellipse(0,0,17,14,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+   ctx.strokeStyle="#d66a1b";ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(-5,0,7,13,0,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.ellipse(5,0,7,13,0,0,Math.PI*2);ctx.stroke();
+   ctx.strokeStyle="#315b32";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(0,-13);ctx.lineTo(2,-20);ctx.stroke();
+   ctx.restore();
+  }
+  // The skater carries a skateboard tucked diagonally along the outside of the body.
  if(level===4){
   ctx.save();ctx.translate(-31,-81);ctx.rotate(-.30);
   ctx.fillStyle="#d65c4e";ctx.strokeStyle="#171c20";ctx.lineWidth=2;
