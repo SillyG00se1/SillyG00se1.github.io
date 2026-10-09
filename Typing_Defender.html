@@ -107,115 +107,22 @@ function drawHospital(){
  for(let i=0;i<2;i++){let x=W*.32+i*250;ctx.fillStyle="#a9b5b8";ctx.fillRect(x,floor-150,150,150);ctx.fillStyle="#647378";ctx.fillRect(x+12,floor-138,126,126);ctx.fillStyle="#d9e3e5";ctx.fillRect(x+25,floor-120,88,65);ctx.fillStyle="#f5c94b";ctx.fillRect(x+115,floor-80,8,20)}
 }
 function drawLevelOneCartoonZombie(z){
- const base=H*.53+z.lane*H*.12,s=z.scale;
- const gait=(z.walkTime||0)%2.9,step=gait<.72?Math.sin(gait/.72*Math.PI*2)*6:0;
- const ink="#273a32",skin="#9bc86c",shade="#6f9c4b",shirt="#b9dfe0";
- ctx.save();ctx.translate(z.x,base);ctx.function drawLevelOneCartoonZombie(z){
- const base=H*.53+z.lane*H*.12,s=z.scale;
- const gait=(z.walkTime||0)%2.9,step=gait<.72?Math.sin(gait/.72*Math.PI*2)*6:0;
- const ink="#273a32",skin="#9bc86c",shade="#6f9c4b",shirt="#b9dfe0";
- ctx.save();ctx.translate(z.x,base);ctx.scale(s,s);ctx.lineJoin="round";ctx.lineCap="round";
- // Soft shadow
- ctx.fillStyle="rgba(0,0,0,.22)";ctx.beginPath();ctx.ellipse(0,5,43,9,0,0,Math.PI*2);ctx.fill();
- // Legs and oversized shoes
- ctx.strokeStyle=ink;ctx.lineWidth=17;ctx.beginPath();ctx.moveTo(-8,-28);ctx.lineTo(-16+step,-3);ctx.lineTo(-25+step,31);ctx.stroke();ctx.beginPath();ctx.moveTo(8,-28);ctx.lineTo(17-step,-2);ctx.lineTo(24-step,31);ctx.stroke();
- ctx.strokeStyle=skin;ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(-8,-28);ctx.lineTo(-16+step,-3);ctx.lineTo(-25+step,28);ctx.stroke();ctx.beginPath();ctx.moveTo(8,-28);ctx.lineTo(17-step,-2);ctx.lineTo(24-step,28);ctx.stroke();
- ctx.fillStyle=ink;ctx.beginPath();ctx.ellipse(-29+step,35,19,8,-.12,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(31-step,35,18,8,.08,0,Math.PI*2);ctx.fill();
- ctx.fillStyle="#d4d9b4";ctx.beginPath();ctx.ellipse(-31+step,33,9,3,0,0,Math.PI*2);ctx.ellipse(29-step,33,8,3,0,0,Math.PI*2);ctx.fill();
- // Neck overlaps the gown and head, connecting the silhouette
- ctx.fillStyle=ink;ctx.beginPath();ctx.roundRect(-8,-133,19,29,5);ctx.fill();
- ctx.fillStyle=skin;ctx.beginPath();ctx.roundRect(-5,-135,13,28,4);ctx.fill();
- // Loose, blue hospital gown with a clean zigzag hem
- ctx.fillStyle=ink;ctx.beginPath();ctx.moveTo(-19,-112);ctx.quadraticCurveTo(-4,-126,11,-112);ctx.lineTo(23,-91);ctx.lineTo(19,-37);ctx.lineTo(11,-32);ctx.lineTo(4,-38);ctx.lineTo(-4,-32);ctx.lineTo(-12,-38);ctx.lineTo(-21,-33);ctx.lineTo(-24,-91);ctx.closePath();ctx.fill();
- ctx.fillStyle=shirt;ctx.beginPath();ctx.moveTo(-16,-110);ctx.quadraticCurveTo(-4,-120,8,-109);ctx.lineTo(18,-90);ctx.lineTo(15,-41);ctx.lineTo(10,-38);ctx.lineTo(4,-43);ctx.lineTo(-4,-37);ctx.lineTo(-12,-43);ctx.lineTo(-18,-38);ctx.lineTo(-20,-91);ctx.closePath();ctx.fill();
- ctx.strokeStyle="#639fa5";ctx.lineWidth=2;for(let yy=-99;yy<-48;yy+=14){ctx.beginPath();ctx.moveTo(-13,yy);ctx.lineTo(11,yy+4);ctx.stroke()}ctx.fillStyle="#609ba1";for(let yy=-93;yy<-50;yy+=20){ctx.fillRect(-4,yy,5,5);ctx.fillRect(7,yy+6,4,4)}
- // Droopy arms
- ctx.strokeStyle=ink;ctx.lineWidth=16;ctx.beginPath();ctx.moveTo(-17,-104);ctx.lineTo(-29,-80);ctx.lineTo(-31,-58);ctx.stroke();ctx.beginPath();ctx.moveTo(16,-103);ctx.lineTo(27,-79);ctx.lineTo(24,-58);ctx.stroke();
- ctx.strokeStyle=skin;ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(-17,-104);ctx.lineTo(-29,-80);ctx.lineTo(-31,-58);ctx.stroke();ctx.beginPath();ctx.moveTo(16,-103);ctx.lineTo(27,-79);ctx.lineTo(24,-58);ctx.stroke();
- ctx.fillStyle=skin;ctx.strokeStyle=ink;ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(-32,-54,7,10,-.2,0,Math.PI*2);ctx.ellipse(24,-54,7,10,.2,0,Math.PI*2);ctx.fill();ctx.stroke();
- // Head silhouette is a single smooth shape with a broad jaw
- ctx.fillStyle=ink;ctx.beginPath();ctx.moveTo(-13,-153);ctx.quadraticCurveTo(-20,-178,1,-184);ctx.quadraticCurveTo(26,-188,33,-166);ctx.quadraticCurveTo(38,-151,28,-139);ctx.quadraticCurveTo(19,-127,5,-131);ctx.quadraticCurveTo(-3,-134,-8,-143);ctx.lineTo(-17,-146);ctx.quadraticCurveTo(-20,-150,-13,-153);ctx.closePath();ctx.fill();
- ctx.fillStyle=skin;ctx.beginPath();ctx.moveTo(-7,-158);ctx.quadraticCurveTo(-12,-178,7,-180);ctx.quadraticCurveTo(27,-180,29,-162);ctx.lineTo(26,-148);ctx.quadraticCurveTo(22,-137,10,-134);ctx.lineTo(-1,-135);ctx.lineTo(-10,-142);ctx.lineTo(-22,-147);ctx.lineTo(-11,-152);ctx.closePath();ctx.fill();
- // Side profile: one visible eye, a projecting nose, and a simple mouth
- ctx.fillStyle=ink;ctx.beginPath();ctx.ellipse(-2,-158,8,10,-.12,0,Math.PI*2);ctx.fill();
- ctx.fillStyle="#fff3c4";ctx.beginPath();ctx.ellipse(-2,-158,5,7,-.12,0,Math.PI*2);ctx.fill();
- ctx.fillStyle="#26372e";ctx.beginPath();ctx.arc(-1,-158,2.5,0,Math.PI*2);ctx.fill();
- 
- // Simple nose and one clean goofy grin, kept clear of the eyes
- ctx.fillStyle=shade;ctx.beginPath();ctx.moveTo(-10,-151);ctx.lineTo(-24,-147);ctx.lineTo(-11,-142);ctx.closePath();ctx.fill();
- ctx.fillStyle=ink;ctx.beginPath();ctx.moveTo(-20,-143);ctx.quadraticCurveTo(-9,-139,1,-142);ctx.lineTo(4,-137);ctx.quadraticCurveTo(-5,-130,-15,-136);ctx.closePath();ctx.fill();
- ctx.fillStyle="#fff4d6";ctx.beginPath();ctx.moveTo(-15,-141);ctx.lineTo(-10,-140);ctx.lineTo(-11,-136);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(-7,-140);ctx.lineTo(-3,-141);ctx.lineTo(-4,-137);ctx.closePath();ctx.fill();
- // Messy hair and recognizable bandage detail
- ctx.fillStyle=ink;ctx.beginPath();ctx.moveTo(-11,-164);ctx.lineTo(-16,-177);ctx.lineTo(-7,-173);ctx.lineTo(-3,-188);ctx.lineTo(5,-178);ctx.lineTo(13,-184);ctx.lineTo(18,-175);ctx.lineTo(28,-172);ctx.lineTo(26,-161);ctx.lineTo(14,-169);ctx.lineTo(3,-167);ctx.closePath();ctx.fill();
- ctx.fillStyle="#f6e9bc";ctx.save();ctx.translate(16,-174);ctx.rotate(-.35);ctx.fillRect(-7,-3,14,6);ctx.fillStyle="#d5c99b";ctx.fillRect(-2,-2,4,4);ctx.restore();
- ctx.restore();
+ const y=H*.53+z.lane*H*.12,s=z.scale,w=Math.sin((z.walkTime||0)*5)*6,I="#273a32",S="#9bc86c",B="#b9dfe0";
+ ctx.save();ctx.translate(z.x,y);ctx.scale(s,s);ctx.lineCap="round";ctx.lineJoin="round";
+ ctx.fillStyle="rgba(0,0,0,.2)";ctx.beginPath();ctx.ellipse(0,5,42,9,0,0,7);ctx.fill();
+ ctx.strokeStyle=I;ctx.lineWidth=17;ctx.beginPath();ctx.moveTo(-8,-28);ctx.lineTo(-16+w,-3);ctx.lineTo(-25+w,29);ctx.moveTo(8,-28);ctx.lineTo(17-w,-2);ctx.lineTo(24-w,29);ctx.stroke();
+ ctx.strokeStyle=S;ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(-8,-28);ctx.lineTo(-16+w,-3);ctx.lineTo(-25+w,27);ctx.moveTo(8,-28);ctx.lineTo(17-w,-2);ctx.lineTo(24-w,27);ctx.stroke();
+ ctx.fillStyle=I;ctx.beginPath();ctx.ellipse(-29+w,35,19,8,0,0,7);ctx.ellipse(31-w,35,18,8,0,0,7);ctx.fill();
+ ctx.fillStyle=I;ctx.beginPath();ctx.roundRect(-8,-143,19,35,5);ctx.fill();ctx.fillStyle=S;ctx.beginPath();ctx.roundRect(-5,-141,13,32,4);ctx.fill();
+ ctx.fillStyle=I;ctx.beginPath();ctx.moveTo(-19,-112);ctx.quadraticCurveTo(-4,-126,11,-112);ctx.lineTo(23,-91);ctx.lineTo(19,-37);ctx.lineTo(11,-32);ctx.lineTo(4,-38);ctx.lineTo(-4,-32);ctx.lineTo(-12,-38);ctx.lineTo(-21,-33);ctx.lineTo(-24,-91);ctx.closePath();ctx.fill();ctx.fillStyle=B;ctx.beginPath();ctx.moveTo(-16,-110);ctx.quadraticCurveTo(-4,-120,8,-109);ctx.lineTo(18,-90);ctx.lineTo(15,-41);ctx.lineTo(10,-38);ctx.lineTo(4,-43);ctx.lineTo(-4,-37);ctx.lineTo(-12,-43);ctx.lineTo(-18,-38);ctx.lineTo(-20,-91);ctx.closePath();ctx.fill();
+ ctx.strokeStyle="#639fa5";ctx.lineWidth=2;for(let yy=-99;yy<-48;yy+=14){ctx.beginPath();ctx.moveTo(-13,yy);ctx.lineTo(11,yy+4);ctx.stroke()}
+ ctx.strokeStyle=I;ctx.lineWidth=16;ctx.beginPath();ctx.moveTo(-17,-104);ctx.lineTo(-29,-80);ctx.lineTo(-31,-58);ctx.moveTo(16,-103);ctx.lineTo(27,-79);ctx.lineTo(24,-58);ctx.stroke();ctx.strokeStyle=S;ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(-17,-104);ctx.lineTo(-29,-80);ctx.lineTo(-31,-58);ctx.moveTo(16,-103);ctx.lineTo(27,-79);ctx.lineTo(24,-58);ctx.stroke();
+ ctx.fillStyle=I;ctx.beginPath();ctx.moveTo(-12,-153);ctx.quadraticCurveTo(-20,-178,3,-184);ctx.quadraticCurveTo(26,-188,32,-165);ctx.quadraticCurveTo(36,-151,26,-140);ctx.quadraticCurveTo(19,-130,7,-132);ctx.lineTo(-1,-137);ctx.lineTo(-12,-143);ctx.lineTo(-23,-147);ctx.closePath();ctx.fill();ctx.fillStyle=S;ctx.beginPath();ctx.moveTo(-9,-155);ctx.quadraticCurveTo(-15,-175,4,-180);ctx.quadraticCurveTo(24,-184,28,-164);ctx.quadraticCurveTo(32,-151,23,-142);ctx.quadraticCurveTo(17,-134,7,-135);ctx.lineTo(-2,-140);ctx.lineTo(-12,-146);ctx.lineTo(-22,-147);ctx.closePath();ctx.fill();
+ ctx.fillStyle=I;ctx.beginPath();ctx.ellipse(-2,-158,8,10,0,0,7);ctx.fill();ctx.fillStyle="#fff3c4";ctx.beginPath();ctx.ellipse(-2,-158,5,7,0,0,7);ctx.fill();ctx.fillStyle=I;ctx.beginPath();ctx.arc(-1,-158,2.5,0,7);ctx.fill();
+ ctx.fillStyle="#6f9c4b";ctx.beginPath();ctx.moveTo(-10,-151);ctx.lineTo(-24,-147);ctx.lineTo(-11,-142);ctx.fill();ctx.fillStyle=I;ctx.beginPath();ctx.moveTo(-20,-143);ctx.quadraticCurveTo(-9,-139,1,-142);ctx.lineTo(4,-137);ctx.quadraticCurveTo(-5,-130,-15,-136);ctx.closePath();ctx.fill();
+ ctx.fillStyle=I;ctx.beginPath();ctx.moveTo(-11,-164);ctx.lineTo(-16,-177);ctx.lineTo(-7,-173);ctx.lineTo(-3,-188);ctx.lineTo(5,-178);ctx.lineTo(13,-184);ctx.lineTo(18,-175);ctx.lineTo(28,-172);ctx.lineTo(26,-161);ctx.lineTo(14,-169);ctx.lineTo(3,-167);ctx.closePath();ctx.fill();ctx.fillStyle="#f6e9bc";ctx.save();ctx.translate(16,-174);ctx.rotate(-.35);ctx.fillRect(-7,-3,14,6);ctx.fillStyle="#d5c99b";ctx.fillRect(-2,-2,4,4);ctx.restore();ctx.restore();
 }
-ye:"#d8d4bd",face:"long"},
-  {skin:"#858784",shadow:"#484d4b",light:"#b2b0a4",shirt:"#b9bfbd",trim:"#58666b",pants:"#3d4549",shoe:"#22292c",hair:"#303536",eye:"#e0d9c5",face:"angular"},
-  {skin:"#758064",shadow:"#414936",light:"#9da180",shirt:"#687052",trim:"#a28f6b",pants:"#4d493b",shoe:"#302b24",hair:"#39382d",eye:"#d8d0ad",face:"weathered"},
-  {skin:"#71828b",shadow:"#3d4a53",light:"#9aaab0",shirt:"#3e485c",trim:"#a8564b",pants:"#343a44",shoe:"#20262d",hair:"#292f36",eye:"#dce0d5",face:"angular"},
-  {skin:"#8a765e",shadow:"#4e4031",light:"#b19a77",shirt:"#664a39",trim:"#a8784c",pants:"#51402f",shoe:"#2d261e",hair:"#392b21",eye:"#ddd1b4",face:"long"}
- ][currentScene-1];
- const c=looks,gait=(z.walkTime||0)%2.9,swing=gait<.72?Math.sin(gait/.72*Math.PI*2)*5:0;
- ctx.save();ctx.translate(p,base);ctx.scale(s,s);
- // Ground shadow
- ctx.fillStyle="rgba(0,0,0,.28)";ctx.beginPath();ctx.ellipse(0,8,39,9,0,0,Math.PI*2);ctx.fill();
- // Uneven trouser legs, knees and worn shoes
- ctx.lineCap="round";ctx.strokeStyle=c.pants;ctx.lineWidth=14;
- ctx.beginPath();ctx.moveTo(-8,-22);ctx.lineTo(-17,7);ctx.lineTo(-25,38);ctx.stroke();
- ctx.beginPath();ctx.moveTo(8,-22);ctx.lineTo(13,5);ctx.lineTo(23,39);ctx.stroke();
- ctx.fillStyle=c.shoe;ctx.beginPath();ctx.moveTo(-30,34);ctx.lineTo(-43,43);ctx.lineTo(-40,49);ctx.lineTo(-14,49);ctx.lineTo(-13,42);ctx.closePath();ctx.fill();
- ctx.beginPath();ctx.moveTo(17,35);ctx.lineTo(13,45);ctx.lineTo(17,50);ctx.lineTo(44,50);ctx.lineTo(42,43);ctx.closePath();ctx.fill();
- ctx.strokeStyle="rgba(210,207,184,.25)";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-20,9);ctx.lineTo(-26,31);ctx.moveTo(14,9);ctx.lineTo(21,31);ctx.stroke();
- // Slumped shoulders and layered torso
- ctx.fillStyle=c.shirt;ctx.beginPath();ctx.moveTo(-14,-113);ctx.quadraticCurveTo(-4,-120,8,-112);ctx.quadraticCurveTo(20,-108,20,-92);ctx.lineTo(17,-29);ctx.quadraticCurveTo(1,-21,-17,-30);ctx.lineTo(-19,-89);ctx.closePath();ctx.fill();
- ctx.fillStyle=c.shadow;ctx.beginPath();ctx.moveTo(-14,-109);ctx.lineTo(-3,-98);ctx.lineTo(-7,-52);ctx.lineTo(-17,-43);ctx.closePath();ctx.fill();
- // Cloth folds, tears and seams
- ctx.strokeStyle="rgba(28,35,31,.48)";ctx.lineWidth=2;
- ctx.beginPath();ctx.moveTo(-12,-87);ctx.lineTo(-2,-82);ctx.moveTo(8,-76);ctx.lineTo(15,-72);ctx.moveTo(-10,-47);ctx.lineTo(-2,-44);ctx.stroke();
- ctx.beginPath();ctx.moveTo(13,-35);ctx.lineTo(7,-28);ctx.lineTo(2,-34);ctx.fillStyle=c.shadow;ctx.fill();
- if(currentScene===1){
-  ctx.strokeStyle="#a5aaa0";ctx.lineWidth=2;for(let yy=-88;yy<-37;yy+=11){ctx.beginPath();ctx.moveTo(-10,yy);ctx.lineTo(12,yy+2);ctx.stroke()}
-  ctx.fillStyle="#e1dfd2";ctx.fillRect(3,-88,11,14);ctx.fillStyle="#815d58";ctx.fillRect(5,-84,7,7);
- }else if(currentScene===2){
-  ctx.fillStyle="#d6d5ca";ctx.beginPath();ctx.moveTo(-9,-109);ctx.lineTo(3,-101);ctx.lineTo(-1,-66);ctx.lineTo(-8,-75);ctx.closePath();ctx.fill();
-  ctx.fillStyle=c.trim;ctx.beginPath();ctx.moveTo(1,-100);ctx.lineTo(9,-96);ctx.lineTo(3,-67);ctx.lineTo(-2,-75);ctx.closePath();ctx.fill();
-  ctx.strokeStyle="#d6d5ca";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-14,-85);ctx.lineTo(-7,-82);ctx.stroke();
- }else if(currentScene===3){
-  ctx.strokeStyle="#393f31";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-14,-89);ctx.lineTo(14,-78);ctx.stroke();
-  ctx.fillStyle="#4c4538";ctx.beginPath();ctx.moveTo(-17,-31);ctx.lineTo(-9,-41);ctx.lineTo(-3,-31);ctx.fill();
- }else if(currentScene===4){
-  ctx.fillStyle="#30394b";ctx.beginPath();ctx.moveTo(-19,-107);ctx.quadraticCurveTo(0,-124,19,-105);ctx.lineTo(16,-91);ctx.lineTo(-16,-91);ctx.closePath();ctx.fill();
-  ctx.strokeStyle=c.trim;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-11,-85);ctx.lineTo(12,-65);ctx.stroke();
-  ctx.fillStyle="#c7c8c3";ctx.fillRect(12,-39,5,5);
- }else{
-  ctx.strokeStyle="#3a2c23";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-15,-92);ctx.lineTo(16,-92);ctx.moveTo(-14,-72);ctx.lineTo(17,-72);ctx.stroke();
-  ctx.fillStyle="#8d7853";ctx.fillRect(-3,-106,5,77);ctx.fillStyle="#c2a56f";ctx.fillRect(-2,-77,4,4);
- }
- // Near arm hangs heavily, with only a brief shuffle every few seconds
- ctx.strokeStyle=c.shadow;ctx.lineWidth=12;ctx.beginPath();ctx.moveTo(-12,-101);ctx.lineTo(-22,-79);ctx.lineTo(-27+swing*.3,-58);ctx.stroke();
- ctx.strokeStyle=c.skin;ctx.lineWidth=14;ctx.beginPath();ctx.moveTo(13,-100);ctx.lineTo(25,-79);ctx.lineTo(23+swing,-57);ctx.stroke();
- ctx.fillStyle=c.light;ctx.beginPath();ctx.ellipse(23+swing,-53,5,8,-.18,0,Math.PI*2);ctx.fill();
- // Neck and asymmetrical profile head. Nose projects left, toward the player.
- ctx.fillStyle=c.shadow;ctx.beginPath();ctx.moveTo(-4,-132);ctx.lineTo(13,-130);ctx.lineTo(13,-112);ctx.lineTo(-2,-113);ctx.closePath();ctx.fill();
- ctx.fillStyle=c.skin;ctx.beginPath();ctx.moveTo(-7,-160);ctx.quadraticCurveTo(-13,-177,2,-181);ctx.quadraticCurveTo(20,-184,27,-165);ctx.lineTo(25,-145);ctx.lineTo(15,-130);ctx.lineTo(2,-128);ctx.lineTo(-7,-138);ctx.lineTo(-22,-147);ctx.lineTo(-10,-151);ctx.closePath();ctx.fill();
- // Sunken socket and a single visible eye
- ctx.fillStyle=c.shadow;ctx.beginPath();ctx.ellipse(-5,-154,8,5,-.12,0,Math.PI*2);ctx.fill();
- ctx.fillStyle=c.eye;ctx.beginPath();ctx.ellipse(-7,-154,3.2,2.4,0,0,Math.PI*2);ctx.fill();
- ctx.fillStyle="#202321";ctx.beginPath();ctx.arc(-8,-154,1.6,0,Math.PI*2);ctx.fill();
- ctx.strokeStyle=c.shadow;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-13,-162);ctx.lineTo(-1,-160);ctx.stroke();
- // Cheek hollow, nose shadow and a crooked mouth
- ctx.fillStyle=c.shadow;ctx.beginPath();ctx.ellipse(-13,-143,5,3,0,0,Math.PI*2);ctx.fill();
- ctx.strokeStyle="#292b27";ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(-18,-143);ctx.lineTo(-7,-140);ctx.lineTo(4,-142);ctx.stroke();
- ctx.strokeStyle=c.light;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-18,-148);ctx.lineTo(-24,-147);ctx.stroke();
- // Ragged, uneven hair silhouette
- ctx.fillStyle=c.hair;ctx.beginPath();ctx.moveTo(-8,-159);ctx.lineTo(-13,-171);ctx.lineTo(-5,-173);ctx.lineTo(-2,-182);ctx.lineTo(6,-175);ctx.lineTo(15,-178);ctx.lineTo(23,-168);ctx.lineTo(23,-159);ctx.lineTo(12,-166);ctx.lineTo(1,-164);ctx.closePath();ctx.fill();
- if(currentScene===1){ctx.fillStyle="#c3c7bb";ctx.fillRect(8,-121,10,3)}
- if(currentScene===4){ctx.fillStyle="#b95b50";ctx.fillRect(12,-119,5,4)}
- // Small paint splashes from successful hits
- for(let spot of z.paint){ctx.fillStyle=spot.c;ctx.globalAlpha=.9;ctx.beginPath();ctx.arc(spot.x,spot.y,spot.r,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1}
- ctx.restore();
-}
+function zombie(z){drawLevelOneCartoonZombie(z)}
 function drawOffice(){
  ctx.fillStyle="#8b9197";ctx.fillRect(0,0,W,H);ctx.fillStyle="#d8dadd";ctx.fillRect(0,H*.58,W,H*.42);ctx.fillStyle="#aab0b5";ctx.fillRect(0,H*.55,W,18);
  for(let i=0;i<5;i++){let x=70+i*250;ctx.fillStyle="#496778";ctx.fillRect(x,145,190,220);ctx.strokeStyle="#dce4e7";ctx.lineWidth=8;ctx.strokeRect(x,145,190,220);ctx.beginPath();ctx.moveTo(x+95,145);ctx.lineTo(x+95,365);ctx.stroke()}
@@ -253,21 +160,9 @@ function drawPumpkinPatch(){
  ctx.fillStyle="#6f4a2e";ctx.fillRect(W*.73,H*.27,25,210);ctx.fillStyle="#4e7b3d";ctx.beginPath();ctx.arc(W*.74,H*.25,90,0,7);ctx.fill();
 
 }
-function drawPlayer(){
- let x=W*.15,y=H*.48;
- ctx.fillStyle="#24343d";ctx.fillRect(x-55,y-70,110,150);
- ctx.fillStyle="#dce7e9";ctx.fillRect(x-38,y-54,76,52);
- ctx.fillStyle="#3e9bb2";ctx.fillRect(x-27,y-43,54,30);
- ctx.fillStyle="#202a2f";ctx.fillRect(x-65,y-35,15,90);ctx.fillRect(x+50,y-35,15,90);
- ctx.fillStyle="#d9e2e4";ctx.beginPath();ctx.arc(x,y-88,30,0,7);ctx.fill();
- ctx.fillStyle="#4b6670";ctx.fillRect(x-18,y-105,36,14);
- // paintball launcher
- ctx.fillStyle="#33444c";ctx.fillRect(x+58,y-35,85,18);ctx.fillStyle="#9eb4ba";ctx.fillRect(x+120,y-29,34,7);
- ctx.fillStyle="#e0a14a";ctx.beginPath();ctx.arc(x+76,y-26,8,0,7);ctx.fill();
-}
 function draw(){
  ctx.clearRect(0,0,W,H);drawSky();switch(currentScene){case 1:drawHospital();break;case 2:drawOffice();break;case 3:drawPark();break;case 4:drawSkatePark();break;case 5:drawPumpkinPatch();break;default:drawHospital();}
- if(screen==="game"){drawPlayer();for(let z of zombies)zombie(z);drawEffects();return}
+ if(screen==="game"){for(let z of zombies)zombie(z);drawEffects();return}
 }
 function drawEffects(){
  for(let s of splats){ctx.globalAlpha=Math.max(0,s.life/1.1);ctx.fillStyle=s.c;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,7);ctx.fill();for(let d of s.d){ctx.beginPath();ctx.arc(s.x+d.x,s.y+d.y,d.r,0,7);ctx.fill()};ctx.globalAlpha=1}
