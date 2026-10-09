@@ -154,7 +154,7 @@ function startLesson(n,lvl){
  timerStarted=false;startTime=0;submitted=false;characterStatus=Array.from(prompt,()=> "untyped");typedText="";showTypingScreen()
 }
 function showTypingScreen(){
- let chars="";for(let start=0;start<prompt.length;start+=75){let row=prompt.slice(start,start+50).split("").map((c,j)=>{let i=start+j;return `<span id="c${i}" class="char">${c===" "?"\u00a0":esc(c)}</span>`}).join("");chars+=`<div class="prompt-row">${row}</div>`;}
+ let chars="",start=0;while(start<prompt.length){let end=Math.min(start+75,prompt.length);if(end<prompt.length){let space=prompt.lastIndexOf(" ",end-1);if(space>=start)end=space+1}if(end<=start)end=Math.min(start+75,prompt.length);let row=prompt.slice(start,end).split("").map((c,j)=>{let i=start+j;return `<span id="c${i}" class="char">${c===" "?"\u00a0":esc(c)}</span>`}).join("");chars+=`<div class="prompt-row">${row}</div>`;start=end;}
  screen(`<div class="typing-wrap"><h2>Lesson ${lessonNumber} • Level ${levelNumber}: ${LEVEL_NAMES[levelNumber-1]}</h2><div style="font-size:20px;margin-bottom:8px">${esc(studentName)}</div>
  <div id="prompt" class="prompt">${chars}</div>
  <textarea id="typingArea" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea><div id="timer" class="timer">Time: 0.0 seconds</div>
