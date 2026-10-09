@@ -127,7 +127,7 @@ function drawHospital(){
 }
 function drawLevelOneCartoonZombie(z){
  const y=H*.53+z.lane*H*.12,s=z.scale,w=Math.sin((z.walkTime||0)*5)*6,I="#273a32",S="#9bc86c",B="#b9dfe0";
- ctx.save();ctx.translate(z.x,y);ctx.scale(s,s);ctx.lineCap="round";ctx.lineJoin="round";
+ ctx.save();ctx.translate(z.x,y);ctx.scale(-s,s);ctx.lineCap="round";ctx.lineJoin="round";
  ctx.fillStyle="rgba(0,0,0,.2)";ctx.beginPath();ctx.ellipse(0,5,42,9,0,0,7);ctx.fill();
  ctx.strokeStyle=I;ctx.lineWidth=17;ctx.beginPath();ctx.moveTo(-8,-38);ctx.lineTo(-16+w,-3);ctx.lineTo(-25+w,29);ctx.moveTo(8,-38);ctx.lineTo(17-w,-2);ctx.lineTo(24-w,29);ctx.stroke();
  ctx.strokeStyle=S;ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(-8,-28);ctx.lineTo(-16+w,-3);ctx.lineTo(-25+w,27);ctx.moveTo(8,-28);ctx.lineTo(17-w,-2);ctx.lineTo(24-w,27);ctx.stroke();
@@ -161,7 +161,7 @@ function zombie(z){
  drawLevelOneCartoonZombie(z);
  if(level===1)return;
  const y=H*.53+z.lane*H*.12,s=z.scale,I="#273a32",S="#9bc86c";
- ctx.save();ctx.translate(z.x,y);ctx.scale(s,s);
+ ctx.save();ctx.translate(z.x,y);ctx.scale(-s,s);
  if(level===2){
    // Office: square cheek, side-swept hair and blocky teeth.
    ctx.fillStyle=I;ctx.beginPath();ctx.moveTo(-18,-166);ctx.lineTo(-27,-184);ctx.lineTo(-12,-178);ctx.lineTo(-5,-190);ctx.lineTo(6,-181);ctx.lineTo(20,-185);ctx.lineTo(28,-171);ctx.lineTo(17,-170);ctx.lineTo(4,-173);ctx.closePath();ctx.fill();
