@@ -140,8 +140,31 @@ function drawLevelOneCartoonZombie(z,drawHead=true){
  // Neck and body.
  ctx.fillStyle=I;ctx.beginPath();ctx.roundRect(-8,-137,19,27,5);ctx.fill();ctx.fillStyle=S;ctx.beginPath();ctx.roundRect(-5,-135,13,24,4);ctx.fill();
  ctx.fillStyle=I;ctx.beginPath();ctx.moveTo(-19,-112);ctx.quadraticCurveTo(-4,-126,11,-112);ctx.lineTo(23,-91);ctx.lineTo(19,-37);ctx.lineTo(11,-32);ctx.lineTo(4,-38);ctx.lineTo(-4,-32);ctx.lineTo(-12,-38);ctx.lineTo(-21,-33);ctx.lineTo(-24,-91);ctx.closePath();ctx.fill();
- ctx.fillStyle=B;ctx.beginPath();ctx.moveTo(-16,-110);ctx.quadraticCurveTo(-4,-120,8,-109);ctx.lineTo(18,-90);ctx.lineTo(15,-41);ctx.lineTo(10,-38);ctx.lineTo(4,-43);ctx.lineTo(-4,-37);ctx.lineTo(-12,-43);ctx.lineTo(-18,-38);ctx.lineTo(-20,-91);ctx.closePath();ctx.fill();
- ctx.strokeStyle="#639fa5";ctx.lineWidth=2;for(let yy=-99;yy<-48;yy+=14){ctx.beginPath();ctx.moveTo(-13,yy);ctx.lineTo(11,yy+4);ctx.stroke()}
+ // Scene-specific outfits: preserve the hospital gown on Level 1 and dress the other levels for their settings.
+ ctx.beginPath();ctx.moveTo(-16,-110);ctx.quadraticCurveTo(-4,-120,8,-109);ctx.lineTo(18,-90);ctx.lineTo(15,-41);ctx.lineTo(10,-38);ctx.lineTo(4,-43);ctx.lineTo(-4,-37);ctx.lineTo(-12,-43);ctx.lineTo(-18,-38);ctx.lineTo(-20,-91);ctx.closePath();
+ ctx.fillStyle=currentScene===1?B:currentScene===2?"#39434b":currentScene===3?"#3d9a55":currentScene===4?"#7651a1":"#e87828";ctx.fill();
+ if(currentScene===1){
+  ctx.strokeStyle="#639fa5";ctx.lineWidth=2;for(let yy=-99;yy<-48;yy+=14){ctx.beginPath();ctx.moveTo(-13,yy);ctx.lineTo(11,yy+4);ctx.stroke()}
+ }else if(currentScene===2){
+  // Office outfit: collared shirt, narrow tie, and jacket lapels.
+  ctx.fillStyle="#e8e8df";ctx.beginPath();ctx.moveTo(-9,-113);ctx.lineTo(1,-104);ctx.lineTo(9,-113);ctx.lineTo(6,-89);ctx.lineTo(-3,-89);ctx.closePath();ctx.fill();
+  ctx.fillStyle="#b83d45";ctx.beginPath();ctx.moveTo(-2,-103);ctx.lineTo(2,-103);ctx.lineTo(5,-80);ctx.lineTo(0,-75);ctx.lineTo(-4,-80);ctx.closePath();ctx.fill();
+  ctx.strokeStyle="#111820";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-10,-111);ctx.lineTo(-3,-96);ctx.lineTo(-8,-91);ctx.moveTo(9,-111);ctx.lineTo(4,-96);ctx.lineTo(8,-91);ctx.stroke();
+ }else if(currentScene===3){
+  // Park outfit: casual green tee with a bright pocket.
+  ctx.fillStyle="#b4e36c";ctx.fillRect(5,-91,8,10);ctx.strokeStyle="#286d3c";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-12,-94);ctx.lineTo(10,-90);ctx.stroke();
+ }else if(currentScene===4){
+  // Skatepark outfit: purple hoodie with drawstrings and a front pouch.
+  ctx.strokeStyle="#d9c7f5";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-5,-104);ctx.lineTo(-6,-87);ctx.moveTo(3,-104);ctx.lineTo(5,-87);ctx.stroke();
+  ctx.fillStyle="#5b3b80";ctx.beginPath();ctx.moveTo(-12,-72);ctx.lineTo(10,-72);ctx.lineTo(12,-57);ctx.lineTo(-14,-57);ctx.closePath();ctx.fill();
+  ctx.strokeStyle="#d9c7f5";ctx.stroke();
+ }else if(currentScene===5){
+  // Pumpkin patch outfit: orange flannel with dark crossing checks.
+  ctx.strokeStyle="#713d2c";ctx.lineWidth=3;
+  for(let xx=-12;xx<=10;xx+=10){ctx.beginPath();ctx.moveTo(xx,-107);ctx.lineTo(xx+2,-43);ctx.stroke()}
+  for(let yy=-96;yy<=-54;yy+=14){ctx.beginPath();ctx.moveTo(-17,yy);ctx.lineTo(15,yy+2);ctx.stroke()}
+  ctx.fillStyle="#e7c8a2";ctx.fillRect(-3,-101,6,7);
+ }
  // Only the visible arm: centered across the torso, with a clear elbow and hand.
  ctx.strokeStyle=I;ctx.lineWidth=16;ctx.beginPath();ctx.moveTo(2,-99);ctx.lineTo(-7,-78);ctx.lineTo(2,-61);ctx.stroke();
  ctx.strokeStyle=S;ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(2,-99);ctx.lineTo(-7,-78);ctx.lineTo(2,-61);ctx.stroke();
@@ -161,7 +184,7 @@ function zombie(z){
  // Shared swept hair silhouette, also outlined in fine black.
  ctx.fillStyle="#273a32";ctx.beginPath();ctx.moveTo(-17,-165);ctx.lineTo(-26,-179);ctx.lineTo(-14,-175);ctx.lineTo(-10,-190);ctx.lineTo(0,-181);ctx.lineTo(8,-196);ctx.lineTo(14,-182);ctx.lineTo(28,-185);ctx.lineTo(23,-174);ctx.lineTo(32,-169);ctx.lineTo(20,-167);ctx.lineTo(10,-171);ctx.lineTo(0,-169);ctx.lineTo(-7,-172);ctx.closePath();ctx.fill();ctx.stroke();
  // One visible eye, shifted 2 pixels forward toward the nose on every level.
- ctx.save();ctx.translate(2,0);
+ ctx.save();ctx.translate(7,0);
  ctx.fillStyle="#000";ctx.beginPath();ctx.moveTo(-14,-166);ctx.lineTo(-8,-175);ctx.lineTo(4,-173);ctx.lineTo(13,-165);ctx.lineTo(1,-168);ctx.closePath();ctx.fill();
  ctx.fillStyle="#fff0a5";ctx.beginPath();ctx.ellipse(-1,-158,level===3?8:7,level===3?9:8,-.15,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#000";ctx.lineWidth=1.333;ctx.stroke();
  ctx.fillStyle="#000";ctx.beginPath();ctx.arc(level===4?0:1,-157,level===3?4:3,0,Math.PI*2);ctx.fill();
