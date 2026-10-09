@@ -137,13 +137,20 @@ function drawLevelOneCartoonZombie(z,drawHead=true){
  ctx.moveTo(-9,-39);ctx.lineTo(-19+w,-17);ctx.lineTo(-34+w,1);ctx.lineTo(-39+w,25);
  ctx.moveTo(8,-39);ctx.lineTo(17-w,-17);ctx.lineTo(8-w,2);ctx.lineTo(20-w,26);ctx.stroke();
  ctx.fillStyle=I;ctx.beginPath();ctx.ellipse(-43+w,32,18,8,-.08,0,7);ctx.ellipse(25-w,33,18,8,.08,0,7);ctx.fill();
+ // Pants are behind the longer shirt; each leg has only one angular bend.
+ if(currentScene!==1){
+  ctx.fillStyle=currentScene===2?"#26343e":currentScene===3?"#294f83":currentScene===4?"#34313b":"#4d4c4a";
+  ctx.beginPath();ctx.moveTo(-18,-69);ctx.lineTo(-2,-69);ctx.lineTo(-8,-39);ctx.lineTo(-16,-39);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(0,-69);ctx.lineTo(16,-69);ctx.lineTo(16,-39);ctx.lineTo(8,-39);ctx.closePath();ctx.fill();
+  ctx.strokeStyle="#101820";ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-1,-68);ctx.lineTo(-1,-40);ctx.stroke();
+ }
  // Neck and body.
  ctx.fillStyle=I;ctx.beginPath();ctx.roundRect(-8,-137,19,27,5);ctx.fill();ctx.fillStyle=S;ctx.beginPath();ctx.roundRect(-5,-135,13,24,4);ctx.fill();
  ctx.fillStyle=I;ctx.beginPath();ctx.moveTo(-19,-112);ctx.quadraticCurveTo(-4,-126,11,-112);ctx.lineTo(23,-91);ctx.lineTo(19,-37);ctx.lineTo(11,-32);ctx.lineTo(4,-38);ctx.lineTo(-4,-32);ctx.lineTo(-12,-38);ctx.lineTo(-21,-33);ctx.lineTo(-24,-91);ctx.closePath();ctx.fill();
  // Scene-specific outfits: preserve the hospital gown on Level 1 and dress the other levels for their settings.
  ctx.beginPath();ctx.moveTo(-16,-110);ctx.quadraticCurveTo(-4,-120,8,-109);ctx.lineTo(18,-90);
  if(currentScene===1){ctx.lineTo(15,-41);ctx.lineTo(10,-38);ctx.lineTo(4,-43);ctx.lineTo(-4,-37);ctx.lineTo(-12,-43);ctx.lineTo(-18,-38);}
- else {ctx.lineTo(15,-73);ctx.lineTo(-18,-73);}
+ else {ctx.lineTo(15,-67);ctx.lineTo(-18,-67);}
  ctx.lineTo(-20,-91);ctx.closePath();
  ctx.fillStyle=currentScene===1?B:currentScene===2?"#39434b":currentScene===3?"#3d9a55":currentScene===4?"#7651a1":"#e87828";ctx.fill();
  if(currentScene===1){
@@ -168,7 +175,7 @@ function drawLevelOneCartoonZombie(z,drawHead=true){
   for(let yy=-96;yy<=-54;yy+=14){ctx.beginPath();ctx.moveTo(-17,yy);ctx.lineTo(15,yy+2);ctx.stroke()}
   ctx.fillStyle="#e7c8a2";ctx.fillRect(-3,-101,6,7);
  }
- // Only the visible arm: centered across the torso, with a clear elbow and hand.
+ // The arm is drawn after the trousers and shirt so it stays visibly in front.
  ctx.strokeStyle=I;ctx.lineWidth=16;ctx.beginPath();ctx.moveTo(2,-99);ctx.lineTo(-7,-78);ctx.lineTo(2,-61);ctx.stroke();
  ctx.strokeStyle=S;ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(2,-99);ctx.lineTo(-7,-78);ctx.lineTo(2,-61);ctx.stroke();
  ctx.fillStyle=I;ctx.beginPath();ctx.ellipse(3,-57,9,7,-.2,0,Math.PI*2);ctx.fill();
@@ -184,8 +191,17 @@ function zombie(z){
  ctx.save();ctx.translate(0,-160);ctx.scale(1.05,1.05);ctx.translate(0,160);
  ctx.fillStyle=S;ctx.strokeStyle=I;ctx.lineWidth=1.333;ctx.lineJoin="round";
  ctx.beginPath();ctx.moveTo(-17,-185);ctx.bezierCurveTo(-5,-194,13,-190,23,-179);ctx.bezierCurveTo(32,-169,31,-155,23,-147);ctx.bezierCurveTo(19,-143,17,-138,13,-134);ctx.bezierCurveTo(5,-127,-6,-130,-13,-137);ctx.bezierCurveTo(-20,-144,-25,-155,-24,-166);ctx.bezierCurveTo(-24,-175,-22,-181,-17,-185);ctx.closePath();ctx.fill();ctx.stroke();
- // Shared swept hair silhouette, also outlined in fine black.
- ctx.fillStyle="#273a32";ctx.beginPath();ctx.moveTo(-20,-174);ctx.quadraticCurveTo(-25,-187,-11,-188);ctx.quadraticCurveTo(0,-197,9,-188);ctx.quadraticCurveTo(24,-190,27,-177);ctx.quadraticCurveTo(18,-173,9,-176);ctx.quadraticCurveTo(-3,-172,-12,-176);ctx.closePath();ctx.fill();ctx.stroke();
+ // Hair styling differs by scene: business zombie is bald; others sweep backward.
+ if(level!==2){
+  ctx.fillStyle="#273a32";
+  if(level===4){
+   // Long, loose hair trailing behind the skater's head.
+   ctx.beginPath();ctx.moveTo(-20,-176);ctx.quadraticCurveTo(-30,-181,-28,-164);ctx.lineTo(-25,-146);ctx.quadraticCurveTo(-20,-151,-18,-164);ctx.lineTo(-13,-174);ctx.quadraticCurveTo(-5,-177,7,-176);ctx.quadraticCurveTo(22,-176,27,-177);ctx.quadraticCurveTo(24,-190,9,-188);ctx.quadraticCurveTo(0,-197,-11,-188);ctx.quadraticCurveTo(-25,-188,-20,-176);ctx.closePath();
+  }else{
+   ctx.beginPath();ctx.moveTo(-23,-176);ctx.quadraticCurveTo(-31,-190,-16,-191);ctx.quadraticCurveTo(-4,-198,7,-189);ctx.quadraticCurveTo(22,-191,27,-178);ctx.quadraticCurveTo(12,-181,2,-178);ctx.quadraticCurveTo(-10,-174,-23,-176);ctx.closePath();
+  }
+  ctx.fill();ctx.stroke();
+ }
  // One visible eye, shifted 2 pixels forward toward the nose on every level.
  ctx.save();ctx.translate(14,0);
  ctx.fillStyle="#000";ctx.beginPath();ctx.moveTo(-14,-166);ctx.lineTo(-8,-175);ctx.lineTo(4,-173);ctx.lineTo(13,-165);ctx.lineTo(1,-168);ctx.closePath();ctx.fill();
@@ -208,15 +224,17 @@ function zombie(z){
  else if(level===4){ctx.beginPath();ctx.moveTo(1,-143);ctx.lineTo(5,-143);ctx.lineTo(4,-138);ctx.closePath();ctx.fill();}
  else if(level===5){ctx.fillRect(10,-147,4,4);}
  else {ctx.beginPath();ctx.moveTo(-3,-142);ctx.lineTo(2,-141);ctx.lineTo(1,-136);ctx.lineTo(-2,-137);ctx.closePath();ctx.fill();}
- // Levels 2-5 wear distinct trousers; Level 1 retains the hospital gown.
- if(currentScene!==1){
-  ctx.fillStyle=currentScene===2?"#26343e":currentScene===3?"#294f83":currentScene===4?"#34313b":"#4d4c4a";
-  ctx.beginPath();ctx.moveTo(-19,-76);ctx.lineTo(-2,-76);ctx.lineTo(-4,-39);ctx.lineTo(-12,-36);ctx.lineTo(-17,-41);ctx.closePath();ctx.fill();
-  ctx.beginPath();ctx.moveTo(0,-76);ctx.lineTo(16,-76);ctx.lineTo(15,-41);ctx.lineTo(9,-36);ctx.lineTo(2,-39);ctx.closePath();ctx.fill();
-  ctx.strokeStyle="#101820";ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-1,-75);ctx.lineTo(-1,-42);ctx.stroke();
+
+
+ // The skater carries a skateboard tucked diagonally along the outside of the body.
+ if(level===4){
+  ctx.save();ctx.translate(-31,-81);ctx.rotate(-.30);
+  ctx.fillStyle="#d65c4e";ctx.strokeStyle="#171c20";ctx.lineWidth=2;
+  ctx.beginPath();ctx.roundRect(-5,-39,10,78,5);ctx.fill();ctx.stroke();
+  ctx.fillStyle="#f1d6a2";ctx.fillRect(-3,-25,6,50);
+  for(let wy of [-25,25]){ctx.fillStyle="#202326";ctx.beginPath();ctx.arc(0,wy,4,0,Math.PI*2);ctx.fill();}
+  ctx.restore();
  }
- // Level 5 keeps its small green sprout, with the same black outline weight.
- if(level===5){ctx.fillStyle=S;ctx.beginPath();ctx.moveTo(0,-183);ctx.quadraticCurveTo(5,-201,20,-193);ctx.quadraticCurveTo(13,-184,0,-183);ctx.closePath();ctx.fill();ctx.strokeStyle="#000";ctx.lineWidth=1.333;ctx.stroke();}
  ctx.restore();ctx.restore();
 }
 function drawOffice(){
