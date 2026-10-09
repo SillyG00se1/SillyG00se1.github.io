@@ -27,7 +27,7 @@ textarea{width:100%;min-height:230px;resize:vertical;background:var(--panel);col
 .notice{font-size:20px;max-width:900px;text-align:center;line-height:1.4}
 @media(max-width:900px){.lesson-grid,.level-grid{grid-template-columns:repeat(2,1fr)}}
 </style></head><body><div id="app"></div><script>
-const LESSONS={"1": {"title": "A S D F J K L .", "skill": "A S D F J K L .", "levels": ["asdf. jkl asdf. jkl fdsa lkj ..", "sad lad ask all fall salad", "A lad asks. A sad lad. A salad as all."]}, "2": {"title": "G H", "skill": "G H", "levels": ["fg jh gh gag h j h fgh jhg", "had hag gas has dad glad half", "A glad lad has a flag. Dad had a salad. Alf has a flag."]}, "3": {"title": "E I", "skill": "E I", "levels": ["de ki ei ie fei jdi", "gig hid fig his like slide side hide", "I like all slides. He hid his flag. She is glad."]}, "4": {"title": "R U", "skill": "R U", "levels": ["fr ju ru ur fru jru", "rude sure hair hard fire ride rule fish", "I feel free here. The fish is red. She has a hard ride."]}, "5": {"title": "T Y", "skill": "T Y", "levels": ["ft jy ty yt try thy", "try they stay that this your yurt tasty", "They stay here. Try this. That is a large hat."]}, "6": {"title": "W O", "skill": "W O", "levels": ["we ow wo who two wow lol sws wsw olo lol sws", "we who word work two how now show world", "We work hard. Who has the word. How are you."]}, "7": {"title": "Q P", "skill": "Q P", "levels": ["qaq p p qa aq p aqa ppp p q p", "aqua up quit quick quiet queen people paper", "Lift up the paper. The queen is quite a sight. Quiet people work."]}, "8": {"title": "C M", "skill": "C M", "levels": ["cm mc me cmc mcm mjm cfc jmfc", "me can come same time music make home", "Come home with me. I can make music. The same time works."]}, "9": {"title": "V B", "skill": "V B", "levels": ["vb bv be ve vib biv jb fv fvjb jbj fvf", "be van very have above brave blue five", "I have five. The van is blue. Be brave."]}, "10": {"title": "N X", "skill": "N X", "levels": ["nx xn fv jn njn fvf fvnj fvnj", "no next name mix nine nice new box", "What is next. Mix the box. My name is nice."]}, "11": {"title": "Z", "skill": "Z", "levels": ["z az za zaz aza zzaa zaza zaq qaz aqz", "zip zero size zone zoo lazy amazing", "The zoo is amazing. The box is a nice size. Zero is next."]}, "12": {"title": "; ,", "skill": "; ,", "levels": ["l, ;l k, ;k as, s;l", "ask; fall, glass; class, last, less; pass", "Ask the class, because the glass is full. The class is small; I know."]}, "13": {"title": "?", "skill": "?", "levels": ["a? s? go? hi? yes? no?", "hi? go? yes? no? this? that? home?", "Hi, who are you? Can I go home? Hey, what is that?"]}, "14": {"title": "Capital Letters / Shift", "skill": "Capital letters / Shift", "levels": ["A S G H T I W M", "The I He She We They My This", "I Am Here. She Has A Hat. They Work Hard. We Like Music."]}, "15": {"title": "Full-Letter Review & Fluency", "skill": "Full-letter Review & Fluency", "levels": ["asdf jkl; gh qwerty yuiop zxcvbnm rewkljn enchqp er ed en", "quick school typing keyboard practice friend computer", "I can type with both hands. I am getting faster and more accurate. Practice helps me become a better typist."]}};
+const LESSONS={"1":{"title":"A S D F J K L .","skill":"A S D F J K L .","levels":["asdf jkl. fdsa lkj. asdf jkl. fdsa lkj.","sad lad asks dad. a lad falls. a sad lad asks dad.","a flask falls. all lads ask dad. a sad lad falls."]},"2":{"title":"G H","skill":"G H","levels":["gh ghg. jhg fgh. gh jh. fgh jhg.","a glad lad has a flag. dad has a flag.","a glad lad has a flag. dad has a flag. a glad lad asks dad."]},"3":{"title":"E I","skill":"E I","levels":["de ki ei ie. hid did. lie lid. die.","he is a skilled lad. she is glad. he did a deed.","she likes a fish. he is glad. a lad is sad."]},"4":{"title":"R U","skill":"R U","levels":["ru ur. fur. rude ride. rule fire.","a red fish is here. she is sure. he is rude.","a girl is here. she is sure. fire is rare."]},"5":{"title":"T Y","skill":"T Y","levels":["try thy. yet they. try yet. thy style.","they try. they stay. they stay yet.","they stay here. try this tasty treat. that hat is tasty."]},"6":{"title":"W O","skill":"W O","levels":["we wow. who wore wool. we wow.","we work hard. we show our work. we work.","we wrote the whole story. how they work is worth a look."]},"7":{"title":"Q P","skill":"Q P","levels":["qaq pqp. quit. pop. pip. up.","put the paper up. quite a ripe pear.","a pup is quiet. a pup is quite apt."]},"8":{"title":"C M","skill":"C M","levels":["come. me. mom. comic. calm.","come home with me. make a calm comic.","mom came home. we make music. come home."]},"9":{"title":"V B","skill":"V B","levels":["vibe. brave. blue. five. above.","be brave. blue is very vivid.","five brave boys have blue vibes. be brave."]},"10":{"title":"N X","skill":"N X","levels":["next. mix. box. name. nine.","mix the next box. name the new one.","we can mix six new boxes. next time name them."]},"11":{"title":"Z","skill":"Z","levels":["zoo. zip. zero. zone. lazy.","the zoo has a zebra. zero is a nice size.","the zebra is lazy. the zoo is next to the zone."]},"12":{"title":"; ,","skill":"; ,","levels":["ask, ask; fall, fall; glass, class.","ask the class, then pass the glass; all fall.","the class is small, and the glass is full; ask, then pass."]},"13":{"title":"?","skill":"?","levels":["hi? go? yes? no? who? why?","can we go home? is this yours? why not?","who is here? can we go now? is the box next?"]},"14":{"title":"Capital Letters / Shift","skill":"Capital letters / Shift","levels":["A Sad Lad Asks Dad. He Is Here.","We Work Hard. They Like The Blue Van.","Can You Help Me? I Am Ready. We Can Do This."]},"15":{"title":"Full-Letter Review & Fluency","skill":"Full-letter Review & Fluency","levels":["quick brown fox jumps over lazy dog. pack my box with five dozen liquor jugs.","Typing practice helps me build speed, accuracy, and confidence.","I can type with both hands. I am getting faster and more accurate. Practice helps me become a better typist."]}}
 const LEVEL_NAMES=["Letter Combinations","Words","Sentences"];
 const STUDENTS_KEY="typingUnitStudents",DATA_KEY="typingUnitData";
 let students=loadJSON(STUDENTS_KEY,[]),data=loadJSON(DATA_KEY,[]),remoteReady=false;
@@ -75,18 +75,20 @@ function deleteStudent(){
  if(confirm(`Delete the student profile for ${n}?\n\nThis does NOT delete that student's typing data.`)){students.splice(i,1);saveJSON(STUDENTS_KEY,students);deleteStudentShared(n);if(studentName.toLowerCase()===n.toLowerCase())studentName="";showStudentMenu()}
 }
 function selectStudent(n){studentName=n;showLessonMenu()}
-function bestResult(n){
- let rows=data.filter(r=>String(r.Student).toLowerCase()===studentName.toLowerCase()&&Number(r.Lesson)===n);
+function bestResult(n,level=null){
+ let rows=data.filter(r=>String(r.Student).toLowerCase()===studentName.toLowerCase()&&Number(r.Lesson)===n&&(level===null||Number(r.Level)===level));
  return rows.reduce((b,r)=>!b||Number(r.WPM)>Number(b.WPM)||(Number(r.WPM)===Number(b.WPM)&&Number(r.Accuracy)>Number(b.Accuracy))?r:b,null)
 }
+function completedLevelCount(n){return [1,2,3].filter(l=>data.some(r=>String(r.Student).toLowerCase()===studentName.toLowerCase()&&Number(r.Lesson)===n&&Number(r.Level)===l)).length}
+function levelStats(n,l){const b=bestResult(n,l);return b?(`${Number(b.WPM).toFixed(1)} WPM<br>${Number(b.Accuracy).toFixed(1)}% accuracy`):"Not completed"}
 function showLessonMenu(){
  stopTimer();
  let tiles=[];
  for(let row=0;row<5;row++){
    for(let col=0;col<3;col++){
-     const n=row*3+col+1,l=LESSONS[n],b=bestResult(n);
-     const res=b?`Best: ${Number(b.WPM).toFixed(1)} WPM | ${Number(b.Accuracy).toFixed(1)}% accuracy`:"Not completed";
-     tiles.push(`<button onclick="showLevelMenu(${n})">Lesson ${n}: ${esc(l.title)}<br><br>${res}</button>`);
+     const n=row*3+col+1,l=LESSONS[n],done=completedLevelCount(n);
+     const status=done===3?'<span style="color:#39e75f;font-size:30px;font-weight:900">✓ Complete</span>':`Levels completed: ${done}/3`;
+     tiles.push(`<button onclick="showLevelMenu(${n})">Lesson ${n}: ${esc(l.title)}<br><br>${status}</button>`);
    }
    const groupEnd=(row+1)*3;
    tiles.push(`<div class="games-cell"><button onclick="showGamesMenu(${groupEnd})">GAMES</button></div>`);
@@ -142,7 +144,7 @@ function endNinjaReview(){if(ninjaState){window.onkeydown=null;window.removeEven
 function nextFromNinja(){const g=ninjaState&&ninjaState.groupEnd||3;const q={3:1,6:2,9:3,12:4,15:5}[g]||1;const nextLesson=g+1;endNinjaReview();sessionStorage.setItem("typingUnitReturn","1");sessionStorage.setItem("typingUnitStudent",studentName);sessionStorage.setItem("typingUnitNextLesson",String(nextLesson));window.location.href="Keyboard_Quest.html?level="+q+"&return=Typing_Unit.html";}
 function reviewNotice(n){startNinjaReview(n)}
 function showLevelMenu(n){
- lessonNumber=n;let l=LESSONS[n],levels=LEVEL_NAMES.map((x,i)=>button(`LEVEL ${i+1}<br>${x}`,`startLesson(${n},${i+1})`)).join("");
+ lessonNumber=n;let l=LESSONS[n],levels=LEVEL_NAMES.map((x,i)=>button(`LEVEL ${i+1}<br>${x}<br><br>${levelStats(n,i+1)}`,`startLesson(${n},${i+1})`)).join("");
  screen(`<div class="center"><h2>Lesson ${n}: ${esc(l.title)}</h2><div class="subtitle">New keys / skill: ${esc(l.skill)}</div><div class="grid level-grid">${levels}</div><div class="bottom">${button("BACK TO LESSONS","showLessonMenu()")}</div></div>`)
 }
 function showGamesMenu(groupEnd){
@@ -200,13 +202,9 @@ function saveData(elapsed,wpm,accuracy){
 }
 function showResults(elapsed,wpm,accuracy){
  window.onkeydown=null;
- let b=bestResult(lessonNumber),best=b?`Best for this lesson: ${Number(b.WPM).toFixed(1)} WPM | ${Number(b.Accuracy).toFixed(1)}% accuracy`:"";
- screen(`<div class="center"><h1>Typing Results</h1><div class="results">Student: ${esc(studentName)}\n\nLesson ${lessonNumber}: ${esc(LESSONS[lessonNumber].title)}\nLevel ${levelNumber}: ${LEVEL_NAMES[levelNumber-1]}\n\nTime: ${elapsed.toFixed(1)} seconds\n\nTyping Speed: ${wpm.toFixed(1)} WPM\n\nAccuracy: ${accuracy.toFixed(1)}%</div><div style="font-size:21px;font-weight:bold;margin:15px">${best}</div>
+ screen(`<div class="center"><h1>Typing Results</h1><div class="results">Student: ${esc(studentName)}\n\nLesson ${lessonNumber}: ${esc(LESSONS[lessonNumber].title)}\nLevel ${levelNumber}: ${LEVEL_NAMES[levelNumber-1]}\n\nTime: ${elapsed.toFixed(1)} seconds\n\nTyping Speed: ${wpm.toFixed(1)} WPM\n\nAccuracy: ${accuracy.toFixed(1)}%</div>
  <div class="bottom">${button("TRY AGAIN",`startLesson(${lessonNumber},${levelNumber})`)}${button("OTHER LEVELS",`showLevelMenu(${lessonNumber})`)}${button("ALL LESSONS","showLessonMenu()")}${button([3,6,9,12,15].includes(lessonNumber)&&levelNumber===3?"🍓 NEXT LESSON • TYPING NINJA":"NEXT","nextFromResults()")}</div></div>`);
- window.onkeydown=function(e){
-   if(e.target&&["INPUT","TEXTAREA","SELECT"].includes(e.target.tagName))return;
-   if(e.code==="Space"){e.preventDefault();nextFromResults()}
- };
+ window.onkeydown=function(e){if(e.target&&["INPUT","TEXTAREA","SELECT"].includes(e.target.tagName))return;if(e.code==="Space"){e.preventDefault();nextFromResults()}}
 }
 function nextFromResults(){
  if(levelNumber<3)return startLesson(lessonNumber,levelNumber+1);
