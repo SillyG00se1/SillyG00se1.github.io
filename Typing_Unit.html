@@ -94,6 +94,7 @@ function showLessonMenu(){
  screen(`<div class="center"><h2>${esc(studentName)}'s Typing Progress</h2><div class="grid lesson-grid">${tiles.join("")}</div><div class="bottom">${button("BACK TO STUDENTS","showStudentMenu()")}</div></div>`);
 }
 function startKeyboardQuest(level){sessionStorage.setItem("typingUnitReturn","1");sessionStorage.setItem("typingUnitStudent",studentName);sessionStorage.setItem("typingUnitNextLesson",String((level-1)*3+4));window.location.href="Keyboard_Quest.html?level="+encodeURIComponent(level)+"&return=Typing_Unit.html"}
+function startTypingDefender(level,groupEnd){const nextLesson=groupEnd+1;sessionStorage.setItem("typingUnitReturn","1");sessionStorage.setItem("typingUnitStudent",studentName);sessionStorage.setItem("typingUnitNextLesson",String(nextLesson));window.location.href="Typing_Defender.html?level="+encodeURIComponent(level)+"&return=Typing_Unit.html&nextLesson="+encodeURIComponent(nextLesson)}
 const NINJA_GROUPS={3:{letters:"asdfjklghei."},6:{letters:"asdfjklgheirutywo"},9:{letters:"asdfjklgheirutywoqpcmvbnx"},12:{letters:"asdfjklgheirutywoqpcmvbnxz;"},15:{letters:"asdfjklgheirutywoqpcmvbnxz;"}};
 let ninjaState=null;
 let ninjaRaf=0;
@@ -146,7 +147,7 @@ function showLevelMenu(n){
 }
 function showGamesMenu(groupEnd){
  const gameLevel={3:1,6:2,9:3,12:4,15:5}[groupEnd]||1;
- screen(`<div class="center"><h2>Games</h2><div class="subtitle">Lessons ${groupEnd-2}-${groupEnd}</div><div class="grid level-grid">${button("🍓 FRUIT NINJA<br>LEVEL "+gameLevel,`startNinjaReview(${groupEnd})`)}${button("⌨️ KEYBOARD QUEST<br>LEVEL "+gameLevel,`startKeyboardQuest(${gameLevel})`)}</div><div class="bottom">${button("BACK TO LESSONS","showLessonMenu()")}</div></div>`)
+ screen(`<div class="center"><h2>Games</h2><div class="subtitle">Lessons ${groupEnd-2}-${groupEnd}</div><div class="grid level-grid">${button("🍓 FRUIT NINJA<br>LEVEL "+gameLevel,`startNinjaReview(${groupEnd})`)}${button("⌨️ KEYBOARD QUEST<br>LEVEL "+gameLevel,`startKeyboardQuest(${gameLevel})`)}${button("🧟 ZOMBIE TYPING DEFENDER<br>LEVEL "+gameLevel,`startTypingDefender(${gameLevel},${groupEnd})`)}</div><div class="bottom">${button("BACK TO LESSONS","showLessonMenu()")}</div></div>`)
 }
 function startLesson(n,lvl){
  lessonNumber=n;levelNumber=lvl;prompt=LESSONS[n].levels[lvl-1];currentPosition=0;correctCount=0;errorCount=0;correctedErrorCount=0;
