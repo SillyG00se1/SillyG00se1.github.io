@@ -206,8 +206,7 @@ function zombie(z){
  ctx.save();ctx.translate(0,-160);ctx.scale(1.05,1.05);ctx.translate(0,160);
  ctx.fillStyle=S;ctx.strokeStyle=I;ctx.lineWidth=1.333;ctx.lineJoin="round";
  ctx.beginPath();ctx.moveTo(-17,-185);ctx.bezierCurveTo(-5,-194,13,-190,23,-179);ctx.bezierCurveTo(32,-169,31,-155,23,-147);ctx.bezierCurveTo(19,-143,17,-138,13,-134);ctx.bezierCurveTo(5,-127,-6,-130,-13,-137);ctx.bezierCurveTo(-20,-144,-25,-155,-24,-166);ctx.bezierCurveTo(-24,-175,-22,-181,-17,-185);ctx.closePath();ctx.fill();ctx.stroke();
- // Blend the neck into the head by covering the short jaw/neck seam with skin tone.
- ctx.strokeStyle=S;ctx.lineWidth=2.5;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(-8,-134);ctx.quadraticCurveTo(1,-130,11,-134);ctx.stroke();
+ // Keep the neck outline black; the previous skin-tone blend did not look right.
  // Hair styling differs by scene: business zombie is bald; others sweep backward.
  if(level!==2){
   ctx.fillStyle="#273a32";
