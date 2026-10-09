@@ -80,6 +80,7 @@ function bestResult(n,level=null){
  return rows.reduce((b,r)=>!b||Number(r.WPM)>Number(b.WPM)||(Number(r.WPM)===Number(b.WPM)&&Number(r.Accuracy)>Number(b.Accuracy))?r:b,null)
 }
 function completedLevelCount(n){return [1,2,3].filter(l=>data.some(r=>String(r.Student).toLowerCase()===studentName.toLowerCase()&&Number(r.Lesson)===n&&Number(r.Level)===l)).length}
+function lessonMeetsAccuracy(n){return [1,2,3].every(l=>{const rows=data.filter(r=>String(r.Student).toLowerCase()===studentName.toLowerCase()&&Number(r.Lesson)===n&&Number(r.Level)===l);return rows.length>0&&Math.max(...rows.map(r=>Number(r.Accuracy)||0))>80})}
 function levelStats(n,l){const b=bestResult(n,l);return b?(`${Number(b.WPM).toFixed(1)} WPM<br>${Number(b.Accuracy).toFixed(1)}% accuracy`):"Not completed"}
 function showLessonMenu(){
  stopTimer();
@@ -87,7 +88,7 @@ function showLessonMenu(){
  for(let row=0;row<5;row++){
    for(let col=0;col<3;col++){
      const n=row*3+col+1,l=LESSONS[n],done=completedLevelCount(n);
-     const status=done===3?'<span style="color:#39e75f;font-size:30px;font-weight:900">✓ Complete</span>':`Levels completed: ${done}/3`;
+     const status=lessonMeetsAccuracy(n)?'<span style="color:#39e75f;font-size:30px;font-weight:900">✓ Complete</span>':`Levels completed: ${done}/3`;
      tiles.push(`<button onclick="showLevelMenu(${n})">Lesson ${n}: ${esc(l.title)}<br><br>${status}</button>`);
    }
    const groupEnd=(row+1)*3;
