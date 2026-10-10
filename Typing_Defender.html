@@ -324,9 +324,21 @@ function drawPumpkinPatch(){
  ctx.fillStyle="#6f4a2e";ctx.fillRect(W*.73,H*.27,25,210);ctx.fillStyle="#4e7b3d";ctx.beginPath();ctx.arc(W*.74,H*.25,90,0,7);ctx.fill();
 
 }
+function drawCautionLine(){
+ const x=Math.max(44,W*.075),top=88,bottom=H;
+ ctx.save();
+ // A high-contrast caution-tape boundary spans the full playfield below the HUD.
+ ctx.fillStyle="#f8d32b";ctx.fillRect(x-10,top,20,bottom-top);
+ ctx.beginPath();ctx.rect(x-10,top,20,bottom-top);ctx.clip();
+ ctx.strokeStyle="#171717";ctx.lineWidth=9;
+ for(let y=top-30;y<bottom+30;y+=27){ctx.beginPath();ctx.moveTo(x-18,y);ctx.lineTo(x+18,y+22);ctx.stroke()}
+ ctx.restore();
+ ctx.fillStyle="#151515";ctx.fillRect(x-38,top+12,76,28);
+ ctx.fillStyle="#ffdf38";ctx.font="bold 13px Arial";ctx.textAlign="center";ctx.fillText("DANGER",x,top+31);ctx.textAlign="start";
+}
 function draw(){
  ctx.clearRect(0,0,W,H);drawSky();switch(currentScene){case 1:drawHospital();break;case 2:drawOffice();break;case 3:drawPark();break;case 4:drawSkatePark();break;case 5:drawPumpkinPatch();break;default:drawHospital();}
- if(screen==="game"){for(let z of zombies)zombie(z);drawEffects();return}
+ if(screen==="game"){drawCautionLine();for(let z of zombies)zombie(z);drawEffects();return}
 }
 function drawEffects(){
  for(let s of splats){ctx.globalAlpha=Math.max(0,s.life/1.1);ctx.fillStyle=s.c;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,7);ctx.fill();for(let d of s.d){ctx.beginPath();ctx.arc(s.x+d.x,s.y+d.y,d.r,0,7);ctx.fill()};ctx.globalAlpha=1}
@@ -346,7 +358,7 @@ function updateHUD(){
 function loop(now){
  if(!running)return;let dt=Math.min(.04,(now-last)/1000);last=now;
  for(let c of clouds){c.x-=c.v*dt;if(c.x<-200)c.x=W+100}
- for(let z of zombies){z.x-=z.speed*dt;z.walkTime=(z.walkTime||0)+dt;if(z.x<W*.26){z.x=W*.26;shake=2;endGame("Too Close!");return}}
+ for(let z of zombies){z.x-=z.speed*dt;z.walkTime=(z.walkTime||0)+dt;if(z.x<Math.max(44,W*.075)+42){z.x=Math.max(44,W*.075)+42;shake=2;endGame("The Zombies Broke Through!");return}}
  for(let s of splats)s.life-=dt; splats=splats.filter(s=>s.life>0);
  for(let p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=420*dt;p.life-=dt}particles=particles.filter(p=>p.life>0);
  if(!zombies.length){spawnTimer+=dt;if(spawnTimer>.5){spawnTimer=0;newZombie()}}
