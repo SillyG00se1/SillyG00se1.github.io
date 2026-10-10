@@ -37,6 +37,13 @@ let characterStatus=[],timerStarted=false,startTime=0,submitted=false,timerId=nu
 
 function loadJSON(k,f){try{let v=JSON.parse(localStorage.getItem(k));return v??f}catch(e){return f}}
 function saveJSON(k,v){localStorage.setItem(k,JSON.stringify(v))}
+const BACKUP_KEY="typingUnitProtectedBackup";
+function mapRemoteResult(x){return {Date:x.date,Time:x.time,Student:x.student,Lesson:x.lesson,Level:x.level,"Level Name":x.level_name,Prompt:x.prompt,"Time Seconds":x.time_seconds,WPM:x.wpm,Accuracy:x.accuracy,"Correct Characters":x.correct_characters,Errors:x.errors,"Corrected Characters":x.corrected_characters};}
+function preserveDataSnapshot(reason, rows=data){
+  try{const existing=loadJSON(BACKUP_KEY,null);if(!existing||!Array.isArray(existing.rows)||existing.rows.length===0){saveJSON(BACKUP_KEY,{savedAt:new Date().toISOString(),reason,rows:rows.map(r=>({...r}))});}}
+  catch(e){console.error("Could not preserve the local recovery snapshot.",e);}
+}
+function hasLocalResults(){return Array.isArray(data)&&data.length>0;}
 async function loadSharedData(){
   try{
     const [sr,dr]=await Promise.all([
@@ -45,9 +52,18 @@ async function loadSharedData(){
     ]);
     const remoteStudents=sr.map(x=>x.name).filter(Boolean);
     students=[...new Set([...students,...remoteStudents])].sort((a,b)=>a.localeCompare(b));
-    data=dr.map(x=>({Date:x.date,Time:x.time,Student:x.student,Lesson:x.lesson,Level:x.level,"Level Name":x.level_name,Prompt:x.prompt,"Time Seconds":x.time_seconds,WPM:x.wpm,Accuracy:x.accuracy,"Correct Characters":x.correct_characters,Errors:x.errors,"Corrected Characters":x.corrected_characters}));
-    remoteReady=true;saveJSON(STUDENTS_KEY,students);saveJSON(DATA_KEY,data);
-  }catch(e){console.warn("Shared Supabase storage unavailable; using local browser storage.",e);}
+    const remoteData=dr.map(mapRemoteResult);
+    if(remoteData.length===0 && hasLocalResults()){
+      preserveDataSnapshot("Remote results unexpectedly empty at startup",data);
+      console.error("Supabase returned no typing results. Kept local results instead of overwriting them.");
+      alert("WARNING: Supabase returned an empty typing-results table, but this browser has saved results. The app kept the local data and did not replace it. Do not reset or clear data. Download a CSV backup and check Supabase before continuing.");
+    }else{
+      if(hasLocalResults() && remoteData.length>0 && remoteData.length<data.length)preserveDataSnapshot("Remote results count lower than local cache",data);
+      data=remoteData;
+      saveJSON(DATA_KEY,data);
+    }
+    remoteReady=true;saveJSON(STUDENTS_KEY,students);
+  }catch(e){console.warn("Shared Supabase storage unavailable; keeping local browser data.",e);alert("Could not refresh shared typing data from Supabase. The app is keeping this browser's saved copy. Check your connection before making data changes.");}
 }
 async function saveStudentShared(name){try{await supabaseRequest("typing_students",{method:"POST",body:JSON.stringify({name})})}catch(e){console.warn("Could not save student to shared storage.",e)}}
 async function deleteStudentShared(name){try{await supabaseRequest("typing_students?name=eq."+encodeURIComponent(name),{method:"DELETE"})}catch(e){console.warn("Could not delete student from shared storage.",e)}}
@@ -221,9 +237,20 @@ function downloadData(){
 }
 async function viewData(refresh=true){
  stopTimer();
- if(refresh)try{const dr=await supabaseRequest("typing_results?select=*&order=id.desc");data=dr.map(x=>({Date:x.date,Time:x.time,Student:x.student,Lesson:x.lesson,Level:x.level,"Level Name":x.level_name,Prompt:x.prompt,"Time Seconds":x.time_seconds,WPM:x.wpm,Accuracy:x.accuracy,"Correct Characters":x.correct_characters,Errors:x.errors,"Corrected Characters":x.corrected_characters}));saveJSON(DATA_KEY,data)}catch(e){}
+ if(refresh){
+  try{
+   const dr=await supabaseRequest("typing_results?select=*&order=id.desc"),remoteData=dr.map(mapRemoteResult);
+   if(remoteData.length===0 && hasLocalResults()){
+    preserveDataSnapshot("Remote results unexpectedly empty in View All Data",data);
+    alert("SAFETY WARNING: Supabase returned zero results, but this browser has saved records. The local records were preserved. Download a CSV now and check the Supabase table before deleting anything.");
+   }else{
+    if(hasLocalResults()&&remoteData.length>0&&remoteData.length<data.length)preserveDataSnapshot("Remote results count lower than local cache in View All Data",data);
+    data=remoteData;saveJSON(DATA_KEY,data);
+   }
+  }catch(e){console.error("Could not refresh typing data.",e);alert("Could not refresh data from Supabase. Showing this browser's saved copy instead. No local records were overwritten.");}
+ }
  let h=["Date","Time","Student","Lesson","Level","Level Name","Prompt","Time Seconds","WPM","Accuracy","Correct Characters","Errors","Corrected Characters"];
- let rows=data.length?data.map(r=>`<tr>${h.map(k=>`<td>${esc(r[k]??"")}</td>`).join("")}</tr>`).join(""):`<tr><td colspan="${h.length}">No typing data saved yet.</td></tr>`;
+ let rows=data.length?data.map(r=>`<tr>${h.map(k=>`<td>${esc(r[k]??"")}</td>`).join("")}</tr>`).join(""):`<tr><td colspan="${h.length}">No typing data saved in this browser.</td></tr>`;
  screen(`<div style="height:100%;min-height:0;display:flex;flex-direction:column"><h2 style="flex:0 0 auto">Typing Data</h2><div class="bottom" style="justify-content:flex-start;flex:0 0 auto;margin:8px 0">${button("DOWNLOAD CSV","downloadData()")}${button("BACK","showStudentMenu()")}${button("RESET STUDENT DATA","resetStudentData()")}</div><div class="data-wrap" style="min-height:0;min-width:0;flex:1;overflow:auto"><table style="width:max-content;min-width:100%"><thead><tr>${h.map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div></div>`)
 }
 async function resetStudentData(){
@@ -238,16 +265,42 @@ async function resetStudentData(){
  const password=window.prompt("Enter the password to reset typing data for "+name+":");
  if(password===null)return;
  if(password!=="1234"){alert("Incorrect password. No data was deleted.");return}
- if(!confirm("Permanently delete all typing records for "+name+"? The student profile will remain, but this student's lesson progress and results will be reset."))return;
+ if(!confirm("SAFETY CHECK: Before deletion, the app will count this student's matching records and make a local recovery snapshot. Continue to preview the deletion?"))return;
  try{
-   await supabaseRequest("typing_results?student=eq."+encodeURIComponent(name),{method:"DELETE",headers:{Prefer:"return=minimal"}});
-   data=data.filter(r=>String(r.Student||"").toLowerCase()!==name.toLowerCase());
+   const allRemote=await supabaseRequest("typing_results?select=id,student&order=id.asc");
+   const matches=allRemote.filter(r=>String(r.student||"")===name);
+   const otherStudents=new Set(allRemote.map(r=>String(r.student||"")).filter(n=>n&&n!==name));
+   if(!matches.length){
+    alert("Safety stop: Supabase returned zero records for "+name+". Nothing was deleted. If this browser has local records, download the CSV and inspect the database before proceeding.");
+    return;
+   }
+   if(matches.some(r=>!r.id||String(r.student||"")!==name)){
+    alert("Safety stop: The records returned for this student did not pass verification. Nothing was deleted.");
+    return;
+   }
+   if(!confirm("FINAL DELETE PREVIEW\nStudent: "+name+"\nRecords to delete: "+matches.length+"\nOther students with records in Supabase: "+otherStudents.size+"\n\nA recovery snapshot will be saved in this browser first. This is permanent in Supabase. Continue?"))return;
+   preserveDataSnapshot("Before deleting results for "+name,data);
+   const filter="typing_results?student=eq."+encodeURIComponent(name)+"&select=id,student";
+   const deleted=await supabaseRequest(filter,{method:"DELETE",headers:{Prefer:"return=representation"}});
+   if(!Array.isArray(deleted)||deleted.length!==matches.length){
+     preserveDataSnapshot("Deletion count mismatch for "+name,[...data]);
+     throw new Error("Expected to delete "+matches.length+" rows but Supabase returned "+(Array.isArray(deleted)?deleted.length:"an invalid response")+". Do not retry; verify the table and recovery snapshot.");
+   }
+   const deletedIds=new Set(deleted.map(r=>String(r.id)));
+   if(matches.some(r=>!deletedIds.has(String(r.id)))||deleted.some(r=>String(r.student||"")!==name)){
+     throw new Error("Supabase returned deleted rows that did not match the preview. Stop and inspect the table.");
+   }
+   const remaining=await supabaseRequest("typing_results?select=id,student&order=id.asc");
+   if(remaining.some(r=>String(r.student||"")===name)){
+     throw new Error("Verification failed: records for "+name+" still remain in Supabase. The local snapshot is preserved; do not retry yet.");
+   }
+   data=data.filter(r=>String(r.Student||"")!==name);
    saveJSON(DATA_KEY,data);
-   alert("Typing data for "+name+" has been reset. The student profile remains.");
+   alert("Verified: deleted "+deleted.length+" typing records for "+name+". Other students' records were checked and preserved. A local recovery snapshot was saved before deletion.");
    await viewData(false);
  }catch(e){
    console.error(e);
-   alert("The shared typing data could not be reset. No local records were changed. Please check the Supabase DELETE policy and try again.");
+   alert("The reset could not be fully verified. Do not retry yet. The app attempted to preserve a local recovery snapshot. Details: "+(e&&e.message?e.message:"unknown error")+". Check Supabase Table Editor and download any remaining data.");
  }
 }
 document.addEventListener("keydown",function(e){if(e.key!=="Escape")return;const app=document.getElementById("app");if(!app)return;const back=[...app.querySelectorAll("button")].find(b=>b.textContent.trim().toUpperCase()==="BACK TO LESSONS");if(back){e.preventDefault();back.click();}});
