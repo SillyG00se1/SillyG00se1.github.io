@@ -23,15 +23,15 @@ button:hover,button:focus{outline:3px solid #fff;background:linear-gradient(#4c6
 </head>
 <body>
 <header class="top"><h1>🚀 COSMIC TYPING DEFENDER</h1><div class="hud"><span>LEVEL <strong id="level">1</strong></span><span>SHIELDS <strong id="lives">3</strong></span><span>ENERGY <strong id="score">0</strong></span><span>STREAK <strong id="streak">0</strong></span></div></header>
-<main id="arena"><canvas id="space"></canvas><div id="feedback">Ready, space cadet?</div><div class="overlay" id="overlay"><div class="panel"><h2>Cosmic Typing Defender</h2><p>🌌 Cosmic Typing Defender</p><div class="levelgrid" id="levelgrid"></div><button id="start">START MISSION 🚀</button></div></div></main>
+<main id="arena"><canvas id="space"></canvas><div id="feedback">Ready, space cadet?</div><div class="overlay" id="overlay"><div class="panel"><h2>Cosmic Typing Defender</h2><div class="levelgrid" id="levelgrid"></div><button id="start">START MISSION 🚀</button></div></div></main>
 <footer class="bottom"><input id="typing" aria-label="Type the glowing target" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder=""><button id="fire">BLAST! ✨</button><button id="pause">PAUSE</button><button id="home">MISSIONS</button></footer>
 <script>
 const missions=[
  {name:"Home Row Cadet",range:"Lessons 1–3",desc:"Home row + G, H, E, I",words:["sad","dad","ask","fall","glad","fish","hide","side","jig","his","she","dash","half","flag","like","dish","jill","hill","ideal","all"]},
  {name:"Orbit Explorer",range:"Lessons 4–6",desc:"Add R, U, T, Y, W, O",words:["star","your","write","story","tower","water","trust","today","yellow","worry","route","outer","start","ready","toward","worth","study","truly","world","writer"]},
  {name:"Nebula Navigator",range:"Lessons 7–9",desc:"Add Q, P, C, M, V, B",words:["space","brave","blue","comet","planet","purple","vivid","move","peace","quick","become","picture","vacuum","public","bright","camp","music","probe","clever","bounce"]},
- {name:"Galaxy Guardian",range:"Lessons 10–12",desc:"Add N, X, Z + punctuation",words:["next","zone","amazing","expand","explore","mission","connect","exciting","zenith","mix","oxygen","cosmic","signal","launch","maximum","science","excellent","zoom","class;","go, now"]},
- {name:"Cosmic Champion",range:"Lessons 13–15",desc:"Punctuation review + capitals",words:["We Can Win.","Type With Care.","Blast Off!","Explore New Worlds.","Practice Makes Progress.","Ready, Space Cadet?","The Stars Are Bright.","We Learn And Improve.","Mission Complete!","I Can Type Fast.","The Galaxy Is Vast.","Reach For The Stars.","Aim High.","You Are A Star.","We Explore New Worlds."]},
+ {name:"Galaxy Guardian",range:"Lessons 10–12",desc:"Add N, X, Z + punctuation",words:["next","zone","amazing","expand","explore","mission","connect","exciting","zenith","mix","oxygen","cosmic","signal","launch","maximum","science","excellent","zoom","class;","go,now"]},
+ {name:"Cosmic Champion",range:"Lessons 13–15",desc:"Punctuation review + capitals",words:["Cosmic.","Launch!","Explore.","Galaxy?","Practice.","Ready?","Stars.","Improve.","Mission!","Fast.","Vast.","Reach!","Aim.","Star.","Worlds."]},
  {name:"BONUS: Number Nebula",range:"Bonus mission",desc:"Numbers 0–9",words:["123","456","789","2026","314","808","42","100","2468","13579","909","555","20260","9876","10101"]}
 ];
 const canvas=document.getElementById("space"),ctx=canvas.getContext("2d"),arena=document.getElementById("arena");
