@@ -49,11 +49,14 @@ const LEVELS={
   5:{name:"LESSONS 13-15",words:["hospital","defender","computer","student","excellent","challenge","practice","adventure","keyboard","zombies","pumpkin","patch","skateboard","office","park","building","paintball","accuracy","strength","everything","animation","attention","beautiful","character","characters","classroom","community","creature","different","education","environment","fantastic","friendship","important","information","incredible","instruction","intelligent","interesting","invention","journey","knowledge","language","learning","lightning","materials","mystery","neighborhood","observation","opportunity","paragraph","performance","photograph","playground","population","prediction","preparation","presentation","pronunciation","remember","responsible","scientific","something","sometimes","surprising","technology","temperature","understand","university","wonderful","yesterday","yourself"],speed:340}
 };
 const LEVEL_CHARACTERS={
-  1:new Set("asdfghjkl"),
-  2:new Set("asdfghjkle iortuwy".replace(/ /g,"")),
-  3:new Set("asdfghjkle iortuwybcmnpqv".replace(/ /g,"")),
-  4:new Set("asdfghjkle iortuwybcmnpqxzABCDEFGHIJKLMNOPQRSTUVWXYZ."),
-  5:new Set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.;")
+  // Cumulative character pools follow the Typing Unit lesson groups:
+  // Level 1 = lessons 1-3, Level 2 = 1-6, Level 3 = 1-9,
+  // Level 4 = 1-12, Level 5 = full review (1-15).
+  1:new Set("asdfjklghei"),
+  2:new Set("asdfjklgheirutywo"),
+  3:new Set("asdfjklgheirutywoqpcmvb"),
+  4:new Set("asdfjklgheirutywoqpcmvbnxz,;"),
+  5:new Set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,;")
 };
 // Level 4 introduces uppercase letters and periods independently; Level 5 adds semicolons.
 // Keep examples separate so capitals are not always paired with punctuation.
@@ -62,6 +65,22 @@ LEVELS[5].words.push("Hospital","Defender","Computer","Student","Excellent","Cha
 for(const n of Object.keys(LEVELS)){
  const allowed=LEVEL_CHARACTERS[n];
  LEVELS[n].words=[...new Set(LEVELS[n].words.filter(w=>!/[!?]/.test(w)&&[...w].every(ch=>allowed.has(ch))))];
+}
+
+// Additional vocabulary adapted from the actual Typing Unit lesson prompts.
+// Extract individual words from the lessons, then keep only words whose
+// letters/punctuation have been introduced by that Zombie Defender level.
+const TYPING_UNIT_LESSON_WORDS={
+  1:`dad sad lass lad ask fall flask alas salad salsa lads dads glad flag half flash dash gash shag glass shall gall hash hide like side slide lie lid did likes fish dish she he is hides`,
+  2:`sure ride fair rule rude rare lure user fur ruler stay yet stray tasty style dusty study silly shy try tidy they that this treat shady who wow wore wool work show word wood whole how wrote story worth look`,
+  3:`quip pop quiet quite paper puppy purple pup pipe proper make home mock music comic calm cream comma mom made came makes us happy come`,
+  4:`brave blue vivid believe above beaver five boys eyes next name nine mix examine expand annex box six amazing zoom zebra zigzag cozy lazy zone zero class glass pass small silk still then cope musical`,
+  5:`We Work Hard They Like Blue We Make Music A Brave Puppy We Can Learn New Skills Practice Helps Us Improve I can type with both hands I am getting faster and more accurate Practice helps me become a better typist`
+};
+for(const n of Object.keys(TYPING_UNIT_LESSON_WORDS)){
+ const allowed=LEVEL_CHARACTERS[n];
+ const extras=TYPING_UNIT_LESSON_WORDS[n].split(/\\s+/).filter(w=>w&&[...w].every(ch=>allowed.has(ch)));
+ LEVELS[n].words=[...new Set([...LEVELS[n].words,...extras])];
 }
 function resize(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);draw()}
 addEventListener("resize",resize);
