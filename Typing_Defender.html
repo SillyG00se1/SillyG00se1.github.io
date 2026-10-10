@@ -103,9 +103,18 @@ function pickWord(){
 }
 function newZombie(){
  word=pickWord();wordIndex=0;typed="";
- let lane=Math.floor(Math.random()*3);
- zombies=[{x:W+100,lane,scale:.86+Math.random()*.16,flash:0,paint:[],speed:LEVELS[level].speed*(.9+Math.random()*.2),walkTime:Math.random()*2.9}];
  round++;
+ let lane=Math.floor(Math.random()*3);
+ // Convert a typing pace into pixels/second: at the maximum, a zombie crosses
+ // from its spawn point to the caution line in the time needed to type its word
+ // at 55 WPM (using the standard 5 characters per word).
+ const paceWPM=Math.min(55,18+(round-1)*1.5);
+ const spawnX=W+100;
+ const boundaryX=Math.max(44,W*.075)+42;
+ const distance=spawnX-boundaryX;
+ const typingSeconds=(Math.max(2,word.length)*60)/(paceWPM*5);
+ const zombieSpeed=distance/typingSeconds;
+ zombies=[{x:spawnX,lane,scale:.86+Math.random()*.16,flash:0,paint:[],speed:zombieSpeed,walkTime:Math.random()*2.9,paceWPM}];
  updateWord();
 }
 function updateWord(){
