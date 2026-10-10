@@ -294,6 +294,12 @@ async function resetStudentData(){
    if(remaining.some(r=>String(r.student||"")===name)){
      throw new Error("Verification failed: records for "+name+" still remain in Supabase. The local snapshot is preserved; do not retry yet.");
    }
+   const expectedOtherIds=new Set(allRemote.filter(r=>String(r.student||"")!==name).map(r=>String(r.id)));
+   const remainingIds=new Set(remaining.map(r=>String(r.id)));
+   if(expectedOtherIds.size!==remainingIds.size||[...expectedOtherIds].some(id=>!remainingIds.has(id))){
+     preserveDataSnapshot("Other-student verification failed after reset",data);
+     throw new Error("Verification failed: the remaining database rows do not match the pre-delete records for other students. The local snapshot is preserved; stop and inspect Supabase immediately.");
+   }
    data=data.filter(r=>String(r.Student||"")!==name);
    saveJSON(DATA_KEY,data);
    alert("Verified: deleted "+deleted.length+" typing records for "+name+". Other students' records were checked and preserved. A local recovery snapshot was saved before deletion.");
