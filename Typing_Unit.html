@@ -265,7 +265,6 @@ async function resetStudentData(){
  const password=window.prompt("Enter the password to reset typing data for "+name+":");
  if(password===null)return;
  if(password!=="1234"){alert("Incorrect password. No data was deleted.");return}
- if(!confirm("SAFETY CHECK: Before deletion, the app will count this student's matching records and make a local recovery snapshot. Continue to preview the deletion?"))return;
  try{
    const allRemote=await supabaseRequest("typing_results?select=id,student&order=id.asc");
    const matches=allRemote.filter(r=>String(r.student||"")===name);
@@ -302,7 +301,6 @@ async function resetStudentData(){
    }
    data=data.filter(r=>String(r.Student||"")!==name);
    saveJSON(DATA_KEY,data);
-   alert("Verified: deleted "+deleted.length+" typing records for "+name+". Other students' records were checked and preserved. A local recovery snapshot was saved before deletion.");
    await viewData(false);
  }catch(e){
    console.error(e);
