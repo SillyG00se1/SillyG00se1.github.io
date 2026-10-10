@@ -74,7 +74,7 @@ function showMenu(){
  draw();
 }
 function startGame(n){
- level=Number(n)||1;currentScene=level;screen="game";running=true;score=correct=wrong=0;typed="";combo=0;round=0;spawnTimer=0;shake=0;startTime=performance.now();
+ level=Number(n)||1;currentScene=level;screen="game";running=true;score=correct=wrong=0;typed="";combo=0;round=0;spawnTimer=0;shake=0;targetWordLength=3;lengthStreak=0;startTime=performance.now();
  zombies=[];splats=[];particles=[];clouds=[];
  for(let i=0;i<5;i++)clouds.push({x:Math.random()*W,y:80+Math.random()*170,s:35+Math.random()*70,v:8+Math.random()*12});
  document.getElementById("hud").hidden=false;document.getElementById("word").hidden=false;document.getElementById("typed").hidden=false;
@@ -83,10 +83,20 @@ function startGame(n){
  newZombie();last=performance.now();raf=requestAnimationFrame(loop);
 }
 let lastWordByLevel={};
+// Words gradually grow as the player succeeds. Mistakes shorten the next target.
+let targetWordLength=3,lengthStreak=0;
 function pickWord(){
  const a=LEVELS[level].words;
- let choices=a.filter(w=>w!==lastWordByLevel[level]);
- if(!choices.length) choices=a;
+ const maxLength=Math.max(2,...a.map(w=>w.length));
+ targetWordLength=Math.max(2,Math.min(targetWordLength,maxLength));
+ let choices=a.filter(w=>w.length===targetWordLength&&w!==lastWordByLevel[level]);
+ if(!choices.length) choices=a.filter(w=>w.length===targetWordLength);
+ // If this level has no words of the target length, use the nearest available length.
+ if(!choices.length){
+  const available=[...new Set(a.map(w=>w.length))].sort((x,y)=>Math.abs(x-targetWordLength)-Math.abs(y-targetWordLength));
+  if(available.length){targetWordLength=available[0];choices=a.filter(w=>w.length===targetWordLength&&w!==lastWordByLevel[level]);if(!choices.length)choices=a.filter(w=>w.length===targetWordLength)}
+ }
+ if(!choices.length)choices=a;
  const next=choices[Math.floor(Math.random()*choices.length)];
  lastWordByLevel[level]=next;
  return next;
@@ -349,9 +359,9 @@ function paintball(){
  let y=H*.53+z.lane*H*.12-120;
  splats.push({x:z.x,y:y-20,r:28,c:["#ff4b72","#4db8ff","#ffd447","#64d66f","#b66cff"][round%5],life:1.1,d:Array.from({length:10},()=>({x:(Math.random()-.5)*75,y:(Math.random()-.5)*75,r:3+Math.random()*8}))});
  for(let i=0;i<24;i++){let a=Math.random()*Math.PI*2,v=80+Math.random()*240;particles.push({x:z.x,y:y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:.35+.35*Math.random(),c:["#ff4b72","#4db8ff","#ffd447","#64d66f","#b66cff"][round%5]})}
- score+=150+combo*25;combo++;correct++;shake=8;zombies=[];typed="";spawnTimer=0;if(round>=20){setTimeout(()=>{if(running)endGame("Level Complete")},260)}
+ score+=150+combo*25;combo++;correct++;lengthStreak++;if(lengthStreak>=2){targetWordLength=Math.min(Math.max(...LEVELS[level].words.map(w=>w.length)),targetWordLength+1);lengthStreak=0}shake=8;zombies=[];typed="";spawnTimer=0;if(round>=20){setTimeout(()=>{if(running)endGame("Level Complete")},260)}
 }
-function wrongKey(){wrong++;combo=0;shake=4}
+function wrongKey(){wrong++;combo=0;lengthStreak=0;targetWordLength=Math.max(2,targetWordLength-1);shake=4}
 function updateHUD(){
  let s=stats();document.getElementById("score").textContent=score;document.getElementById("accuracy").textContent=s.acc.toFixed(0);document.getElementById("wpm").textContent=s.wpm.toFixed(0);document.getElementById("paint").textContent=correct;
 }
