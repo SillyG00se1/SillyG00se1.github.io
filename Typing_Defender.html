@@ -108,7 +108,7 @@ function newZombie(){
  // Convert a typing pace into pixels/second: at the maximum, a zombie crosses
  // from its spawn point to the caution line in the time needed to type its word
  // at 55 WPM (using the standard 5 characters per word).
- const paceWPM=Math.min(55,18+(round-1)*1.5);
+ const paceWPM=Math.min(55,4+Math.floor((round-1)/5)*1.5);
  const spawnX=W+100;
  const boundaryX=Math.max(44,W*.075)+42;
  const distance=spawnX-boundaryX;
