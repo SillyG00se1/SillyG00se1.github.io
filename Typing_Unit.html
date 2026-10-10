@@ -224,19 +224,31 @@ async function viewData(refresh=true){
  if(refresh)try{const dr=await supabaseRequest("typing_results?select=*&order=id.desc");data=dr.map(x=>({Date:x.date,Time:x.time,Student:x.student,Lesson:x.lesson,Level:x.level,"Level Name":x.level_name,Prompt:x.prompt,"Time Seconds":x.time_seconds,WPM:x.wpm,Accuracy:x.accuracy,"Correct Characters":x.correct_characters,Errors:x.errors,"Corrected Characters":x.corrected_characters}));saveJSON(DATA_KEY,data)}catch(e){}
  let h=["Date","Time","Student","Lesson","Level","Level Name","Prompt","Time Seconds","WPM","Accuracy","Correct Characters","Errors","Corrected Characters"];
  let rows=data.length?data.map(r=>`<tr>${h.map(k=>`<td>${esc(r[k]??"")}</td>`).join("")}</tr>`).join(""):`<tr><td colspan="${h.length}">No typing data saved yet.</td></tr>`;
- screen(`<div style="height:100%;min-height:0;display:flex;flex-direction:column"><h2 style="flex:0 0 auto">Typing Data</h2><div class="bottom" style="justify-content:flex-start;flex:0 0 auto;margin:8px 0">${button("DOWNLOAD CSV","downloadData()")}${button("BACK","showStudentMenu()")}${button("CLEAR ALL DATA","clearAllData()")}</div><div class="data-wrap" style="min-height:0;min-width:0;flex:1;overflow:auto"><table style="width:max-content;min-width:100%"><thead><tr>${h.map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div></div>`)
+ screen(`<div style="height:100%;min-height:0;display:flex;flex-direction:column"><h2 style="flex:0 0 auto">Typing Data</h2><div class="bottom" style="justify-content:flex-start;flex:0 0 auto;margin:8px 0">${button("DOWNLOAD CSV","downloadData()")}${button("BACK","showStudentMenu()")}${button("RESET STUDENT DATA","resetStudentData()")}</div><div class="data-wrap" style="min-height:0;min-width:0;flex:1;overflow:auto"><table style="width:max-content;min-width:100%"><thead><tr>${h.map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div></div>`)
 }
-async function clearAllData(){
- const password=window.prompt("Enter the teacher password to clear ALL typing data:");
+async function resetStudentData(){
+ if(!students.length&&!data.length){alert("There are no student profiles or typing records to reset.");return}
+ const names=[...new Set([...students,...data.map(r=>String(r.Student||"")).filter(Boolean)])].sort((a,b)=>a.localeCompare(b));
+ if(!names.length){alert("No students were found.");return}
+ const choice=window.prompt("Enter the number of the student whose typing data you want to reset:\n\n"+names.map((n,i)=>`${i+1}. ${n}`).join("\n"));
+ if(choice===null)return;
+ const index=Number(choice)-1;
+ if(!Number.isInteger(index)||index<0||index>=names.length){alert("Please enter a valid student number. No data was changed.");return}
+ const name=names[index];
+ const password=window.prompt("Enter the password to reset typing data for "+name+":");
  if(password===null)return;
- if(password!=="MUSDvision"){alert("Incorrect password. No data was deleted.");return}
- if(!confirm("Delete ALL saved typing data for ALL students? This cannot be undone."))return;
+ if(password!=="1234"){alert("Incorrect password. No data was deleted.");return}
+ if(!confirm("Permanently delete all typing records for "+name+"? The student profile will remain, but this student's lesson progress and results will be reset."))return;
  try{
-   await supabaseRequest("typing_results?id=not.is.null",{method:"DELETE",headers:{Prefer:"return=minimal"}});
-   data=[];saveJSON(DATA_KEY,data);
-   alert("All typing data has been cleared.");
-   viewData(false);
- }catch(e){console.error(e);alert("The shared typing data could not be cleared. Please add the Supabase DELETE policy.");}
+   await supabaseRequest("typing_results?student=eq."+encodeURIComponent(name),{method:"DELETE",headers:{Prefer:"return=minimal"}});
+   data=data.filter(r=>String(r.Student||"").toLowerCase()!==name.toLowerCase());
+   saveJSON(DATA_KEY,data);
+   alert("Typing data for "+name+" has been reset. The student profile remains.");
+   await viewData(false);
+ }catch(e){
+   console.error(e);
+   alert("The shared typing data could not be reset. No local records were changed. Please check the Supabase DELETE policy and try again.");
+ }
 }
 document.addEventListener("keydown",function(e){if(e.key!=="Escape")return;const app=document.getElementById("app");if(!app)return;const back=[...app.querySelectorAll("button")].find(b=>b.textContent.trim().toUpperCase()==="BACK TO LESSONS");if(back){e.preventDefault();back.click();}});
 function bootTypingUnit(){const returning=sessionStorage.getItem("typingUnitReturn")==="1";const savedStudent=sessionStorage.getItem("typingUnitStudent")||"";const params=new URLSearchParams(location.search);const nextLesson=Number(params.get("lesson")||0);const nextLevel=Number(params.get("level")||1);if(returning&&savedStudent){studentName=savedStudent;sessionStorage.removeItem("typingUnitReturn");sessionStorage.removeItem("typingUnitStudent");if(nextLesson>=1&&nextLesson<=15&&nextLevel>=1&&nextLevel<=3){sessionStorage.removeItem("typingUnitNextLesson");startLesson(nextLesson,nextLevel)}else{sessionStorage.removeItem("typingUnitNextLesson");showLessonMenu()}}else showStudentMenu();}loadSharedData().finally(bootTypingUnit);
