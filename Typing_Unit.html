@@ -66,7 +66,20 @@ async function loadSharedData(){
   }catch(e){console.warn("Shared Supabase storage unavailable; keeping local browser data.",e);alert("Could not refresh shared typing data from Supabase. The app is keeping this browser's saved copy. Check your connection before making data changes.");}
 }
 async function saveStudentShared(name){try{await supabaseRequest("typing_students",{method:"POST",body:JSON.stringify({name})})}catch(e){console.warn("Could not save student to shared storage.",e)}}
-async function deleteStudentShared(name){await supabaseRequest("typing_students?name=eq."+encodeURIComponent(name),{method:"DELETE"});const remaining=await supabaseRequest("typing_students?select=name&name=eq."+encodeURIComponent(name));if(remaining.some(r=>String(r.name||"").toLowerCase()===name.toLowerCase()))throw new Error("Supabase still contains this student profile after the delete request.")}
+async function teacherSignIn(){
+ const email=window.prompt("Teacher email address (Supabase Auth):");if(email===null||!email.trim())return null;
+ const password=window.prompt("Teacher account password:");if(password===null)return null;
+ const res=await fetch(SUPABASE_URL+"/auth/v1/token?grant_type=password",{method:"POST",headers:{apikey:SUPABASE_KEY,"Content-Type":"application/json"},body:JSON.stringify({email:email.trim(),password})});
+ const body=await res.json().catch(()=>({}));
+ if(!res.ok||!body.access_token)throw new Error(body.msg||body.message||"Teacher sign-in failed. Check the email and password.");
+ return {accessToken:body.access_token,email:body.user&&body.user.email||email.trim()};
+}
+async function deleteStudentShared(name,teacher){
+ const res=await fetch(SUPABASE_URL+"/functions/v1/delete-student",{method:"POST",headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+teacher.accessToken,"Content-Type":"application/json"},body:JSON.stringify({name})});
+ const body=await res.json().catch(()=>({}));
+ if(!res.ok||!body.success)throw new Error(body.error||("Secure deletion failed (HTTP "+res.status+")."));
+ if(body.deleted!==name)throw new Error("The server response did not match the selected student. Please refresh and verify Supabase.");
+}
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function button(t,fn){return `<button onclick="${fn}">${t}</button>`}
 function screen(x){document.getElementById("app").innerHTML=`<div class="screen">${x}</div>`}
@@ -124,8 +137,15 @@ async function deleteStudent(){
  if(c===null||!c.trim())return;let i=Number(c)-1;
  if(!Number.isInteger(i)||i<0||i>=students.length){alert("Please enter a valid student number. No changes were made.");return}let n=students[i];
  if(!confirm("Delete the student profile for "+n+"?\n\nThis does NOT delete that student's typing data."))return;
- try{await deleteStudentShared(n);students=students.filter(s=>s.toLowerCase()!==n.toLowerCase());saveJSON(STUDENTS_KEY,students);if(studentName.toLowerCase()===n.toLowerCase())studentName="";showStudentMenu();alert("Student profile deleted from shared storage. Their typing records were kept.")}
- catch(e){console.error("Student profile deletion failed.",e);alert("The student profile could not be verified as deleted from shared storage, so the local student list was not changed. This may be a Supabase permission issue. Details: "+(e.message||e))}
+ try{
+  const teacher=await teacherSignIn();if(!teacher)return;
+  if(!confirm("Confirm teacher-authorized deletion of the profile for "+n+"?\\n\\nHistorical typing results will be preserved."))return;
+  await deleteStudentShared(n,teacher);
+  students=students.filter(s=>s.toLowerCase()!==n.toLowerCase());saveJSON(STUDENTS_KEY,students);
+  if(studentName.toLowerCase()===n.toLowerCase())studentName="";
+  showStudentMenu();alert("Student profile deleted from shared storage. Historical typing results were preserved.");
+ }
+ catch(e){console.error("Student profile deletion failed.",e);alert("The secure deletion did not complete. The local student list was not changed. Check the teacher login, TEACHER_EMAILS secret, and deployed Edge Function. Details: "+(e.message||e))}
 }
 function selectStudent(n){studentName=n;showLessonMenu()}
 function bestResult(n,level=null){
