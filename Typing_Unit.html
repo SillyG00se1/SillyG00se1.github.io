@@ -66,7 +66,7 @@ async function loadSharedData(){
   }catch(e){console.warn("Shared Supabase storage unavailable; keeping local browser data.",e);alert("Could not refresh shared typing data from Supabase. The app is keeping this browser's saved copy. Check your connection before making data changes.");}
 }
 async function saveStudentShared(name){try{await supabaseRequest("typing_students",{method:"POST",body:JSON.stringify({name})})}catch(e){console.warn("Could not save student to shared storage.",e)}}
-async function deleteStudentShared(name){try{await supabaseRequest("typing_students?name=eq."+encodeURIComponent(name),{method:"DELETE"})}catch(e){console.warn("Could not delete student from shared storage.",e)}}
+async function deleteStudentShared(name){await supabaseRequest("typing_students?name=eq."+encodeURIComponent(name),{method:"DELETE"});const remaining=await supabaseRequest("typing_students?select=name&name=eq."+encodeURIComponent(name));if(remaining.some(r=>String(r.name||"").toLowerCase()===name.toLowerCase()))throw new Error("Supabase still contains this student profile after the delete request.")}
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function button(t,fn){return `<button onclick="${fn}">${t}</button>`}
 function screen(x){document.getElementById("app").innerHTML=`<div class="screen">${x}</div>`}
@@ -118,11 +118,14 @@ async function renameStudent(){
   alert("The rename could not be fully verified. The student menu and local records were not changed. Check Supabase before trying again. Details: "+(e.message||e));
  }
 }
-function deleteStudent(){
+async function deleteStudent(){
  if(!students.length){alert("There are no student profiles to delete.");return}
- let c=window.prompt("Enter the number of the student to delete:\n\n"+students.map((s,i)=>`${i+1}. ${s}`).join("\n")),i=Number(c)-1;
- if(!Number.isInteger(i)||i<0||i>=students.length)return;let n=students[i];
- if(confirm(`Delete the student profile for ${n}?\n\nThis does NOT delete that student's typing data.`)){students.splice(i,1);saveJSON(STUDENTS_KEY,students);deleteStudentShared(n);if(studentName.toLowerCase()===n.toLowerCase())studentName="";showStudentMenu()}
+ let c=window.prompt("Enter the number of the student to delete:\n\n"+students.map((s,i)=>String(i+1)+". "+s).join("\n"));
+ if(c===null||!c.trim())return;let i=Number(c)-1;
+ if(!Number.isInteger(i)||i<0||i>=students.length){alert("Please enter a valid student number. No changes were made.");return}let n=students[i];
+ if(!confirm("Delete the student profile for "+n+"?\n\nThis does NOT delete that student's typing data."))return;
+ try{await deleteStudentShared(n);students=students.filter(s=>s.toLowerCase()!==n.toLowerCase());saveJSON(STUDENTS_KEY,students);if(studentName.toLowerCase()===n.toLowerCase())studentName="";showStudentMenu();alert("Student profile deleted from shared storage. Their typing records were kept.")}
+ catch(e){console.error("Student profile deletion failed.",e);alert("The student profile could not be verified as deleted from shared storage, so the local student list was not changed. This may be a Supabase permission issue. Details: "+(e.message||e))}
 }
 function selectStudent(n){studentName=n;showLessonMenu()}
 function bestResult(n,level=null){
@@ -148,6 +151,7 @@ function showLessonMenu(){
 }
 function startKeyboardQuest(level){sessionStorage.setItem("typingUnitReturn","1");sessionStorage.setItem("typingUnitStudent",studentName);sessionStorage.setItem("typingUnitNextLesson",String((level-1)*3+4));window.location.href="Keyboard_Quest.html?level="+encodeURIComponent(level)+"&return=Typing_Unit.html"}
 function startTypingDefender(level,groupEnd){const nextLesson=groupEnd+1;sessionStorage.setItem("typingUnitReturn","1");sessionStorage.setItem("typingUnitStudent",studentName);sessionStorage.setItem("typingUnitNextLesson",String(nextLesson));window.location.href="Typing_Defender.html?level="+encodeURIComponent(level)+"&return=Typing_Unit.html&nextLesson="+encodeURIComponent(nextLesson)}
+function startCosmicDefender(level,groupEnd){const nextLesson=groupEnd+1;sessionStorage.setItem("typingUnitReturn","1");sessionStorage.setItem("typingUnitStudent",studentName);sessionStorage.setItem("typingUnitNextLesson",String(nextLesson));window.location.href="Typing_Cosmic_Defender.html?level="+encodeURIComponent(level)+"&return=Typing_Unit.html&nextLesson="+encodeURIComponent(nextLesson)}
 const NINJA_GROUPS={3:{letters:"asdfjklghei."},6:{letters:"asdfjklgheirutywo"},9:{letters:"asdfjklgheirutywoqpcmvbnx"},12:{letters:"asdfjklgheirutywoqpcmvbnxz;"},15:{letters:"asdfjklgheirutywoqpcmvbnxz;"}};
 let ninjaState=null;
 let ninjaRaf=0;
@@ -200,7 +204,7 @@ function showLevelMenu(n){
 }
 function showGamesMenu(groupEnd){
  const gameLevel={3:1,6:2,9:3,12:4,15:5}[groupEnd]||1;
- screen(`<div class="center"><h2>Games</h2><div class="subtitle">Lessons ${groupEnd-2}-${groupEnd}</div><div class="grid level-grid">${button("🍓 FRUIT NINJA<br>LEVEL "+gameLevel,`startNinjaReview(${groupEnd})`)}${button("⌨️ KEYBOARD QUEST<br>LEVEL "+gameLevel,`startKeyboardQuest(${gameLevel})`)}${button("🧟 ZOMBIE DEFENDER<br>LEVEL "+gameLevel,`startTypingDefender(${gameLevel},${groupEnd})`)}</div><div class="bottom">${button("BACK TO LESSONS","showLessonMenu()")}</div></div>`)
+ screen(`<div class="center"><h2>Games</h2><div class="subtitle">Lessons ${groupEnd-2}-${groupEnd}</div><div class="grid level-grid">${button("🍓 FRUIT NINJA<br>LEVEL "+gameLevel,`startNinjaReview(${groupEnd})`)}${button("⌨️ KEYBOARD QUEST<br>LEVEL "+gameLevel,`startKeyboardQuest(${gameLevel})`)}${button("🧟 ZOMBIE DEFENDER<br>LEVEL "+gameLevel,`startTypingDefender(${gameLevel},${groupEnd})`)}${button("🌌 COSMIC DEFENDER<br>LEVEL "+gameLevel,`startCosmicDefender(${gameLevel},${groupEnd})`)}</div><div class="bottom">${button("BACK TO LESSONS","showLessonMenu()")}</div></div>`)
 }
 function startLesson(n,lvl){
  lessonNumber=n;levelNumber=lvl;prompt=LESSONS[n].levels[lvl-1];currentPosition=0;correctCount=0;errorCount=0;correctedErrorCount=0;
