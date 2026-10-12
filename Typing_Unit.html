@@ -77,12 +77,46 @@ function showStudentMenu(){
  sessionStorage.removeItem("typingUnitReturn");sessionStorage.removeItem("typingUnitStudent");sessionStorage.removeItem("typingUnitNextLesson");
  let list=students.length?`<div class="grid student-grid">${students.map(n=>button(esc(n),`selectStudent(${JSON.stringify(n).replace(/"/g,"&quot;")})`)).join("")}</div>`:`<div class="notice">No student profiles yet.</div>`;
  screen(`<div class="center"><h1>Touch Typing Unit</h1><div class="subtitle">Choose a student profile</div>${list}<div class="bottom">
- ${button("ADD STUDENT","addStudent()")}${button("DELETE STUDENT","deleteStudent()")}${button("VIEW ALL DATA","viewData()")}</div></div>`)
+ ${button("ADD STUDENT","addStudent()")}${button("RENAME STUDENT","renameStudent()")}${button("DELETE STUDENT","deleteStudent()")}${button("VIEW ALL DATA","viewData()")}</div></div>`)
 }
 function addStudent(){
  let n=window.prompt("Enter the student's name:");if(!n||!n.trim())return;n=n.trim();
  if(students.some(s=>s.toLowerCase()===n.toLowerCase())){alert(n+" is already in the student menu.");return}
  students.push(n);students.sort((a,b)=>a.localeCompare(b));saveJSON(STUDENTS_KEY,students);saveStudentShared(n);showStudentMenu()
+}
+async function renameStudent(){
+ if(!students.length){alert("There are no student profiles to rename.");return}
+ const choice=window.prompt("Enter the number of the student to rename:\n\n"+students.map((n,i)=>`${i+1}. ${n}`).join("\n"));
+ if(choice===null)return;
+ const index=Number(choice)-1;
+ if(!Number.isInteger(index)||index<0||index>=students.length){alert("Please enter a valid student number. No changes were made.");return}
+ const oldName=students[index];
+ const password=window.prompt("Enter the password to rename "+oldName+":");
+ if(password===null)return;
+ if(password!=="1234"){alert("Incorrect password. The student was not renamed.");return}
+ const newName=window.prompt("Enter the new name for "+oldName+":",oldName);
+ if(newName===null)return;
+ const cleanName=newName.trim();
+ if(!cleanName){alert("The new name cannot be blank.");return}
+ if(cleanName.toLowerCase()!==oldName.toLowerCase()&&students.some(n=>n.toLowerCase()===cleanName.toLowerCase())){alert(cleanName+" is already in the student menu. No changes were made.");return}
+ if(cleanName===oldName){alert("The name is unchanged.");return}
+ if(!confirm("Rename "+oldName+" to "+cleanName+"? All typing records for this student will be updated to use the new name."))return;
+ try{
+  const oldFilter=encodeURIComponent(oldName);
+  await supabaseRequest("typing_results?student=eq."+oldFilter,{method:"PATCH",body:JSON.stringify({student:cleanName})});
+  await supabaseRequest("typing_students?name=eq."+oldFilter,{method:"PATCH",body:JSON.stringify({name:cleanName})});
+  const check=await supabaseRequest("typing_results?select=id,student&student=eq."+encodeURIComponent(cleanName)+"&order=id.asc");
+  if(check.some(r=>String(r.student||"")!==cleanName))throw new Error("Verification found unexpected student names in the updated records.");
+  students[index]=cleanName;students.sort((a,b)=>a.localeCompare(b));
+  data=data.map(r=>String(r.Student||"").toLowerCase()===oldName.toLowerCase()?{...r,Student:cleanName}:r);
+  if(studentName.toLowerCase()===oldName.toLowerCase())studentName=cleanName;
+  saveJSON(STUDENTS_KEY,students);saveJSON(DATA_KEY,data);
+  alert("Student renamed to "+cleanName+". Existing typing records were updated.");
+  showStudentMenu();
+ }catch(e){
+  console.error("Student rename failed",e);
+  alert("The rename could not be fully verified. The student menu and local records were not changed. Check Supabase before trying again. Details: "+(e.message||e));
+ }
 }
 function deleteStudent(){
  if(!students.length){alert("There are no student profiles to delete.");return}
