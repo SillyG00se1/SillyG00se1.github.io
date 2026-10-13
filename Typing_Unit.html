@@ -94,7 +94,7 @@ function showStudentMenu(){
  sessionStorage.removeItem("typingUnitReturn");sessionStorage.removeItem("typingUnitStudent");sessionStorage.removeItem("typingUnitNextLesson");
  let list=students.length?`<div class="grid student-grid">${students.map(n=>button(esc(n),`selectStudent(${JSON.stringify(n).replace(/"/g,"&quot;")})`)).join("")}</div>`:`<div class="notice">No student profiles yet.</div>`;
  screen(`<div class="center"><h1>Touch Typing Unit</h1><div class="subtitle">Choose a student profile</div>${list}<div class="bottom">
- ${button("ADD STUDENT","addStudent()")}${button("RENAME STUDENT (PASSWORD)","renameStudent()")}${button("DELETE STUDENT","deleteStudent()")}${button("VIEW ALL DATA","viewData()")}</div></div>`)
+ ${button("ADD","addStudent()")}${button("RENAME","renameStudent()")}${button("DELETE","deleteStudent()")}${button("DATA","viewData()")}</div></div>`)
 }
 function addStudent(){
  let n=window.prompt("Enter the student's name:");if(!n||!n.trim())return;n=n.trim();
