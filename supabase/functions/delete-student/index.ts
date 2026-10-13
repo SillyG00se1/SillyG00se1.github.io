@@ -55,11 +55,12 @@ Deno.serve(async (req: Request) => {
     const action = body?.action;
     const name = typeof body?.name === "string" ? body.name.trim() : "";
 
-    if (!name || name.length > 200) {
-      return respond({ error: "A valid student name is required." }, 400);
-    }
     if (!["delete-profile", "rename-profile", "reset-results"].includes(action)) {
       return respond({ error: "Unsupported teacher action." }, 400);
+    }
+    // Rename supplies oldName/newName; other actions require name.
+    if (action !== "rename-profile" && (!name || name.length > 200)) {
+      return respond({ error: "A valid student name is required." }, 400);
     }
 
     // This elevated key remains on the server and must never be exposed in HTML.
