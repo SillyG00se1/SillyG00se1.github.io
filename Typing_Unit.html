@@ -119,24 +119,18 @@ async function renameStudent(){
  if(cleanName===oldName){alert("The name is unchanged.");return}
  if(!confirm("Rename "+oldName+" to "+cleanName+"? All typing records for this student will be updated to use the new name."))return;
  try{
-  const oldFilter=encodeURIComponent(oldName);
-  const profileUpdate=await supabaseRequest("typing_students?name=eq."+oldFilter,{method:"PATCH",body:JSON.stringify({name:cleanName})});
-  if(!Array.isArray(profileUpdate)||!profileUpdate.some(r=>String(r.name||"")===cleanName)){
-   throw new Error("Supabase did not confirm the profile rename. No typing records were changed. This is usually a database permission or policy issue.");
+  // Teacher authorization is verified by the Edge Function; never try a public-table PATCH.
+  const teacher=await teacherSignIn();if(!teacher)return;
+  const result=await teacherFunctionRequest({action:"rename-profile",oldName,newName:cleanName},teacher);
+  if(result.oldName!==oldName||result.newName!==cleanName||result.action!=="rename-profile"){
+   throw new Error("The server response did not match the requested rename. Refresh and verify Supabase before retrying.");
   }
-  const oldProfileCheck=await supabaseRequest("typing_students?select=name&name=eq."+oldFilter);
-  if(oldProfileCheck.some(r=>String(r.name||"")===oldName)){
-   await supabaseRequest("typing_students?name=eq."+encodeURIComponent(cleanName),{method:"PATCH",body:JSON.stringify({name:oldName})}).catch(()=>{});
-   throw new Error("The old profile still exists after renaming. The change was stopped; refresh and check the Supabase student table.");
-  }
-  await supabaseRequest("typing_results?student=eq."+oldFilter,{method:"PATCH",body:JSON.stringify({student:cleanName})});
-  const [oldResults,newResults]=await Promise.all([
-   supabaseRequest("typing_results?select=id,student&student=eq."+oldFilter+"&order=id.asc"),
-   supabaseRequest("typing_results?select=id,student&student=eq."+encodeURIComponent(cleanName)+"&order=id.asc")
+  const [profiles,oldResults]=await Promise.all([
+   supabaseRequest("typing_students?select=name&name=eq."+encodeURIComponent(cleanName)),
+   supabaseRequest("typing_results?select=id,student&student=eq."+encodeURIComponent(oldName))
   ]);
-  if(oldResults.length>0||newResults.some(r=>String(r.student||"")!==cleanName)){
-   await supabaseRequest("typing_students?name=eq."+encodeURIComponent(cleanName),{method:"PATCH",body:JSON.stringify({name:oldName})}).catch(()=>{});
-   throw new Error("Supabase could not verify all result names. The profile rename was rolled back where possible; refresh and check the student and results tables before retrying.");
+  if(profiles.length!==1||profiles[0].name!==cleanName||oldResults.length){
+   throw new Error("The rename response was successful, but the follow-up check could not verify the profile and results. Refresh and check Supabase before retrying.");
   }
   students=[...new Set(students.filter(n=>n.toLowerCase()!==oldName.toLowerCase()).concat(cleanName))].sort((a,b)=>a.localeCompare(b));
   data=data.map(r=>String(r.Student||"").toLowerCase()===oldName.toLowerCase()?{...r,Student:cleanName}:r);
@@ -146,7 +140,7 @@ async function renameStudent(){
   showStudentMenu();
  }catch(e){
   console.error("Student rename failed",e);
-  alert("The rename could not be fully verified. The student menu and local records were not changed. Refresh and check Supabase before trying again. Details: "+(e.message||e));
+  alert("The rename did not complete or could not be fully verified. Refresh and check Supabase before trying again. Details: "+(e.message||e));
  }
 }
 async function deleteStudent(){
