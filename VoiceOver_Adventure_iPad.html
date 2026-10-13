@@ -66,7 +66,11 @@ th{background:#111827}
 
 <section id="game" class="card hidden" aria-live="polite" aria-label="VoiceOver Adventure game">
 <h2 id="levelTitle"></h2>
-<div id="obstacle" class="obstacle" tabindex="0" role="application" aria-label="Large gesture area. Follow the spoken instruction. Swipe or tap here."></div>\n<p class="small" id="gestureHelp">Gesture area covers most of the screen. If gestures are intercepted by VoiceOver, use the answer buttons below.</p>\n<div class="controls" id="answerControls" aria-label="Answer controls">\n<button type="button" data-answer="left" class="secondary">Swipe Left</button><button type="button" data-answer="right" class="secondary">Swipe Right</button><button type="button" data-answer="up" class="secondary">Swipe Up</button><button type="button" data-answer="down" class="secondary">Swipe Down</button><button type="button" data-answer="single" class="secondary">Single Tap</button><button type="button" data-answer="double" class="secondary">Double Tap</button>\n</div>
+<div id="obstacle" class="obstacle" tabindex="0" role="application" aria-label="Large gesture area. Follow the spoken instruction. Swipe or tap here."></div>
+<p class="small" id="gestureHelp">Gesture area covers most of the screen. If gestures are intercepted by VoiceOver, use the answer buttons below.</p>
+<div class="controls" id="answerControls" aria-label="Answer controls">
+<button type="button" data-answer="left" class="secondary">Swipe Left</button><button type="button" data-answer="right" class="secondary">Swipe Right</button><button type="button" data-answer="up" class="secondary">Swipe Up</button><button type="button" data-answer="down" class="secondary">Swipe Down</button><button type="button" data-answer="single" class="secondary">Single Tap</button><button type="button" data-answer="double" class="secondary">Double Tap</button>
+</div>
 <div id="command" class="command" aria-live="assertive"></div>
 <div id="status" class="status"></div>
 <div class="controls"><button id="repeatButton" class="secondary">Repeat</button><button id="homeButton" class="secondary">Home</button></div>
@@ -297,7 +301,8 @@ else{if(!level.scored)state.score=0;status.textContent=state.levelIndex===0?"Inc
 cancelPendingTransition();advanceAfterAnswer();
 }
 
-document.querySelectorAll(".level").forEach(button=>button.addEventListener("click",()=>startLevel(Number(button.dataset.level))));\ndocument.querySelectorAll("[data-answer]").forEach(button=>button.addEventListener("click",()=>handleCommand(button.dataset.answer)));
+document.querySelectorAll(".level").forEach(button=>button.addEventListener("click",()=>startLevel(Number(button.dataset.level))));
+document.querySelectorAll("[data-answer]").forEach(button=>button.addEventListener("click",()=>handleCommand(button.dataset.answer)));
 $("dataButton").addEventListener("click",showData);
 $("refreshDataButton").addEventListener("click",loadData);
 $("clearDataButton").addEventListener("click",clearAllData);
