@@ -16,7 +16,7 @@ h1,h2{margin-top:0}
 .levels{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
 .level{background:#374151;text-align:left;min-height:120px}
 .level strong{display:block;font-size:1.2rem;margin-bottom:8px}
-.obstacle{font-size:4rem;text-align:center;min-height:320px;padding:45px 25px;border-radius:20px;background:#374151;touch-action:none;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+.obstacle{font-size:4rem;text-align:center;min-height:68vh;min-height:68dvh;width:100%;padding:35px 20px;border-radius:20px;background:#374151;touch-action:none;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .obstacle:focus{outline:4px solid #facc15;outline-offset:4px}
 .obstacle-name{font-size:2.1rem;font-weight:bold;margin-top:6px}
 .command{font-size:2rem;font-weight:bold;text-align:center;padding:0;min-height:0}
@@ -64,9 +64,9 @@ th{background:#111827}
 <div class="controls" style="margin-top:18px"><button id="refreshDataButton">Refresh</button><button id="clearDataButton" class="secondary">Clear Data</button><button id="homeFromDataButton" class="secondary">Home</button></div>
 </section>
 
-<section id="game" class="card hidden" aria-live="polite">
+<section id="game" class="card hidden" aria-live="polite" aria-label="VoiceOver Adventure game">
 <h2 id="levelTitle"></h2>
-<div id="obstacle" class="obstacle" tabindex="0" aria-label="Current obstacle"></div>
+<div id="obstacle" class="obstacle" tabindex="0" role="application" aria-label="Large gesture area. Follow the spoken instruction. Swipe or tap here."></div>\n<p class="small" id="gestureHelp">Gesture area covers most of the screen. If gestures are intercepted by VoiceOver, use the answer buttons below.</p>\n<div class="controls" id="answerControls" aria-label="Answer controls">\n<button type="button" data-answer="left" class="secondary">Swipe Left</button><button type="button" data-answer="right" class="secondary">Swipe Right</button><button type="button" data-answer="up" class="secondary">Swipe Up</button><button type="button" data-answer="down" class="secondary">Swipe Down</button><button type="button" data-answer="single" class="secondary">Single Tap</button><button type="button" data-answer="double" class="secondary">Double Tap</button>\n</div>
 <div id="command" class="command" aria-live="assertive"></div>
 <div id="status" class="status"></div>
 <div class="controls"><button id="repeatButton" class="secondary">Repeat</button><button id="homeButton" class="secondary">Home</button></div>
@@ -144,7 +144,7 @@ function renderStep(){
 if(state.screen!=="game")return;
 const expected=state.currentSequence[state.step],item=OBSTACLES[expected];
 obstacle.innerHTML="<div>"+item.emoji+"</div><div class=\"obstacle-name\">"+item.name+", "+(expected==="single"?"single tap":expected==="double"?"double tap":"swipe "+expected)+"</div>";
-obstacle.setAttribute("aria-label",item.name+". "+prettyCommand(expected)+" required.");
+obstacle.setAttribute("aria-label",item.name+". "+prettyCommand(expected)+" required. Large gesture area. Follow the spoken instruction.");
 command.textContent="";
 status.textContent="";
 requestAnimationFrame(()=>{if(state.screen==="game")obstacle.focus({preventScroll:true})});
@@ -297,7 +297,7 @@ else{if(!level.scored)state.score=0;status.textContent=state.levelIndex===0?"Inc
 cancelPendingTransition();advanceAfterAnswer();
 }
 
-document.querySelectorAll(".level").forEach(button=>button.addEventListener("click",()=>startLevel(Number(button.dataset.level))));
+document.querySelectorAll(".level").forEach(button=>button.addEventListener("click",()=>startLevel(Number(button.dataset.level))));\ndocument.querySelectorAll("[data-answer]").forEach(button=>button.addEventListener("click",()=>handleCommand(button.dataset.answer)));
 $("dataButton").addEventListener("click",showData);
 $("refreshDataButton").addEventListener("click",loadData);
 $("clearDataButton").addEventListener("click",clearAllData);
