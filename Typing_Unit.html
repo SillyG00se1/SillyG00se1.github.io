@@ -51,7 +51,7 @@ async function loadSharedData(){
       supabaseRequest("typing_results?select=*&order=id.desc")
     ]);
     const remoteStudents=sr.map(x=>x.name).filter(Boolean);
-    students=[...new Set([...students,...remoteStudents])].sort((a,b)=>a.localeCompare(b));
+    students=[...new Set(remoteStudents)].sort((a,b)=>a.localeCompare(b));
     const remoteData=dr.map(mapRemoteResult);
     if(remoteData.length===0 && hasLocalResults()){
       preserveDataSnapshot("Remote results unexpectedly empty at startup",data);
@@ -120,19 +120,33 @@ async function renameStudent(){
  if(!confirm("Rename "+oldName+" to "+cleanName+"? All typing records for this student will be updated to use the new name."))return;
  try{
   const oldFilter=encodeURIComponent(oldName);
+  const profileUpdate=await supabaseRequest("typing_students?name=eq."+oldFilter,{method:"PATCH",body:JSON.stringify({name:cleanName})});
+  if(!Array.isArray(profileUpdate)||!profileUpdate.some(r=>String(r.name||"")===cleanName)){
+   throw new Error("Supabase did not confirm the profile rename. No typing records were changed. This is usually a database permission or policy issue.");
+  }
+  const oldProfileCheck=await supabaseRequest("typing_students?select=name&name=eq."+oldFilter);
+  if(oldProfileCheck.some(r=>String(r.name||"")===oldName)){
+   await supabaseRequest("typing_students?name=eq."+encodeURIComponent(cleanName),{method:"PATCH",body:JSON.stringify({name:oldName})}).catch(()=>{});
+   throw new Error("The old profile still exists after renaming. The change was stopped; refresh and check the Supabase student table.");
+  }
   await supabaseRequest("typing_results?student=eq."+oldFilter,{method:"PATCH",body:JSON.stringify({student:cleanName})});
-  await supabaseRequest("typing_students?name=eq."+oldFilter,{method:"PATCH",body:JSON.stringify({name:cleanName})});
-  const check=await supabaseRequest("typing_results?select=id,student&student=eq."+encodeURIComponent(cleanName)+"&order=id.asc");
-  if(check.some(r=>String(r.student||"")!==cleanName))throw new Error("Verification found unexpected student names in the updated records.");
-  students[index]=cleanName;students.sort((a,b)=>a.localeCompare(b));
+  const [oldResults,newResults]=await Promise.all([
+   supabaseRequest("typing_results?select=id,student&student=eq."+oldFilter+"&order=id.asc"),
+   supabaseRequest("typing_results?select=id,student&student=eq."+encodeURIComponent(cleanName)+"&order=id.asc")
+  ]);
+  if(oldResults.length>0||newResults.some(r=>String(r.student||"")!==cleanName)){
+   await supabaseRequest("typing_students?name=eq."+encodeURIComponent(cleanName),{method:"PATCH",body:JSON.stringify({name:oldName})}).catch(()=>{});
+   throw new Error("Supabase could not verify all result names. The profile rename was rolled back where possible; refresh and check the student and results tables before retrying.");
+  }
+  students=[...new Set(students.filter(n=>n.toLowerCase()!==oldName.toLowerCase()).concat(cleanName))].sort((a,b)=>a.localeCompare(b));
   data=data.map(r=>String(r.Student||"").toLowerCase()===oldName.toLowerCase()?{...r,Student:cleanName}:r);
   if(studentName.toLowerCase()===oldName.toLowerCase())studentName=cleanName;
   saveJSON(STUDENTS_KEY,students);saveJSON(DATA_KEY,data);
-  alert("Student renamed to "+cleanName+". Existing typing records were updated.");
+  alert("Student renamed to "+cleanName+". Supabase confirmed the profile and checked for remaining records under the old name.");
   showStudentMenu();
  }catch(e){
   console.error("Student rename failed",e);
-  alert("The rename could not be fully verified. The student menu and local records were not changed. Check Supabase before trying again. Details: "+(e.message||e));
+  alert("The rename could not be fully verified. The student menu and local records were not changed. Refresh and check Supabase before trying again. Details: "+(e.message||e));
  }
 }
 async function deleteStudent(){
