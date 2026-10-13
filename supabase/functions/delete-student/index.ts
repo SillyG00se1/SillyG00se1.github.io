@@ -58,7 +58,7 @@ Deno.serve(async (req: Request) => {
     if (!name || name.length > 200) {
       return respond({ error: "A valid student name is required." }, 400);
     }
-    if (!["delete-profile", "reset-results"].includes(action)) {
+    if (!["delete-profile", "rename-profile", "reset-results"].includes(action)) {
       return respond({ error: "Unsupported teacher action." }, 400);
     }
 
@@ -90,6 +90,64 @@ Deno.serve(async (req: Request) => {
 
       // Deliberately leave typing_results unchanged.
       return respond({ success: true, action, deleted: name, resultsPreserved: true });
+    }
+
+    if (action === "rename-profile") {
+      const oldName = typeof body?.oldName === "string" ? body.oldName.trim() : "";
+      const newName = typeof body?.newName === "string" ? body.newName.trim() : "";
+      if (!oldName || oldName.length > 200 || !newName || newName.length > 200) {
+        return respond({ error: "A valid old and new student name are required." }, 400);
+      }
+      if (oldName === newName) return respond({ error: "The new name is unchanged." }, 400);
+
+      const { data: oldProfile, error: oldLookupError } = await admin
+        .from("typing_students").select("name").eq("name", oldName).maybeSingle();
+      if (oldLookupError) throw oldLookupError;
+      if (!oldProfile) return respond({ error: "Student profile not found." }, 404);
+
+      const { data: targetProfile, error: targetLookupError } = await admin
+        .from("typing_students").select("name").eq("name", newName).maybeSingle();
+      if (targetLookupError) throw targetLookupError;
+      if (targetProfile) return respond({ error: "A student with that name already exists." }, 409);
+
+      const { data: updatedProfiles, error: profileUpdateError } = await admin
+        .from("typing_students").update({ name: newName }).eq("name", oldName).select("name");
+      if (profileUpdateError) throw profileUpdateError;
+      if (!updatedProfiles?.some((row) => row.name === newName)) {
+        return respond({ error: "Supabase could not verify the profile rename." }, 500);
+      }
+
+      try {
+        const { error: resultsUpdateError } = await admin
+          .from("typing_results").update({ student: newName }).eq("student", oldName);
+        if (resultsUpdateError) throw resultsUpdateError;
+
+        const [{ data: oldProfiles, error: oldProfileCheckError },
+               { data: newProfiles, error: newProfileCheckError },
+               { data: oldResults, error: oldResultsCheckError },
+               { data: renamedResults, error: renamedResultsCheckError }] = await Promise.all([
+          admin.from("typing_students").select("name").eq("name", oldName),
+          admin.from("typing_students").select("name").eq("name", newName),
+          admin.from("typing_results").select("id").eq("student", oldName),
+          admin.from("typing_results").select("id,student").eq("student", newName),
+        ]);
+        if (oldProfileCheckError) throw oldProfileCheckError;
+        if (newProfileCheckError) throw newProfileCheckError;
+        if (oldResultsCheckError) throw oldResultsCheckError;
+        if (renamedResultsCheckError) throw renamedResultsCheckError;
+        if (oldProfiles?.length || newProfiles?.length !== 1 || oldResults?.length ||
+            renamedResults?.some((row) => row.student !== newName)) {
+          throw new Error("Rename verification failed.");
+        }
+      } catch (verificationError) {
+        // Best-effort rollback keeps the profile consistent if result migration fails.
+        await admin.from("typing_results").update({ student: oldName }).eq("student", newName);
+        await admin.from("typing_students").update({ name: oldName }).eq("name", newName);
+        console.error("Student rename verification failed; rollback attempted.", verificationError);
+        return respond({ error: "The rename could not be verified. The server attempted to roll it back; refresh and check the student and results tables." }, 500);
+      }
+
+      return respond({ success: true, action, oldName, newName, resultsUpdated: true });
     }
 
     // reset-results deletes only results belonging to this exact student name.
