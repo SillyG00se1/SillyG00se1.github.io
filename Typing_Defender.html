@@ -40,7 +40,7 @@ p{font-size:24px;line-height:1.4}
 const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
 let W=1200,H=760,dpr=1,screen="menu",level=1,currentScene=1,running=false,last=0,raf=0;
 let score=0,correct=0,wrong=0,typed="",word="",wordIndex=0,startTime=0,combo=0,correctWordsTotal=0,correctWordsInRow=0;
-let zombies=[],splats=[],particles=[],clouds=[],shake=0,spawnTimer=0,round=0;
+let zombies=[],splats=[],particles=[],clouds=[],shake=0,spawnTimer=0,round=0,slowTimer=0;
 const LEVELS={
   1:{name:"LESSONS 1-3",words:["ask","sad","dad","fall","jag","lag","glass","flash","all","flag","add","lass","flask","salad","dash","half","gall","had","has","glad","shall","flail","slag","salsa","sash","halls","falls","flags","gags","jabs","jags","lads","sagas","alas","ash","fad","fads","gala","gals","hags","jazz","slash","hash","shag","lass","glad","slag","dash","flash","flask","salad","shall","all","fall","flag","glass","ask","dad","sad","had","has"],speed:180},
   2:{name:"LESSONS 4-6",words:["fire","ride","rule","fish","free","here","red","there","they","that","this","your","try","stay","write","work","word","world","show","how","after","other","their","those","these","three","where","while","white","whole","house","horse","shirt","short","shore","share","store","story","tower","lower","power","flower","fresh","faster","father","rather","heart","earth","water","wait","wear","year","writer","writing","throw","threw","truth","trust","style","start","stare","stair","first","four","fourth","reward","retire","fire","ride","rule","fish","here","there","they","that","this","your","work","word","show","how"],speed:220},
@@ -99,7 +99,7 @@ function showMenu(){
  draw();
 }
 function startGame(n){
- level=Number(n)||1;currentScene=level;screen="game";running=true;score=correct=wrong=0;typed="";combo=0;round=0;spawnTimer=0;shake=0;targetWordLength=3;lengthStreak=0;correctWordsTotal=0;correctWordsInRow=0;startTime=performance.now();
+ level=Number(n)||1;currentScene=level;screen="game";running=true;score=correct=wrong=0;typed="";combo=0;round=0;spawnTimer=0;shake=0;slowTimer=0;targetWordLength=3;lengthStreak=0;correctWordsTotal=0;correctWordsInRow=0;startTime=performance.now();
  zombies=[];splats=[];particles=[];clouds=[];
  for(let i=0;i<5;i++)clouds.push({x:Math.random()*W,y:80+Math.random()*170,s:35+Math.random()*70,v:8+Math.random()*12});
  document.getElementById("hud").hidden=false;document.getElementById("word").hidden=false;document.getElementById("typed").hidden=false;
@@ -130,15 +130,15 @@ function newZombie(){
  word=pickWord();wordIndex=0;typed="";
  round++;
  let lane=Math.floor(Math.random()*3);
- // Pace changes only after successful words, not simply because a round elapsed.
- // Use a standard five-character word so visible movement speed is consistent across word lengths.
- // Speeds above 55 WPM are locked until 15 consecutive correct words.
+ // Pace progresses with successful words, while word length scales the travel time.
+ // A longer word gives the player proportionally more time at the same effective WPM.
+ // Speeds above 55 WPM stay locked until 15 consecutive correct words.
  const speedCap=correctWordsInRow>=15?75:55;
  const paceWPM=Math.min(speedCap,4+Math.floor(correctWordsTotal/5)*1.5);
  const spawnX=W+100;
  const boundaryX=Math.max(44,W*.075)+42;
  const distance=spawnX-boundaryX;
- const typingSeconds=60/Math.max(1,paceWPM);
+ const typingSeconds=(Math.max(1,paceWPM)>0?60*Math.max(1,word.length)/Math.max(1,paceWPM):60);
  const zombieSpeed=distance/typingSeconds;
  zombies=[{x:spawnX,lane,scale:.86+Math.random()*.16,flash:0,paint:[],speed:zombieSpeed,baseSpeed:zombieSpeed,walkTime:Math.random()*2.9,paceWPM}];
  updateWord();
@@ -398,6 +398,9 @@ function paintball(){
 }
 function wrongKey(){
  wrong++;combo=0;lengthStreak=0;correctWordsInRow=0;targetWordLength=Math.max(2,targetWordLength-1);shake=4;
+ // Briefly slow the current zombie after a typo, then restore its original pace.
+ const z=zombies[0];
+ if(z){z.speed=z.baseSpeed*.55;slowTimer=1.1}
 }
 function updateHUD(){
  let s=stats();document.getElementById("score").textContent=score;document.getElementById("accuracy").textContent=s.acc.toFixed(0);document.getElementById("wpm").textContent=s.wpm.toFixed(0);document.getElementById("paint").textContent=correct;
@@ -405,6 +408,10 @@ function updateHUD(){
 function loop(now){
  if(!running)return;let dt=Math.min(.04,(now-last)/1000);last=now;
  for(let c of clouds){c.x-=c.v*dt;if(c.x<-200)c.x=W+100}
+ if(slowTimer>0){
+  slowTimer=Math.max(0,slowTimer-dt);
+  if(slowTimer===0){for(const z of zombies)z.speed=z.baseSpeed}
+ }
  for(let z of zombies){
   z.x-=z.speed*dt;z.walkTime=(z.walkTime||0)+dt;
   if(z.x<Math.max(44,W*.075)+42){z.x=Math.max(44,W*.075)+42;shake=2;endGame("The Zombies Broke Through!");return}}
