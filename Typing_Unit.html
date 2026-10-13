@@ -108,9 +108,6 @@ async function renameStudent(){
  const index=Number(choice)-1;
  if(!Number.isInteger(index)||index<0||index>=students.length){alert("Please enter a valid student number. No changes were made.");return}
  const oldName=students[index];
- const password=window.prompt("Enter the password to rename "+oldName+":");
- if(password===null)return;
- if(password!=="1234"){alert("Incorrect password. The student was not renamed.");return}
  const newName=window.prompt("Enter the new name for "+oldName+":",oldName);
  if(newName===null)return;
  const cleanName=newName.trim();
