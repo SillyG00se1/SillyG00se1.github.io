@@ -97,7 +97,7 @@ function showStudentMenu(){
  ${button("ADD","addStudent()")}${button("RENAME","renameStudent()")}${button("DELETE","deleteStudent()")}${button("DATA","viewData()")}</div></div>`)
 }
 function addStudent(){
- let n=window.prompt("Enter the student's name:");if(!n||!n.trim())return;n=n.trim();
+ let n=window.prompt("Enter the student or teacher's name:");if(!n||!n.trim())return;n=n.trim();
  if(students.some(s=>s.toLowerCase()===n.toLowerCase())){alert(n+" is already in the student menu.");return}
  students.push(n);students.sort((a,b)=>a.localeCompare(b));saveJSON(STUDENTS_KEY,students);saveStudentShared(n);showStudentMenu()
 }
