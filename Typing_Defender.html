@@ -441,6 +441,7 @@ function showLeaderboard(levelOnly=null){
  }
  h+='<div class="levels">';
  if(unitIntegrated)h+='<button onclick="launchCosmicDefender()">🌌 COSMIC DEFENDER</button>';
+ if(unitIntegrated&&nextLessonFromUnit>=1&&nextLessonFromUnit<=15)h+='<button onclick="continueToNextTypingLesson()">NEXT LESSON ➜</button>';
  h+='<button onclick="showMenu()">LEVELS</button>';
  if(levelOnly!==null)h+='<button onclick="showLeaderboard()">ALL LEADERBOARDS</button>';
  h+='</div></div></div>';
