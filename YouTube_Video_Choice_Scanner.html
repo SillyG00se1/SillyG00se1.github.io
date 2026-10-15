@@ -99,7 +99,7 @@ const STORAGE_KEY="youtubeVideoChoiceScanner.savedSets";
 const home=document.getElementById("home"),activity=document.getElementById("activity"),playerScreen=document.getElementById("playerScreen");
 const choiceCount=document.getElementById("choiceCount"),scanTime=document.getElementById("scanTime"),links=document.getElementById("links");
 const choices=document.getElementById("choices"),scanLabel=document.getElementById("scanLabel"),positionLabel=document.getElementById("positionLabel");
-const player=document.getElementById("player"),playerTitle=document.getElementById("playerTitle");
+let player=document.getElementById("player");const playerTitle=document.getElementById("playerTitle");
 const savedSets=document.getElementById("savedSets"),setName=document.getElementById("setName");
 let videos=[],index=0,timer=null,scanMs=2300;
 
@@ -154,6 +154,14 @@ const ytTag=document.createElement("script");ytTag.src="https://www.youtube.com/
 function stopYouTubeWatcher(){
   ytWatchToken++;
   if(ytPlayer){try{ytPlayer.destroy()}catch(e){}ytPlayer=null}
+  // YouTube's API destroy() removes its iframe from the document. Create a fresh iframe
+  // so a second selection never tries to play inside the removed, stale element.
+  const fresh=document.createElement("iframe");
+  fresh.id="player";
+  fresh.allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+  fresh.allowFullscreen=true;
+  document.getElementById("playerWrap").replaceChildren(fresh);
+  player=fresh;
 }
 function watchForVideoEnd(){
   const token=++ytWatchToken;
