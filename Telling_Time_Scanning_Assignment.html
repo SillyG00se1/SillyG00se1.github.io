@@ -7,22 +7,23 @@
 <style>
 :root{color-scheme:light;--navy:#142b4a;--blue:#1769aa;--pale:#eef6ff;--green:#147d45;--red:#b42318}
 *{box-sizing:border-box}body{margin:0;background:#f4f7fb;color:#172334;font-family:Arial,Helvetica,sans-serif;line-height:1.45}
-header{background:var(--navy);color:white;padding:18px 16px;text-align:center}header h1{margin:0;font-size:clamp(1.5rem,4vw,2.2rem)}header p{margin:6px 0 0}
-main{max-width:850px;margin:0 auto;padding:18px 14px 40px}.panel{background:#fff;border:1px solid #d5dfeb;border-radius:16px;padding:18px;margin:0 0 16px;box-shadow:0 3px 12px #142b4a0c}
+header{background:var(--navy);color:white;padding:10px 12px;text-align:center}header h1{margin:0;font-size:clamp(1.35rem,3vw,1.8rem)}header p{margin:3px 0 0}
+main{max-width:850px;margin:0 auto;padding:8px 10px 12px}.panel{background:#fff;border:1px solid #d5dfeb;border-radius:12px;padding:10px;margin:0 0 8px;box-shadow:0 3px 12px #142b4a0c}
 .topline{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}.progress{font-weight:700;color:#31465e}.instructions{margin:10px 0 0}
-.clock-wrap{display:flex;justify-content:center;margin:14px 0 8px}.clock{width:min(82vw,360px);height:auto;display:block;filter:contrast(1.12)}
-.question-title{text-align:center;font-size:1.2rem;font-weight:700;margin:6px 0}
-.options{display:grid;grid-template-columns:1fr;gap:10px;margin-top:16px}
-.option{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:3px solid #c5d3e2;border-radius:12px;padding:13px 15px;background:#fff;font-size:1.15rem;font-weight:700;color:#172334;cursor:pointer;min-height:62px}
+.clock-wrap{display:flex;justify-content:center;margin:5px 0 2px}.clock{width:min(58vh,260px,68vw);max-height:34vh;height:auto;display:block;filter:contrast(1.12)}
+.question-title{text-align:center;font-size:1.1rem;font-weight:700;margin:3px 0}
+.options{display:grid;grid-template-columns:1fr;gap:7px;margin-top:8px}
+.option{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:2px solid #c5d3e2;border-radius:10px;padding:7px 10px;background:#fff;font-size:1.05rem;font-weight:700;color:#172334;cursor:pointer;min-height:48px}
 .option .letter{display:grid;place-items:center;flex:0 0 36px;height:36px;border-radius:50%;background:#e9f1fa;color:var(--navy)}
 .option:focus-visible,.option.selected{outline:4px solid #ffbf47;outline-offset:2px;border-color:var(--blue);background:#eef6ff}
 .option.correct{border-color:var(--green);background:#eaf8ef}.option.incorrect{border-color:var(--red);background:#fff0ef}
 button{font:inherit;cursor:pointer;border-radius:10px;border:2px solid #a9bacd;background:white;padding:10px 14px;color:#172334;font-weight:700}
-button:focus-visible{outline:4px solid #ffbf47;outline-offset:2px}.primary{background:var(--blue);color:white;border-color:var(--blue)}.controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+button:focus-visible{outline:4px solid #ffbf47;outline-offset:2px}.primary{background:var(--blue);color:white;border-color:var(--blue)}.controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}
 .status{text-align:center;min-height:1.5em;font-weight:700;margin-top:12px}.small{font-size:.94rem;color:#4a5a6d}.hidden{display:none!important}
 .scanbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center}.scanbar label{font-weight:700}.scanbar input{width:1.1rem;height:1.1rem}
 .score{font-size:1.25rem;font-weight:700;text-align:center}.history{padding-left:20px}.history li{margin:4px 0}
-@media(min-width:620px){.options{grid-template-columns:repeat(3,minmax(0,1fr))}.option{flex-direction:column;text-align:center;justify-content:center;gap:8px;min-height:118px}.option .letter{flex-basis:34px}}
+@media(min-width:620px){.options{grid-template-columns:repeat(3,minmax(0,1fr))}.option{flex-direction:column;text-align:center;justify-content:center;gap:5px;min-height:74px;padding:6px}.option .letter{flex-basis:28px;height:28px}}
+@media(max-height:760px){header{padding:6px 10px}main{padding:5px 8px 8px}.panel{padding:8px;margin-bottom:6px}.clock{width:min(36vh,210px,56vw);max-height:27vh}.clock-wrap{margin:2px 0}.question-title{margin:1px 0}.options{gap:5px;margin-top:5px}.option{min-height:40px;padding:5px 8px}.option .letter{flex-basis:28px;height:28px}.controls{margin-top:5px}.small{font-size:.82rem}}
 </style>
 </head>
 <body>
@@ -56,12 +57,7 @@ button:focus-visible{outline:4px solid #ffbf47;outline-offset:2px}.primary{backg
 <p id="feedback" style="text-align:center"></p>
 <div class="controls"><button class="primary" id="againBtn">Try again</button><button id="readScoreBtn">Read score aloud</button></div>
 </section>
-<section class="panel" id="savedPanel">
-<h2>Saved scores on this device</h2>
-<p class="small">Scores are stored in this browser only. They are not sent to a server or Supabase.</p>
-<div id="savedScores"></div>
-<div class="controls"><button id="clearScoresBtn">Clear saved scores</button></div>
-</section>
+
 </main>
 <script>
 (function(){
@@ -74,7 +70,7 @@ const QUESTIONS=[
 {time:"8:00",hour:8,choices:["6 o'clock","8 o'clock","7 o'clock"]},
 {time:"6:00",hour:6,choices:["6 o'clock","5 o'clock","10 o'clock"]}
 ];
-const STORAGE_KEY="tellingTimeScanningAssignmentScores_v1";
+
 const $=id=>document.getElementById(id);
 let order=[],index=0,score=0,answered=false,selected=0,scanTimer=null,scanGeneration=0,results=[];
 const setup=$("setup"),quiz=$("quiz"),resultsPanel=$("results"),optionsEl=$("options");
@@ -93,9 +89,7 @@ function speakChoices(){const q=order[index];speak("Choice A. "+q.displayChoices
 function choose(i){if(answered||!order[index])return;answered=true;stopScan();const q=order[index],chosen=q.displayChoices[i],correct=chosen===q.time.replace(":00"," o'clock");if(correct)score++;results.push({question:q.time,answer:chosen,correct});[...optionsEl.querySelectorAll(".option")].forEach((b,j)=>{b.disabled=true;b.classList.remove("selected");if(q.displayChoices[j]===q.time.replace(":00"," o'clock"))b.classList.add("correct");if(j===i&&!correct)b.classList.add("incorrect");});setStatus(correct?"Correct! Great job.":"Not quite. The clock shows "+q.time.replace(":00"," o'clock")+".");$("nextBtn").classList.add("hidden");const answerMessage=correct?"Correct!":"The correct answer is "+q.time.replace(":00"," o'clock")+".";if(!("speechSynthesis" in window)){scanTimer=setTimeout(advanceAfterAnswer,2000);return;}window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(answerMessage);utterance.rate=.88;utterance.onend=()=>{scanTimer=setTimeout(advanceAfterAnswer,2000);};utterance.onerror=()=>{scanTimer=setTimeout(advanceAfterAnswer,2000);};window.speechSynthesis.speak(utterance);}
 function advanceAfterAnswer(){if(index===QUESTIONS.length-1){finish();}else{index++;showQuestion();}}
 function startAssignment(){window.speechSynthesis?.cancel();order=QUESTIONS.map(q=>{const correct=q.time.replace(":00"," o'clock");const wrong=shuffle(q.choices.filter(c=>c!==correct)).slice(0,2);return {...q,displayChoices:shuffle([correct,...wrong])};});index=0;score=0;results=[];setup.classList.add("hidden");resultsPanel.classList.add("hidden");quiz.classList.remove("hidden");showQuestion();}
-function finish(){stopScan();quiz.classList.add("hidden");resultsPanel.classList.remove("hidden");const percent=Math.round(score/QUESTIONS.length*100);$("finalScore").textContent="Your score: "+score+" out of "+QUESTIONS.length+" ("+percent+"%)";$("feedback").textContent=score===6?"Perfect score!":score>=4?"Nice work! Keep practicing to learn every clock.":"Good effort! Try again and listen carefully to each choice.";saveScore({date:new Date().toISOString(),score,total:QUESTIONS.length,percent,details:results});renderSavedScores();speak("Assignment complete. You got "+score+" out of "+QUESTIONS.length+". That is "+percent+" percent.");$("againBtn").focus();}
-function saveScore(entry){try{const all=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");all.unshift(entry);localStorage.setItem(STORAGE_KEY,JSON.stringify(all.slice(0,20)));}catch(e){$("savedScores").textContent="This browser could not save scores. Check that local storage is enabled."}}
-function renderSavedScores(){const target=$("savedScores");let all=[];try{all=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");}catch(e){}if(!all.length){target.innerHTML='<p class="small">No saved scores yet.</p>';return;}const ul=document.createElement("ol");ul.className="history";all.forEach(item=>{const li=document.createElement("li");const d=new Date(item.date);li.textContent=d.toLocaleDateString()+" "+d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})+" — "+item.score+"/"+item.total+" ("+item.percent+"%)";ul.appendChild(li);});target.replaceChildren(ul);}
+function finish(){stopScan();quiz.classList.add("hidden");resultsPanel.classList.remove("hidden");const percent=Math.round(score/QUESTIONS.length*100);$("finalScore").textContent="Your score: "+score+" out of "+QUESTIONS.length+" ("+percent+"%)";$("feedback").textContent=score===6?"Perfect score!":score>=4?"Nice work! Keep practicing to learn every clock.":"Good effort! Try again and listen carefully to each choice.";speak("Assignment complete. You got "+score+" out of "+QUESTIONS.length+". That is "+percent+" percent.");$("againBtn").focus();}
 $("startBtn").addEventListener("click",startAssignment);
 $("readInstructions").addEventListener("click",()=>speak("Question instructions: Look at the clock and listen to the answer choices. Press your switch when the answer you want is highlighted."));
 if("speechSynthesis" in window){fillVoices();window.speechSynthesis.onvoiceschanged=fillVoices;}
@@ -104,11 +98,9 @@ $("speakBtn").addEventListener("click",()=>{if(order[index])speak("Choice "+Stri
 $("nextBtn").addEventListener("click",()=>{if(!answered)return;if(index===QUESTIONS.length-1)finish();else{index++;showQuestion();}});
 $("againBtn").addEventListener("click",()=>{window.speechSynthesis?.cancel();setup.classList.remove("hidden");resultsPanel.classList.add("hidden");quiz.classList.add("hidden");$("startBtn").focus();});
 $("readScoreBtn").addEventListener("click",()=>speak($("finalScore").textContent));
-$("clearScoresBtn").addEventListener("click",()=>{if(confirm("Clear all telling-time scores saved in this browser?")){localStorage.removeItem(STORAGE_KEY);renderSavedScores();}});
 $("autoScan").addEventListener("change",()=>{if($("autoScan").checked)startScan();else stopScan();});
 $("scanSpeed").addEventListener("change",()=>{if($("autoScan").checked)startScan();});
 document.addEventListener("keydown",e=>{if(quiz.classList.contains("hidden")||answered)return;if(e.key===" "||e.key==="Enter"){if(e.target instanceof HTMLButtonElement){if(e.target.id==="nextBtn")return;}e.preventDefault();choose(selected);}else if(!$("autoScan").checked&&(e.key==="ArrowRight"||e.key==="ArrowDown")){e.preventDefault();selected=(selected+1)%3;paintSelection();}else if(!$("autoScan").checked&&(e.key==="ArrowLeft"||e.key==="ArrowUp")){e.preventDefault();selected=(selected+2)%3;paintSelection();}});
-renderSavedScores();
 })();
 </script>
 </body>
