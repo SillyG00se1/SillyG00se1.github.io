@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FootSwitch Configurator (ElfKey protocol)</title>
+<style>
+:root{--bg:#f6f7f9;--fg:#1c2026;--card:#fff;--bd:#d6dae0;--mut:#667;--ac:#2461d6;--ok:#16794a;--er:#b3261e;--wn:#8a5a00}
+@media (prefers-color-scheme:dark){:root{--bg:#14171b;--fg:#e6e8eb;--card:#1e2227;--bd:#343a42;--mut:#99a;--ac:#6ea0ff;--ok:#5fd39a;--er:#ff8a80;--wn:#ffcc66}}
+*{box-sizing:border-box}body{margin:0;padding:16px;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,sans-serif;max-width:980px;margin-inline:auto}
+h1{font-size:18px;margin:0 0 4px}h2{font-size:14px;margin:0 0 8px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:12px;margin:12px 0}
+button{font:inherit;padding:6px 12px;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--fg);cursor:pointer}
+button.p{background:var(--ac);border-color:var(--ac);color:#fff}button:disabled{opacity:.45;cursor:not-allowed}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--bd);vertical-align:top}
+code,pre,.hex{font:12px ui-monospace,Consolas,monospace}.mut{color:var(--mut)}.ok{color:var(--ok)}.er{color:var(--er)}.wn{color:var(--wn)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0}
+.chip{display:inline-flex;gap:4px;align-items:center;border:1px solid var(--bd);border-radius:12px;padding:1px 8px}
+.chip b{cursor:pointer}#cap{min-width:220px;padding:8px;border:2px dashed var(--bd);border-radius:6px;text-align:center}
+#cap:focus{border-color:var(--ac);outline:0}
+#log{height:200px;overflow:auto;white-space:pre-wrap;background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:8px}
+.wrap{overflow-x:auto}
+</style></head><body>
+<h1>FootSwitch Configurator <span class="mut">· ElfKey 1.9.1 protocol</span></h1>
+<div class="mut">Close ElfKey first (only one program can hold the device). Use Chrome or Edge.</div>
+
+<div class="card"><h2>1. Device</h2>
+ <div class="row"><button class="p" id="bConn">Connect device…</button>
+ <label>Picker shows <select id="cAll"><option value="v">ElfKey vendor IDs (loose)</option><option value="u">ElfKey IDs + vendor-defined interface (strict)</option><option value="a">ALL HID devices</option></select></label>
+ <button id="bList">List granted devices</button>
+ <button id="bRead" disabled>Read all keys</button></div>
+ <div id="dev" class="mut">Not connected.</div>
+ <div id="keyList" class="row"><span class="mut">Key numbers:</span><input id="keyNums" size="26" disabled title="Comma-separated. Auto-filled from the model name; edit if your model is not recognised."></div>
+</div>
+
+<div class="card"><h2>2. Current assignments (read from the pedal)</h2>
+ <div class="wrap"><table><thead><tr><th>Key</th><th>Function</th><th>Assignment</th><th>Raw reply</th><th></th></tr></thead><tbody id="tb"><tr><td colspan="5" class="mut">Nothing read yet.</td></tr></tbody></table></div>
+</div>
+
+<div class="card" id="edCard" hidden><h2>3. Reassign key <span id="edKey"></span></h2>
+ <div class="row"><label>Function <select id="fn"><option value="kb">Keyboard key / combo</option><option value="media">Media</option></select></label>
+ <label id="mdWrap">Output <select id="om"><option value="1">Single (press once)</option><option value="2">Hold (held while pedal held)</option></select></label></div>
+ <div id="kbBox">
+  <div class="row" id="mods"></div>
+  <div class="row"><div id="cap" tabindex="0">Click here, then press the key(s)</div><span id="chips"></span><button id="bClr">Clear keys</button></div>
+  <div class="mut">Up to 6 keys. Modifiers can be ticked or pressed in the box.</div>
+ </div>
+ <div id="mdBox" hidden><select id="media"></select></div>
+ <div class="row"><label><input type="checkbox" id="dry" checked> Dry run (show bytes, do not write)</label>
+ <button class="p" id="bWrite">Preview</button></div>
+ <div id="res"></div>
+</div>
+
+<div class="card"><h2>Log (TX/RX bytes)</h2><div class="row"><button id="bCopy">Copy log</button><button id="bClearLog">Clear</button></div><div id="log" class="hex"></div></div>
+
+<script>
+// ===== PURE: protocol helpers (ported from ElfKey 1.9.1 main/index.js) =====
+const VIDS=[6790,3141,16701,9354,13651];
+const PIDS=[57382,57387,57388,57389,29699,29700,29701,40966,40967,57520,45057,49153,49155,49168,45058,45059,49156,45571,49425,49441,49456,49169];
+const MODS=['Ctrl','Shift','Alt','Win','RCtrl','RShift','RAlt','RWin'];
+const MEDIA=['','VolumeDown','VolumeUp','Mute','PlayPause','Backward','Forward','Stop','OpenPlayer','BrowserHome','StopWebPage','BrowserBack','BrowserForward','RefreshWebPage','MyComputer','OpenEmail','Calculator','SearchFile','ShutDown','Sleep'];
+const SPECIAL={Enter:40,Escape:41,Backspace:42,Tab:43,Space:44,Minus:45,Equal:46,BracketLeft:47,BracketRight:48,Backslash:49,Semicolon:51,Quote:52,Backquote:53,Comma:54,Period:55,Slash:56,CapsLock:57,PrintScreen:70,ScrollLock:71,Pause:72,Insert:73,Home:74,PageUp:75,Delete:76,End:77,PageDown:78,ArrowRight:79,ArrowLeft:80,ArrowDown:81,ArrowUp:82,NumLock:83,NumpadDivide:84,NumpadMultiply:85,NumpadSubtract:86,NumpadAdd:87,NumpadEnter:88,Numpad0:98,NumpadDecimal:99,ContextMenu:101};
+const CODE2HID={...SPECIAL};
+for(let i=0;i<26;i++)CODE2HID['Key'+String.fromCharCode(65+i)]=4+i;
+for(let i=1;i<=9;i++){CODE2HID['Digit'+i]=29+i;CODE2HID['Numpad'+i]=88+i}
+CODE2HID.Digit0=39;
+for(let i=1;i<=12;i++)CODE2HID['F'+i]=57+i;
+for(let i=13;i<=24;i++)CODE2HID['F'+i]=91+i;
+const HID2CODE={};for(const c in CODE2HID)HID2CODE[CODE2HID[c]]=c;
+const MODCODE={ControlLeft:1,ShiftLeft:2,AltLeft:4,MetaLeft:8,ControlRight:16,ShiftRight:32,AltRight:64,MetaRight:128};
+const hidName=b=>{const c=HID2CODE[b];return c?c.replace(/^Key|^Digit/,''):(b?'0x'+b.toString(16):'')};
+const modNames=m=>MODS.filter((_,i)=>m>>i&1).join('+');
+const hex=a=>[...a].map(x=>x.toString(16).padStart(2,'0')).join(' ');
+
+// Build the reports for a keyboard assignment, exactly as saveKeyboard() does for non-retrigger, non-double keys.
+// outMode: 1=Single (mode byte 129), 2=Hold (mode byte 1). keys = HID usage bytes. Returns {header, data[]}.
+function buildKeyboard(keyNumber,outMode,mods,keys){
+  const length=keys.length===6?9:8;
+  let mode=outMode===2?1:129; if(keys.length>1)mode+=5;
+  const first=[length,mode,mods,0,0,0,0,0];
+  const data=[first];
+  keys.forEach((k,i)=>{ if(i<5)first[i+3]=k; else data.push([k,0,0,0,0,0,0,0]) });
+  return {header:[1,129,length,keyNumber,0,0,0,0],data};
+}
+// saveMedia(): header length is always 8, data = [8,7,value,...]
+function buildMedia(keyNumber,value){return {header:[1,129,8,keyNumber,0,0,0,0],data:[[8,7,value,0,0,0,0,0]]}}
+
+// Decode one key-read reply. p = first payload report (p[0]=length). extra = following reports.
+function decodeKey(p,extra){
+  const len=p[0],mode=p[1];
+  if([1,129,6,134,18].includes(mode)){
+    const re=mode===18, mods=p[re?6:2]; let keys=[];
+    if(mode===1||mode===129)keys=[p[3]];
+    else{for(let i=re?7:3;i<=Math.min(len,8)-1;i++)keys.push(p[i]);
+      if(len>8&&extra[0])for(let i=0;i<len-8;i++)keys.push(extra[0][i])}
+    keys=keys.filter(k=>k);
+    return {kind:'kb',outMode:re?3:(mode===1||mode===6?2:1),mods,keys,
+      text:[modNames(mods),...keys.map(hidName)].filter(Boolean).join(' + ')||'(none)'};
+  }
+  if(mode===7)return {kind:'media',value:p[2],text:'Media: '+(MEDIA[p[2]]||p[2])};
+  const names={2:'Mouse',19:'Mouse (retrigger)',4:'Text string',10:'Macro',11:'MIDI',139:'MIDI',48:'OneClick',13:'Double trigger'};
+  return {kind:'other',text:(names[mode]||'Unknown mode '+mode)+' (read-only here)'};
+}
+function extraReads(p){ // how many more reports ElfKey reads for this reply
+  const len=p[0],m=p[1];
+  if([6,134].includes(m))return len>8?1:0;
+  if([2].includes(m))return len>8?1:0;
+  if(m===4||m===13)return Math.max(0,Math.ceil(len/8)-1);
+  return 0;
+}
+function keyNumbersFor(model){
+  const has=s=>model.includes(s),ver=parseFloat(model.slice(-3))||0;
+  const one=(has('FS22')&&!has('FS22X5'))||['FootSwitch1','IRSW20','FS2007','FS2016_','FS2016BT1_','FS2017','FS17','FS2019U','USW1','MS23','IRSW21A','USB1RD35A','USB1RD65A','FS2016G1_'].some(has);
+  const two=['FootSwitch2','FS2016BT2_','FS2016B2A','FS2016BT1A_D','FS2019_USB2','PT23','FS2016G1A_','FS2016G2_'].some(has);
+  const three=['MK321','FS23','FS2020','FS20PRO','FS20G','USW3','FootSwitch3'].some(has);
+  const four=['FS2016BT2A_D','HK4','FS2016G2A_'].some(has), five=has('FS22X5')||has('USB5Key'), six=['HK6','USW6','MK623'].some(has);
+  const rng=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
+  if(one){const k=[2];if(has('FS2017BT2')||has('FS2017U2SW'))k.unshift(1);return k}
+  if(two){const k=[1,2];if(has('PT23'))k.push(17,18,33,34,49,50);return k}
+  if(three){const k=[1,2,3];
+    if(((has('MK321U_')||has('MK321UA_'))&&ver>=1.3)||(has('MK321-Pro')&&ver>=1.6))k.push(17,18,19,33,34,35);
+    else if(has('FS2020BT2')||has('FS2020U2SW'))k.push(4,5,6);
+    else if(has('MK321BT-Way'))k.push(4,5,6,17,18,19,20,21,22,33,34,35,36,37,38);
+    return k}
+  if(four)return rng(1,4); if(five)return rng(1,5);
+  if(six){const k=rng(1,6);if(has('MK623'))k.push(17,18,19,20,21,22,33,34,35,36,37,38);return k}
+  if(has('DIY-'))return rng(1,14);
+  return null; // unrecognised: user edits list
+}
+const hasBT=m=>m.includes('BT')||m.includes('PRO')||(m.includes('Pro')&&!(m.includes('FS22')||m.includes('FS23')))||m.includes('PT23');
+const hasResponse=(m,v)=>hasBT(m)||['FS17G','FS20G','MK321G','FS2016G','AnyKey'].some(s=>m.includes(s))||(m.includes('MK321U')&&v>=3);
+const hasFuncLayer=(m,v)=>((m.includes('MK321U_')||m.includes('MK321UA_'))&&v>=1.3)||(m.includes('MK321-Pro')&&v>=1.6)||m.includes('MK623')||m.includes('MK321BT-Way');
+// ===== END PURE =====
+
+// ===== WebHID transport =====
+const $=id=>document.getElementById(id);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let dev=null,rid=0,model='',version=0,needFlash=false,busy=false,queue=[],waiter=null,keyData={},flashData={};
+function log(s,c){const d=$('log');d.textContent+=s+'\n';d.scrollTop=d.scrollHeight}
+function onReport(e){const u=new Uint8Array(e.data.buffer,e.data.byteOffset,e.data.byteLength).slice();
+  log('RX '+hex(u));
+  if(waiter){const w=waiter;waiter=null;clearTimeout(w.t);w.res(u)}else queue.push(u)}
+function rd(ms=1000){ if(queue.length)return Promise.resolve(queue.shift());
+  return new Promise(res=>{const t=setTimeout(()=>{waiter=null;res(null)},ms);waiter={res,t}})}
+async function wr(msg,delay=20){await sleep(delay);const d=new Uint8Array(msg);log('TX id='+rid+' '+hex(d));await dev.sendReport(rid,d)}
+function flush(){queue.length=0}
+
+async function readModel(){
+  const cmd=[1,131,8,0,0,0,0,0];let name='';await wr(cmd);
+  for(let n=0;n<40;n++){
+    const last=name.slice(-3);
+    if(name!==''&&!isNaN(Number(last))&&name.includes('.'))break;
+    const p=await rd(1000);
+    if(p&&p.length){ if([...p].every(v=>(v>=32&&v<=126)||v===0))name+=String.fromCharCode(...[...p].filter(v=>v));else await wr(cmd)}
+    else if(name==='')await wr(cmd);
+  }
+  return name.trim();
+}
+async function readKey(n){
+  await wr([1,130,8,n,0,0,0,0]);
+  let p;do{p=await rd(1000)}while(p&&p[0]===129&&p[1]===85);
+  if(!p)return {kind:'none',text:'(no reply)',raw:''};
+  const extra=[];for(let i=extraReads(p);i>0;i--){const q=await rd(1000);if(q)extra.push(q)}
+  const k=decodeKey(p,extra);k.raw=hex(p)+extra.map(q=>' | '+hex(q)).join('');
+  if(needFlash)flashData[n]=[[1,129,p[0],n,0,0,0,0],[...p].slice(0,8),...extra.map(q=>[...q].slice(0,8))];
+  return k;
+}
+function keyNums(){return $('keyNums').value.split(/[,\s]+/).map(Number).filter(n=>n>0&&n<256)}
+
+async function guarded(fn){ if(busy)return;busy=true;setBusy(true);try{await fn()}catch(e){log('ERROR '+e.message);alert(e.message)}finally{busy=false;setBusy(false)}}
+function setBusy(b){['bRead','bWrite'].forEach(i=>$(i).disabled=b||!dev)}
+
+async function openDevice(d){
+  if(dev){try{dev.removeEventListener('inputreport',onReport);await dev.close()}catch{}}
+  dev=d;queue=[];if(!dev.opened)await dev.open();dev.addEventListener('inputreport',onReport);
+  const cols=dev.collections.map(c=>'usagePage 0x'+c.usagePage.toString(16)+' usage '+c.usage+' out:'+c.outputReports.map(r=>r.reportId).join('/')+' in:'+c.inputReports.map(r=>r.reportId).join('/'));
+  log('Opened '+dev.productName+' VID 0x'+dev.vendorId.toString(16)+' PID 0x'+dev.productId.toString(16)+'\n  collections: '+cols.join('; '));
+  // Same rule as ElfKey's Device.hasReportId, cross-checked against the descriptor
+  const rule=(dev.vendorId===6790&&dev.productId===57520)||(dev.vendorId===13651&&[49155,49168,49169].includes(dev.productId));
+  const fromDesc=dev.collections.flatMap(c=>c.outputReports).map(r=>r.reportId).find(x=>x>0);
+  rid=fromDesc||(rule?1:0);needFlash=dev.vendorId===3141&&dev.productId===29701;
+  log('reportId='+rid+(needFlash?' (needFlash device)':''));
+  model=await readModel();version=parseFloat(model.slice(-3))||0;
+  if(!model)throw new Error('No model reply. Is ElfKey still open, or is this the wrong HID interface? Try reconnecting and set the picker to ALL HID devices.');
+  const ks=keyNumbersFor(model);
+  $('keyNums').disabled=false;$('keyNums').value=(ks||[1,2,3]).join(',');
+  $('dev').innerHTML='<b class="ok">Connected:</b> '+model+' <span class="mut">('+(dev.productName||'')+')</span>'+(ks?'':' <b class="wn">Model not recognised, edit the key number list.</b>')+(needFlash?' <b class="wn">This model rewrites all keys on save; read all keys first.</b>':'');
+  $('bRead').disabled=false;$('bWrite').disabled=false;
+  await readAll();
+}
+async function readAll(){
+  keyData={};flashData={};flush();const tb=$('tb');tb.innerHTML='';
+  for(const n of keyNums()){const k=await readKey(n);keyData[n]=k;
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+n+'</td><td>'+({kb:'Keyboard',media:'Media',other:'Other',none:'—'}[k.kind])+(k.kind==='kb'?' <span class="mut">'+['','Single','Hold','ReTrigger'][k.outMode]+'</span>':'')+'</td><td>'+k.text+'</td><td class="hex">'+k.raw+'</td><td>'+((k.kind==='kb'||k.kind==='media'||k.kind==='none')?'<button data-k="'+n+'">Edit</button>':'')+'</td>';
+    tb.appendChild(tr)}
+  tb.querySelectorAll('button').forEach(b=>b.onclick=()=>edit(+b.dataset.k));
+}
+
+// ===== Editor =====
+let ed={key:0,mods:0,keys:[]};
+MODS.forEach((m,i)=>{const l=document.createElement('label');l.innerHTML='<input type="checkbox" data-b="'+(1<<i)+'"> '+m;$('mods').appendChild(l)});
+MEDIA.forEach((m,i)=>{if(i)$('media').add(new Option(m,i))});
+$('mods').onchange=e=>{const b=+e.target.dataset.b;ed.mods=e.target.checked?ed.mods|b:ed.mods&~b;preview()};
+function drawChips(){$('chips').innerHTML=ed.keys.map((k,i)=>'<span class="chip">'+hidName(k)+' <b data-i="'+i+'">×</b></span>').join(' ')||'<span class="mut">no keys</span>'}
+$('chips').onclick=e=>{if(e.target.dataset.i!==undefined){ed.keys.splice(+e.target.dataset.i,1);drawChips();preview()}};
+$('bClr').onclick=()=>{ed.keys=[];ed.mods=0;sync();preview()};
+$('cap').onkeydown=e=>{e.preventDefault();
+  if(MODCODE[e.code]){ed.mods|=MODCODE[e.code];sync()}
+  else if(CODE2HID[e.code]!==undefined){if(ed.keys.length<6&&!ed.keys.includes(CODE2HID[e.code]))ed.keys.push(CODE2HID[e.code]);drawChips()}
+  else log('Key "'+e.code+'" has no HID mapping in ElfKey; ignored.');
+  preview()};
+function sync(){$('mods').querySelectorAll('input').forEach(c=>c.checked=!!(ed.mods&+c.dataset.b));drawChips()}
+$('fn').onchange=()=>{const m=$('fn').value==='media';$('kbBox').hidden=m;$('mdBox').hidden=!m;$('mdWrap').hidden=m;preview()};
+['om','media','dry'].forEach(i=>$(i).onchange=preview);
+function edit(n){const k=keyData[n]||{};ed={key:n,mods:k.kind==='kb'?k.mods:0,keys:k.kind==='kb'?[...k.keys]:[]};
+  $('edCard').hidden=false;$('edKey').textContent=n;$('res').innerHTML='';
+  $('fn').value=k.kind==='media'?'media':'kb';if(k.kind==='media')$('media').value=k.value;
+  $('om').value=k.kind==='kb'&&k.outMode===2?'2':'1';$('fn').onchange();sync();preview();$('edCard').scrollIntoView({behavior:'smooth'})}
+function plan(){
+  if($('fn').value==='media')return buildMedia(ed.key,+$('media').value);
+  if(!ed.keys.length&&!ed.mods)return null;
+  return buildKeyboard(ed.key,+$('om').value,ed.mods,ed.keys);
+}
+function preview(){const p=plan();$('bWrite').textContent=$('dry').checked?'Preview bytes':'Write to pedal';
+  $('res').innerHTML=p?'<div class="hex mut">Will send: header <b>'+hex(p.header)+'</b> then '+p.data.map(d=>'data <b>'+hex(d)+'</b>').join(', ')+'</div>':'<div class="mut">Choose at least one key or modifier.</div>'}
+$('dry').onchange=preview;
+
+$('bWrite').onclick=()=>guarded(async()=>{
+  const p=plan();if(!p)return;preview();
+  if($('dry').checked){log('DRY RUN key '+ed.key+': '+hex(p.header)+' / '+p.data.map(hex).join(' / '));return}
+  if(needFlash&&Object.keys(flashData).length<keyNums().length){alert('This model needs every key read first so it can restore the others. Press "Read all keys".');return}
+  if(!confirm('Write key '+ed.key+' on '+model+'?'))return;
+  flush();
+  // === reproduces ElfKey saveKeyboard(): [flush cmd] -> header -> data report(s) -> [response] -> [restore others] -> readKey ===
+  if(needFlash){await wr([1,128,128,1,0,0,0,0]);await rd(1000)}
+  await wr(p.header);for(const d of p.data)await wr(d);
+  if(hasResponse(model,version))await rd(1000);
+  if(needFlash)for(const [n,msgs] of Object.entries(flashData))if(+n!==ed.key)for(const m of msgs)await wr(m);
+  const after=await readKey(ed.key);keyData[ed.key]=after;
+  if(hasFuncLayer(model,version)){await wr([1,209,0,0,0,0,0,0]);await rd(1000)}
+  // verify
+  let ok=false;const w=p.data[0];
+  if($('fn').value==='media')ok=after.kind==='media'&&after.value===w[2];
+  else ok=after.kind==='kb'&&after.mods===ed.mods&&after.keys.join()===ed.keys.join()&&(w[1]===129||w[1]===134?after.outMode===1:after.outMode===2);
+  $('res').innerHTML=(ok?'<b class="ok">Verified: pedal now reports '+after.text+'.</b>':'<b class="er">NOT verified. Pedal reports: '+after.text+' (raw '+after.raw+'). The write did not take effect; see log.</b>');
+  await readAll();
+});
+
+// ===== wiring =====
+$('bRead').onclick=()=>guarded(readAll);
+$('bConn').onclick=()=>guarded(async()=>{
+  if(!navigator.hid)throw new Error('WebHID is not available. Use Chrome or Edge, opened from file:// or https.');
+  const m=$('cAll').value;
+  const filters=m==='a'?[]:m==='v'?VIDS.map(v=>({vendorId:v})):VIDS.flatMap(v=>PIDS.map(p=>({vendorId:v,productId:p,usagePage:0xFF00,usage:1})));
+  log('requestDevice mode='+m);
+  let sel;try{sel=await navigator.hid.requestDevice({filters})}catch(e){throw e}
+  if(!sel.length)return;await openDevice(sel[0]);
+});
+navigator.hid?.addEventListener('disconnect',e=>{if(e.device===dev){dev=null;$('dev').innerHTML='<b class="er">Disconnected.</b>';setBusy(false)}});
+$('bList').onclick=async()=>{const l=await navigator.hid.getDevices();log('Granted devices: '+(l.length?l.map(d=>(d.productName||'?')+' VID 0x'+d.vendorId.toString(16)+' PID 0x'+d.productId.toString(16)+' ['+d.collections.map(c=>'0x'+c.usagePage.toString(16)+'/'+c.usage).join(',')+']').join(' ; '):'none yet. Pick one with the picker first.'))};
+$('bCopy').onclick=()=>navigator.clipboard.writeText($('log').textContent);
+$('bClearLog').onclick=()=>$('log').textContent='';
+drawChips();
+</script></body></html>
