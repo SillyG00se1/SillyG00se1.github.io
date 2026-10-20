@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Switch Scanning Selector</title>
+<style>
+:root{color-scheme:dark;--bg:#10131c;--panel:#1b2130;--panel2:#252d40;--ink:#f7f8ff;--muted:#b9c3d8;--accent:#ffe36e;--good:#5cf0ad;--focus:#79d8ff;--line:#45516b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.45 system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+main{max-width:1200px;margin:auto;padding:18px}
+h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.1;margin:8px 0 12px;text-align:center}
+h2{font-size:1.35rem;margin:0 0 12px}
+p{margin:8px 0;color:var(--muted)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;margin:16px 0}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+label{display:block;font-weight:700;margin-bottom:6px}
+input,select,button{font:inherit}
+input[type=text],select{width:100%;padding:12px;border:2px solid var(--line);border-radius:10px;background:#0e1320;color:var(--ink);min-height:48px}
+input[type=range]{width:100%;accent-color:var(--accent);min-height:32px}
+input[type=file]{max-width:100%;font-size:1rem}
+button{border:2px solid #65718b;border-radius:12px;background:var(--panel2);color:var(--ink);padding:12px 16px;font-weight:750;cursor:pointer;min-height:48px}
+button:hover{filter:brightness(1.15)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:4px solid var(--focus);outline-offset:3px}
+.primary{background:var(--accent);color:#171717;border-color:var(--accent)}
+.success{background:#174d3b;border-color:#4dd6a0}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.small{font-size:.93rem}
+#scanStatus{font-weight:800;text-align:center;font-size:1.15rem;color:var(--accent);min-height:1.7em}
+#targets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.target{min-width:0;min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:#151b29;border:4px solid #3b465e;border-radius:18px;padding:12px;transition:border-color .08s,background .08s,transform .08s}
+.target img{width:100%;height:clamp(95px,18vw,190px);object-fit:contain;border-radius:10px}
+.target .placeholder{height:clamp(95px,18vw,190px);display:grid;place-items:center;width:100%;font-size:3rem;background:#20283a;border-radius:10px}
+.target .targetLabel{font-size:.9rem;color:var(--muted);overflow-wrap:anywhere}
+.target.scanning{border-color:var(--accent);background:#40391b;box-shadow:0 0 0 3px #ffe36e55;transform:scale(1.015)}
+.target.selected{border-color:var(--good);background:#14392d}
+.target:focus-visible{outline:4px solid var(--focus)}
+#message{min-height:2.2em;font-weight:800;text-align:center;font-size:1.2rem}
+#message.good{color:var(--good)}#message.bad{color:#ff9a9a}
+.mapping{display:flex;flex-wrap:wrap;gap:8px}
+.pill{border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:#111725;color:var(--muted)}
+.pill.ready{color:var(--good);border-color:#327d63}
+.pill.missing{color:#ffb4b4}
+kbd{padding:2px 7px;border:1px solid #71809b;border-radius:6px;background:#0c1019;color:white}
+#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:10}
+.hidden{display:none!important}
+footer{text-align:center;color:var(--muted);font-size:.9rem;padding:12px}
+@media(max-width:650px){main{padding:10px}#targets{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.target{min-height:145px;padding:8px}.panel{padding:13px}.target img,.target .placeholder{height:120px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<main>
+<h1>Switch Scanning Selector</h1>
+<p class="small" style="text-align:center">Choose a student, load their picture set, then use one switch to scan and select a target.</p>
+
+<section class="panel" aria-labelledby="studentHeading">
+<h2 id="studentHeading">1. Student and picture library</h2>
+<div class="controls">
+ <div><label for="studentSelect">Working with</label><select id="studentSelect"><option value="">Loading students…</option></select></div>
+ <div><label for="newStudent">Add a student</label><input id="newStudent" type="text" placeholder="Student name"><div class="actions"><button id="addStudent" type="button">Add student</button></div></div>
+</div>
+<div class="actions">
+ <button id="folderButton" type="button">Import a student folder</button>
+ <button id="filesButton" type="button">Upload images for selected student</button>
+ <button id="deleteStudent" type="button">Delete selected student's saved images</button>
+</div>
+<input id="folderInput" class="hidden" type="file" webkitdirectory directory multiple accept="image/*">
+<input id="imageInput" class="hidden" type="file" multiple accept="image/*">
+<p class="small">Folder format: choose a folder for one student containing images named <b>student</b> (correct target) and <b>1</b> through <b>8</b> (distractors), for example <code>student.jpg</code>, <code>1.png</code>, <code>2.jpg</code>. Extra file extensions are fine. You can also upload the files directly for the selected student. Images are stored in this browser on this device, not uploaded to GitHub.</p>
+<div id="imageStatus" role="status" aria-live="polite">Loading saved picture libraries…</div>
+<div id="mapping" class="mapping" aria-label="Image file status"></div>
+</section>
+
+<section class="panel" aria-labelledby="settingsHeading">
+<h2 id="settingsHeading">2. Scanning settings</h2>
+<div class="controls">
+ <div><label for="speed">Scan interval: <span id="speedLabel">1.5 seconds</span></label><input id="speed" type="range" min="500" max="5000" step="250" value="1500"><p class="small">Time each target stays highlighted.</p></div>
+ <div><label for="targetCount">Targets per round: <span id="countLabel">4</span></label><input id="targetCount" type="range" min="2" max="9" step="1" value="4"><p class="small">Includes the correct target plus distractors.</p></div>
+ <div><label for="scanMode">Scanning mode</label><select id="scanMode"><option value="auto">Automatic scanning</option><option value="manual">Manual: each switch press advances</option></select><p class="small">Automatic cycles continuously. Manual mode advances only when the switch is pressed.</p></div>
+</div>
+<div class="actions">
+ <button id="startScan" class="primary" type="button">Start scanning</button>
+ <button id="pauseScan" type="button">Pause</button>
+ <button id="switchPress" class="success" type="button">SELECT / SWITCH PRESS</button>
+ <button id="newRound" type="button">New round</button>
+</div>
+<p class="small">Switch input: the big on-screen button, <kbd>Space</kbd>, or <kbd>Enter</kbd>. Many USB switches that emulate a keyboard can use their configured key. Avoid pressing a key while a text field is focused.</p>
+</section>
+
+<section class="panel" aria-labelledby="playHeading">
+<h2 id="playHeading">3. Scan and select</h2>
+<div id="scanStatus" role="status" aria-live="polite">Choose a student and press Start scanning.</div>
+<div id="targets" aria-label="Scanning targets"></div>
+<div id="message" role="status" aria-live="polite">The selected target will be checked when the switch is pressed.</div>
+<div class="actions"><button id="resetScore" type="button">Reset score</button><span class="pill" id="score">Correct selections: 0</span><span class="pill" id="round">Round: 0</span></div>
+</section>
+<footer>Single-switch scanning • Student pictures remain in this browser's local storage.</footer>
+</main>
+<script>
+(function(){
+'use strict';
+const DB_NAME='switch-scanning-selector-db';
+const STORE='students';
+const $=id=>document.getElementById(id);
+let db=null,activeStudent='',targets=[],scanIndex=0,scanTimer=null,running=false,roundNumber=0,correctCount=0,wrongCount=0,locked=false;
+const reducedMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function openDB(){
+ return new Promise((resolve,reject)=>{
+  const req=indexedDB.open(DB_NAME,1);
+  req.onupgradeneeded=()=>{const d=req.result;if(!d.objectStoreNames.contains(STORE))d.createObjectStore(STORE,{keyPath:'name'});};
+  req.onsuccess=()=>{db=req.result;resolve(db);};
+  req.onerror=()=>reject(req.error);
+ });
+}
+function transaction(mode='readonly'){return db.transaction(STORE,mode).objectStore(STORE);}
+function getAllStudents(){return new Promise((resolve,reject)=>{const r=transaction().getAll();r.onsuccess=()=>resolve(r.result||[]);r.onerror=()=>reject(r.error);});}
+function getStudent(name){return new Promise((resolve,reject)=>{const r=transaction().get(name);r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>reject(r.error);});}
+function saveStudent(student){return new Promise((resolve,reject)=>{const r=transaction('readwrite').put(student);r.onsuccess=()=>resolve();r.onerror=()=>reject(r.error);});}
+function deleteStudentRecord(name){return new Promise((resolve,reject)=>{const r=transaction('readwrite').delete(name);r.onsuccess=()=>resolve();r.onerror=()=>reject(r.error);});}
+function emptyStudent(name){return {name,images:{}};}
+function safeText(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function fileKey(fileName){const stem=fileName.split('/').pop().replace(/\.[^.]+$/,'').toLowerCase();if(stem==='student')return 'student';if(/^[1-8]$/.test(stem))return stem;return null;}
+function imageData(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(reader.error);reader.readAsDataURL(file);});}
+async function importFiles(files,studentName){
+ if(!studentName){setStatus('Add or select a student first.');return;}
+ const accepted=Array.from(files).filter(f=>f.type.startsWith('image/'));
+ if(!accepted.length){setStatus('No image files found. Choose image files named student, 1, 2, …, 8.');return;}
+ const student=await getStudent(studentName)||emptyStudent(studentName);
+ let imported=0,ignored=[];
+ for(const file of accepted){
+  const key=fileKey(file.name);
+  if(!key){ignored.push(file.name);continue;}
+  try{student.images[key]=await imageData(file);imported++;}
+  catch(e){console.error(e);ignored.push(file.name);}
+ }
+ await saveStudent(student);
+ await refreshStudentMenu(studentName);
+ await renderMapping();
+ setStatus('Saved '+imported+' image(s) for '+studentName+'.'+(ignored.length?' Ignored '+ignored.length+' file(s) not named student or 1–8.':''));
+ if(imported){buildRound();if(running)startTimer();}
+}
+async function importFolder(files){
+ const all=Array.from(files);
+ if(!all.length){setStatus('No files selected.');return;}
+ const groups=new Map();
+ for(const file of all){
+  if(!file.type.startsWith('image/'))continue;
+  const rel=file.webkitRelativePath||file.name;
+  const parts=rel.split('/').filter(Boolean);
+  const folderName=parts.length>1?parts[0]:'';
+  const key=fileKey(file.name);
+  if(!key)continue;
+  const name=folderName||$('newStudent').value.trim()||activeStudent;
+  if(!name)continue;
+  if(!groups.has(name))groups.set(name,{name,images:{}});
+  groups.get(name).images[key]=await imageData(file);
+ }
+ if(!groups.size){setStatus('No recognized images found. Name files student, 1, 2, …, 8 and select the student folder.');return;}
+ for(const [name,added] of groups){
+  const existing=await getStudent(name)||emptyStudent(name);
+  Object.assign(existing.images,added.images);
+  await saveStudent(existing);
+ }
+ const preferred=groups.has(activeStudent)?activeStudent:groups.keys().next().value;
+ await refreshStudentMenu(preferred);
+ await renderMapping();
+ setStatus('Imported images for '+groups.size+' student folder(s).');
+ buildRound();
+}
+async function refreshStudentMenu(selectName=''){
+ const all=(await getAllStudents()).sort((a,b)=>a.name.localeCompare(b.name));
+ const select=$('studentSelect');
+ select.innerHTML='';
+ if(!all.length){select.add(new Option('No students yet',''));activeStudent='';targets=[];renderTargets();$('scanStatus').textContent='Add a student and upload pictures to begin.';return;}
+ all.forEach(s=>select.add(new Option(s.name,s.name)));
+ const chosen=all.some(s=>s.name===selectName)?selectName:(all.some(s=>s.name===activeStudent)?activeStudent:all[0].name);
+ select.value=chosen;activeStudent=chosen;
+ await renderMapping();
+ buildRound();
+}
+async function renderMapping(){
+ const s=activeStudent?await getStudent(activeStudent):null;
+ const keys=['student','1','2','3','4','5','6','7','8'];
+ $('mapping').innerHTML=keys.map(k=>{
+  const ok=!!(s&&s.images&&s.images[k]);
+  const label=k==='student'?'student · correct target':k+' · distractor';
+  return '<span class="pill '+(ok?'ready':'missing')+'">'+(ok?'✓ ':'○ ')+safeText(label)+'</span>';
+ }).join('');
+}
+function setStatus(text){$('imageStatus').textContent=text;}
+function getTargetCount(){return Number($('targetCount').value);}
+async function buildRound(){
+ stopTimer();
+ const student=activeStudent?await getStudent(activeStudent):null;
+ const images=(student&&student.images)||{};
+ const distractors=['1','2','3','4','5','6','7','8'].filter(k=>images[k]);
+ const count=getTargetCount();
+ const chosen=distractors.slice().sort(()=>Math.random()-.5).slice(0,Math.max(0,count-1));
+ targets=[{key:'student',correct:true,image:images.student||null},...chosen.map(key=>({key,correct:false,image:images[key]}))];
+ targets.sort(()=>Math.random()-.5);
+ scanIndex=0;roundNumber++;locked=false;
+ $('round').textContent='Round: '+roundNumber;
+ renderTargets();
+ const hasCorrect=!!images.student;
+ $('scanStatus').textContent=hasCorrect?'Ready to scan '+targets.length+' target(s).':'Upload an image named student for the correct target.';
+ $('message').className='';$('message').textContent=hasCorrect?'Press Start scanning, then activate your switch on a highlighted target.':'The correct-target image is missing. Upload student.jpg (or another image named student).';
+ if(running)startTimer();
+}
+function renderTargets(){
+ const el=$('targets');
+ if(!targets.length){el.innerHTML='<p>No targets yet. Add a student and upload images.</p>';return;}
+ el.innerHTML=targets.map((t,i)=>'<div class="target" data-index="'+i+'" role="img" aria-label="Target '+(i+1)+'"><div class="placeholder '+(t.image?'hidden':'')+'">🖼️</div>'+(t.image?'<img alt="Target '+(i+1)+'" src="'+t.image+'">':'')+'<div class="targetLabel">Target '+(i+1)+'</div></div>').join('');
+ updateHighlight();
+}
+function updateHighlight(){
+ document.querySelectorAll('.target').forEach((el,i)=>{el.classList.toggle('scanning',running&&i===scanIndex);el.setAttribute('aria-label','Target '+(i+1)+(running&&i===scanIndex?', highlighted':''));});
+ $('scanStatus').textContent=running?'Scanning target '+(scanIndex+1)+' of '+targets.length:'Scanning paused · target '+(targets.length?scanIndex+1:0)+' of '+targets.length;
+}
+function stopTimer(){if(scanTimer!==null){clearInterval(scanTimer);scanTimer=null;}running=false;updateHighlight();}
+function startTimer(){
+ stopTimer();
+ if(!targets.length)return;
+ running=true;updateHighlight();
+ if($('scanMode').value==='auto')scanTimer=setInterval(()=>{if(!locked){scanIndex=(scanIndex+1)%targets.length;updateHighlight();}},Number($('speed').value));
+}
+function pause(){stopTimer();$('scanStatus').textContent='Paused. Press Start scanning to continue.';}
+function selectTarget(){
+ if(locked||!targets.length){return;}
+ if(!running){if($('scanMode').value==='manual'){running=true;updateHighlight();}else{$('message').textContent='Press Start scanning first.';return;}}
+ const chosen=targets[scanIndex];
+ if(chosen&&chosen.correct){
+  locked=true;correctCount++;$('score').textContent='Correct selections: '+correctCount;
+  $('message').className='good';$('message').textContent='Correct! Great selection! 🎉';
+  $('scanStatus').textContent='Correct target selected!';
+  stopTimer();celebrate();
+  setTimeout(()=>{locked=false;buildRound();if($('scanMode').value==='auto')startTimer();},reducedMotion?900:1700);
+ }else{
+  wrongCount++;$('message').className='bad';$('message').textContent='Not that one. Keep scanning and try again.';
+  if($('scanMode').value==='manual'){scanIndex=(scanIndex+1)%targets.length;updateHighlight();}
+ }
+}
+function advanceManual(){
+ if($('scanMode').value!=='manual')return;
+ if(!running){running=true;updateHighlight();return;}
+ scanIndex=(scanIndex+1)%targets.length;updateHighlight();
+}
+function onSwitch(){
+ if($('scanMode').value==='manual'&&running){selectTarget();return;}
+ selectTarget();
+}
+function celebrate(){
+ const canvas=$('confetti'),ctx=canvas.getContext('2d');
+ if(!ctx||reducedMotion)return;
+ const dpr=Math.max(1,window.devicePixelRatio||1);
+ canvas.width=innerWidth*dpr;canvas.height=innerHeight*dpr;canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';
+ ctx.setTransform(dpr,0,0,dpr,0,0);
+ const pieces=Array.from({length:140},()=>({x:Math.random()*innerWidth,y:-20-Math.random()*innerHeight*.5,w:5+Math.random()*8,h:7+Math.random()*10,vx:(Math.random()-.5)*5,vy:2+Math.random()*5,rot:Math.random()*6,vr:(Math.random()-.5)*.2,color:['#ffe36e','#5cf0ad','#79d8ff','#ff8dc7','#c6a4ff'][Math.floor(Math.random()*5)]}));
+ let frames=0;
+ function frame(){
+  ctx.clearRect(0,0,innerWidth,innerHeight);
+  pieces.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;p.vy+=.035;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();});
+  frames++;if(frames<130)requestAnimationFrame(frame);else ctx.clearRect(0,0,innerWidth,innerHeight);
+ }
+ requestAnimationFrame(frame);
+}
+$('studentSelect').addEventListener('change',async e=>{pause();activeStudent=e.target.value;await renderMapping();await buildRound();setStatus('Loaded saved pictures for '+activeStudent+'.');});
+$('addStudent').addEventListener('click',async()=>{
+ const name=$('newStudent').value.trim();
+ if(!name){setStatus('Enter a student name first.');$('newStudent').focus();return;}
+ await saveStudent(await getStudent(name)||emptyStudent(name));$('newStudent').value='';await refreshStudentMenu(name);setStatus('Student '+name+' is ready for images.');
+});
+$('newStudent').addEventListener('keydown',e=>{if(e.key==='Enter')$('addStudent').click();});
+$('folderButton').addEventListener('click',()=>$('folderInput').click());
+$('filesButton').addEventListener('click',()=>{if(!activeStudent){setStatus('Add or select a student first.');return;}$('imageInput').click();});
+$('folderInput').addEventListener('change',async e=>{try{await importFolder(e.target.files);}catch(err){console.error(err);setStatus('Could not import folder: '+err.message);}e.target.value='';});
+$('imageInput').addEventListener('change',async e=>{try{await importFiles(e.target.files,activeStudent);}catch(err){console.error(err);setStatus('Could not save images: '+err.message);}e.target.value='';});
+$('deleteStudent').addEventListener('click',async()=>{
+ if(!activeStudent)return;
+ if(!confirm('Delete all saved images and this student entry for '+activeStudent+' from this browser?'))return;
+ const old=activeStudent;await deleteStudentRecord(old);pause();activeStudent='';await refreshStudentMenu();setStatus('Deleted local picture library for '+old+'.');
+});
+$('speed').addEventListener('input',()=>{$('speedLabel').textContent=(Number($('speed').value)/1000).toFixed(2).replace(/0+$/,'').replace(/\.$/,'')+' seconds';if(running&&$('scanMode').value==='auto')startTimer();});
+$('targetCount').addEventListener('input',async()=>{$('countLabel').textContent=$('targetCount').value;await buildRound();});
+$('scanMode').addEventListener('change',()=>{if(running)startTimer();else updateHighlight();});
+$('startScan').addEventListener('click',()=>startTimer());
+$('pauseScan').addEventListener('click',pause);
+$('switchPress').addEventListener('click',()=>{if($('scanMode').value==='manual'){if(!running){advanceManual();return;}selectTarget();}else selectTarget();});
+$('newRound').addEventListener('click',()=>buildRound());
+$('resetScore').addEventListener('click',()=>{correctCount=0;wrongCount=0;$('score').textContent='Correct selections: 0';$('message').textContent='Score reset.';$('message').className='';});
+document.addEventListener('keydown',e=>{
+ if(e.repeat||e.ctrlKey||e.altKey||e.metaKey)return;
+ const tag=(document.activeElement&&document.activeElement.tagName||'').toLowerCase();
+ if(['input','textarea','select'].includes(tag))return;
+ if(e.code==='Space'||e.key==='Enter'){
+  e.preventDefault();
+  if($('scanMode').value==='manual'){if(!running)advanceManual();else selectTarget();}
+  else selectTarget();
+ }
+});
+window.addEventListener('resize',()=>{const c=$('confetti');c.width=0;c.height=0;});
+(async()=>{
+ try{await openDB();await refreshStudentMenu();setStatus('Ready. Add a student or import a student folder.');}
+ catch(err){console.error(err);setStatus('This browser could not open local storage. Try a current version of Chrome or Edge.');}
+})();
+})();
+</script>
+</body>
+</html>
