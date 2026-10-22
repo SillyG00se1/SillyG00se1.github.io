@@ -26,6 +26,12 @@ label{display:block;font-weight:750;margin-bottom:6px}
 select{width:100%;min-height:48px;padding:10px;border-radius:10px;background:#111827;color:white;border:2px solid #53617b}
 .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
 #instruction{font-size:clamp(1.45rem,3.6vw,2.4rem);font-weight:900;text-align:center;color:var(--gold);min-height:2.2em;display:flex;align-items:center;justify-content:center}
+#progressSteps{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:12px 0}
+.stepDot{display:flex;align-items:center;justify-content:center;gap:10px;min-width:120px;min-height:100px;padding:10px 16px;border-radius:16px;background:#121a29;border:3px solid #52617c;color:var(--muted);font-weight:900;font-size:1.25rem}
+.stepDot .stepEmoji{font-size:clamp(2.5rem,6vw,4rem);line-height:1}
+.stepDot.done{background:#164632;border-color:var(--green);color:white}
+.stepDot.current{border-color:var(--gold);color:var(--gold)}
+.stepDot .check{font-size:1.5rem;color:var(--green)}
 #board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .choice{min-height:205px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:9px;background:#131c2b;border:3px solid #445571;border-radius:18px;padding:14px;transition:transform .12s,border-color .12s,background .12s}
 .choice .emoji{font-size:clamp(3.8rem,9vw,6.5rem);line-height:1.1}
@@ -73,6 +79,7 @@ footer{text-align:center;color:var(--muted);font-size:.9rem;padding:10px}
  </div>
  <h2 style="text-align:center;margin-top:16px">Your mission</h2>
  <div id="instruction" aria-live="polite">Press New mission to begin!</div>
+ <div id="progressSteps" aria-label="Instruction step progress"></div>
  <div id="feedback" role="status" aria-live="polite"></div>
  <div id="board" aria-label="Picture choices"></div>
 </section>
@@ -114,7 +121,16 @@ function newMission(){
  boardItems=shuffle([...sequence.map(id=>item(id)),...pool]);
  $('instruction').textContent=makeInstruction(sequence);
  $('feedback').className='';$('feedback').textContent='';
- renderBoard();
+ renderSteps();renderBoard();
+}
+function renderSteps(){
+ const s=settings();
+ const labels=level===4?['First','Next','Last']:sequence.map((_,i)=>'Step '+(i+1));
+ $('progressSteps').innerHTML=sequence.map((id,i)=>{
+  const done=i<step;
+  const current=i===step&&missionActive;
+  return '<div class="stepDot '+(done?'done':current?'current':'')+'"><span>'+labels[i]+':</span><span class="stepEmoji" aria-hidden="true">'+item(id).emoji+'</span>'+(done?'<span class="check" aria-label="complete">✓</span>':'')+'</div>';
+ }).join('');
 }
 function renderBoard(){
  $('board').innerHTML=boardItems.map(it=>'<button type="button" class="choice" data-id="'+it.id+'" aria-label="'+it.name+'"><span class="emoji" aria-hidden="true">'+it.emoji+'</span><span class="name">'+it.name[0].toUpperCase()+it.name.slice(1)+'</span></button>').join('');
@@ -129,7 +145,7 @@ function choose(id,button){
   return;
  }
  $('board').querySelectorAll('.choice.wrong').forEach(b=>b.classList.remove('wrong'));
- button.classList.add('correct');button.disabled=true;step++;
+ button.classList.add('correct');button.disabled=true;step++;renderSteps();
  if(step>=sequence.length){
   locked=true;missionActive=false;missionsCompleted++;stars++;attempts.push(!currentMissionHadError);attempts=attempts.slice(-10);
   $('feedback').className='success';$('feedback').textContent='🎉 Mission complete!';
