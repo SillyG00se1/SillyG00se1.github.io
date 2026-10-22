@@ -21,56 +21,47 @@ button:hover{filter:brightness(1.12)}
 button:focus-visible,select:focus-visible,input:focus-visible{outline:4px solid var(--blue);outline-offset:3px}
 .primary{background:var(--gold);color:#1a1a1a;border-color:var(--gold)}
 .goodBtn{background:#18533e;border-color:#57dca7}
-.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.controls{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;max-width:480px;margin:auto}
 label{display:block;font-weight:750;margin-bottom:6px}
 select{width:100%;min-height:48px;padding:10px;border-radius:10px;background:#111827;color:white;border:2px solid #53617b}
 .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
-#instruction{font-size:clamp(1.45rem,3.6vw,2.4rem);font-weight:900;text-align:center;color:var(--gold);min-height:3em;display:flex;align-items:center;justify-content:center}
-#subInstruction{text-align:center;min-height:1.6em}
-#progressSteps{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:12px 0}
-.stepDot{border-radius:999px;padding:7px 13px;background:#121a29;border:2px solid #52617c;color:var(--muted);font-weight:800}
-.stepDot.done{background:#164632;border-color:var(--green);color:white}
-.stepDot.current{border-color:var(--gold);color:var(--gold)}
+#instruction{font-size:clamp(1.45rem,3.6vw,2.4rem);font-weight:900;text-align:center;color:var(--gold);min-height:2.2em;display:flex;align-items:center;justify-content:center}
 #board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-.choice{min-height:155px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:7px;background:#131c2b;border:3px solid #445571;border-radius:18px;padding:10px;transition:transform .12s,border-color .12s,background .12s}
-.choice .emoji{font-size:clamp(2.7rem,7vw,4.5rem);line-height:1.1}
-.choice .name{font-size:1rem;font-weight:800;color:#e9efff}
+.choice{min-height:205px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:9px;background:#131c2b;border:3px solid #445571;border-radius:18px;padding:14px;transition:transform .12s,border-color .12s,background .12s}
+.choice .emoji{font-size:clamp(3.8rem,9vw,6.5rem);line-height:1.1}
+.choice .name{font-size:1.15rem;font-weight:800;color:#e9efff}
 .choice:disabled{opacity:.72;cursor:default}
 .choice.correct{background:#174b38;border-color:var(--green)}
 .choice.wrong{animation:nudge .2s linear 2;border-color:var(--red)}
 #feedback{font-size:1.2rem;font-weight:850;text-align:center;min-height:2.1em;padding:8px;color:var(--blue)}
 #feedback.success{color:var(--green)}#feedback.try{color:var(--gold)}
 .statrow{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
-.teacherNote{font-size:.95rem}
 footer{text-align:center;color:var(--muted);font-size:.9rem;padding:10px}
 @keyframes nudge{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
-@media(max-width:680px){main{padding:9px}.panel{padding:13px}#board{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.choice{min-height:130px}}
+@media(max-width:680px){main{padding:9px}.panel{padding:13px}#board{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.choice{min-height:165px}.choice .emoji{font-size:clamp(3.5rem,15vw,5.5rem)}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <main>
 <h1>🗺️ Multi-Step Mission</h1>
-<p class="topline">Listen to the mission. Remember the order. Choose each picture to finish the trail!</p>
+
 
 <section class="panel">
  <div class="controls">
-  <div><label for="difficulty">Mission difficulty</label><select id="difficulty">
+  <div><label for="difficulty">Level</label><select id="difficulty">
    <option value="0">Level 1 · One step</option>
    <option value="1">Level 2 · Two steps</option>
    <option value="2">Level 3 · Two steps + more choices</option>
    <option value="3">Level 4 · Three steps</option>
    <option value="4">Level 5 · Three steps + order words</option>
   </select></div>
-  <div><label for="voiceRate">Spoken instruction speed</label><select id="voiceRate"><option value="0.75">Slow</option><option value="0.9" selected>Comfortable</option><option value="1">Normal</option></select></div>
-  <div><label for="speechToggle">Instructions</label><select id="speechToggle"><option value="on">Speak instructions</option><option value="off">Show text only</option></select></div>
+
  </div>
  <div class="actions">
-  <button id="repeat" type="button">🔊 Repeat instruction</button>
   <button id="newMission" class="primary" type="button">New mission</button>
   <button id="reset" type="button">Reset session</button>
  </div>
- <p class="teacherNote">Difficulty increases slowly: the game never changes levels on its own. The teacher chooses when to move up. The progress guide below can help you decide.</p>
 </section>
 
 <section class="panel">
@@ -82,22 +73,17 @@ footer{text-align:center;color:var(--muted);font-size:.9rem;padding:10px}
  </div>
  <h2 style="text-align:center;margin-top:16px">Your mission</h2>
  <div id="instruction" aria-live="polite">Press New mission to begin!</div>
- <div id="subInstruction">Complete the steps in the order you hear them.</div>
- <div id="progressSteps" aria-label="Instruction step progress"></div>
- <div id="feedback" role="status" aria-live="polite">You can ask to hear the instruction again at any time.</div>
+ <div id="feedback" role="status" aria-live="polite"></div>
  <div id="board" aria-label="Picture choices"></div>
 </section>
 
 <section class="panel">
- <h2>Teacher progress guide</h2>
- <p id="progressGuide">Start with one-step instructions. Keep practicing until the student is comfortable and successful across several sessions.</p>
- <div class="actions">
+ <div class="actions" style="justify-content:center">
   <button id="prevLevel" type="button">← Easier level</button>
   <button id="nextLevel" type="button">Next difficulty →</button>
  </div>
- <p class="teacherNote">Suggested pacing: stay at a level until the student completes at least 8 of the last 10 missions correctly without needing the instruction repeated many times. Move up only one level at a time; repeat or lower the level whenever needed.</p>
 </section>
-<footer>Progress is kept for this session only. No student data is uploaded or saved to an account.</footer>
+
 </main>
 <script>
 (function(){
@@ -115,12 +101,7 @@ let level=0,sequence=[],boardItems=[],step=0,missionsCompleted=0,stars=0,attempt
 function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function settings(){return [{steps:1,choices:4,orderWords:false},{steps:2,choices:4,orderWords:false},{steps:2,choices:6,orderWords:false},{steps:3,choices:6,orderWords:false},{steps:3,choices:8,orderWords:true}][level];}
 function item(id){return ITEMS.find(x=>x.id===id);}
-function speak(text){
- if($('speechToggle').value!=='on'||!('speechSynthesis'in window))return;
- speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=Number($('voiceRate').value);speechSynthesis.speak(u);
-}
 function makeInstruction(seq){
- const words=['first','next','last'];
  if(level===0)return 'Touch the '+item(seq[0]).name+'.';
  if(level===1||level===2)return 'Touch the '+item(seq[0]).name+', then touch the '+item(seq[1]).name+'.';
  if(level===3)return 'Touch the '+item(seq[0]).name+', then the '+item(seq[1]).name+', then the '+item(seq[2]).name+'.';
@@ -132,37 +113,31 @@ function newMission(){
  const pool=shuffle(ITEMS.filter(x=>!sequence.includes(x.id))).slice(0,s.choices-s.steps);
  boardItems=shuffle([...sequence.map(id=>item(id)),...pool]);
  $('instruction').textContent=makeInstruction(sequence);
- $('subInstruction').textContent='Complete '+s.steps+' '+(s.steps===1?'step':'steps')+' in the correct order.';
- $('feedback').className='';$('feedback').textContent='Listen carefully, then choose the first picture.';
- renderBoard();renderSteps();speak(makeInstruction(sequence));
+ $('feedback').className='';$('feedback').textContent='';
+ renderBoard();
 }
 function renderBoard(){
  $('board').innerHTML=boardItems.map(it=>'<button type="button" class="choice" data-id="'+it.id+'" aria-label="'+it.name+'"><span class="emoji" aria-hidden="true">'+it.emoji+'</span><span class="name">'+it.name[0].toUpperCase()+it.name.slice(1)+'</span></button>').join('');
  $('board').querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.id,b)));
-}
-function renderSteps(){
- const total=sequence.length;
- $('progressSteps').innerHTML=sequence.map((id,i)=>'<span class="stepDot '+(i<step?'done':i===step&&missionActive?'current':'')+'">'+(i<step?'✓ ':i+1+'. ')+(level===4?['First','Next','Last'][i]+': ':'')+item(id).emoji+'</span>').join('');
 }
 function choose(id,button){
  if(!missionActive||locked)return;
  const expected=sequence[step];
  if(id!==expected){
   currentMissionHadError=true;button.classList.remove('wrong');void button.offsetWidth;button.classList.add('wrong');
-  $('feedback').className='try';$('feedback').textContent='Not quite. Listen again or try another picture.';
-  speak('Not quite. Try again.');return;
+  $('feedback').className='try';$('feedback').textContent='Try another picture.';
+  return;
  }
- button.classList.add('correct');button.disabled=true;step++;renderSteps();
+ $('board').querySelectorAll('.choice.wrong').forEach(b=>b.classList.remove('wrong'));
+ button.classList.add('correct');button.disabled=true;step++;
  if(step>=sequence.length){
   locked=true;missionActive=false;missionsCompleted++;stars++;attempts.push(!currentMissionHadError);attempts=attempts.slice(-10);
-  $('feedback').className='success';$('feedback').textContent='🎉 Mission complete! You followed every step in order!';
-  $('subInstruction').textContent='Great listening and remembering!';
-  updateStats();speak('Amazing! You completed every step in the right order. You earned a star!');
+  $('feedback').className='success';$('feedback').textContent='🎉 Mission complete!';
+  updateStats();
   $('board').querySelectorAll('.choice').forEach(b=>b.disabled=true);
   $('newMission').textContent='Next mission';
  }else{
-  $('feedback').className='success';$('feedback').textContent='✓ Step '+step+' complete. Find the next picture.';
-  speak('Good job. Now find the '+item(sequence[step]).name+'.');
+  $('feedback').className='success';$('feedback').textContent='✓ Find the next picture.';
  }
 }
 function updateStats(){
@@ -171,19 +146,10 @@ function updateStats(){
  $('starCount').textContent='⭐ Stars: '+stars;
  const n=attempts.length,ok=attempts.filter(Boolean).length;
  $('accuracy').textContent='Recent success: '+(n?Math.round(ok/n*100)+'% ('+ok+'/'+n+')':'—');
- const guide=[
- 'Level 1: one familiar picture/action. Practice until the student can follow one-step directions consistently.',
- 'Level 2: two familiar steps in order. Keep the same simple sentence pattern; repeat directions as needed.',
- 'Level 3: still two steps, but more picture choices. This increases visual selection demands without adding memory steps.',
- 'Level 4: three steps with familiar words. Stay here until three-step sequences feel manageable.',
- 'Level 5: three steps using first, next, and last. This adds order words without increasing the number of steps.'
- ];
- $('progressGuide').textContent=guide[level]+' Recent results reflect the last '+n+' completed missions.';
  $('prevLevel').disabled=level===0;$('nextLevel').disabled=level===4;
 }
 $('difficulty').addEventListener('change',()=>{level=Number($('difficulty').value);updateStats();newMission();});
 $('newMission').addEventListener('click',newMission);
-$('repeat').addEventListener('click',()=>{if(sequence.length)speak(makeInstruction(sequence));else speak('Press New mission to begin.');});
 $('prevLevel').addEventListener('click',()=>{if(level>0){level--; $('difficulty').value=String(level);updateStats();newMission();}});
 $('nextLevel').addEventListener('click',()=>{if(level<4){level++;$('difficulty').value=String(level);updateStats();newMission();}});
 $('reset').addEventListener('click',()=>{if(!confirm('Reset the mission count, stars, and recent results?'))return;missionsCompleted=0;stars=0;attempts=[];updateStats();newMission();});
