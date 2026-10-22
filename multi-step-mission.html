@@ -111,7 +111,7 @@ const ITEMS=[
  {id:'cup',name:'cup',emoji:'🥤'},{id:'shoe',name:'shoe',emoji:'👟'},{id:'frog',name:'frog',emoji:'🐸'}
 ];
 const $=id=>document.getElementById(id);
-let level=0,sequence=[],boardItems=[],step=0,missionsCompleted=0,stars=0,attempts=[],locked=false,missionActive=false;
+let level=0,sequence=[],boardItems=[],step=0,missionsCompleted=0,stars=0,attempts=[],locked=false,missionActive=false,currentMissionHadError=false;
 function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function settings(){return [{steps:1,choices:4,orderWords:false},{steps:2,choices:4,orderWords:false},{steps:2,choices:6,orderWords:false},{steps:3,choices:6,orderWords:false},{steps:3,choices:8,orderWords:true}][level];}
 function item(id){return ITEMS.find(x=>x.id===id);}
@@ -127,7 +127,7 @@ function makeInstruction(seq){
  return 'First, touch the '+item(seq[0]).name+'. Next, touch the '+item(seq[1]).name+'. Last, touch the '+item(seq[2]).name+'.';
 }
 function newMission(){
- locked=false;missionActive=true;step=0;
+ locked=false;missionActive=true;step=0;currentMissionHadError=false;
  const s=settings();sequence=shuffle(ITEMS).slice(0,s.steps).map(x=>x.id);
  const pool=shuffle(ITEMS.filter(x=>!sequence.includes(x.id))).slice(0,s.choices-s.steps);
  boardItems=shuffle([...sequence.map(id=>item(id)),...pool]);
@@ -148,13 +148,13 @@ function choose(id,button){
  if(!missionActive||locked)return;
  const expected=sequence[step];
  if(id!==expected){
-  button.classList.remove('wrong');void button.offsetWidth;button.classList.add('wrong');
+  currentMissionHadError=true;button.classList.remove('wrong');void button.offsetWidth;button.classList.add('wrong');
   $('feedback').className='try';$('feedback').textContent='Not quite. Listen again or try another picture.';
   speak('Not quite. Try again.');return;
  }
  button.classList.add('correct');button.disabled=true;step++;renderSteps();
  if(step>=sequence.length){
-  locked=true;missionActive=false;missionsCompleted++;stars++;attempts.push(true);attempts=attempts.slice(-10);
+  locked=true;missionActive=false;missionsCompleted++;stars++;attempts.push(!currentMissionHadError);attempts=attempts.slice(-10);
   $('feedback').className='success';$('feedback').textContent='🎉 Mission complete! You followed every step in order!';
   $('subInstruction').textContent='Great listening and remembering!';
   updateStats();speak('Amazing! You completed every step in the right order. You earned a star!');
