@@ -260,7 +260,6 @@ function orderLabel(i,total){
   if(i===0)return 'First';
   return 'Then';
 }
-}
 function makeInstruction(seq){
  if(seq.length===1)return 'Touch the '+item(seq[0]).name+'.';
  return seq.map((id,i)=>orderLabel(i,seq.length)+', touch the '+item(id).name+'.').join(' ');
