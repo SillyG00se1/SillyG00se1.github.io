@@ -7,6 +7,9 @@
 <style>
 :root{color-scheme:dark;--bg:#101522;--panel:#1b2435;--panel2:#26324a;--ink:#f8f9ff;--muted:#c3cbe0;--gold:#ffe27a;--green:#69efb4;--blue:#8adfff;--red:#ffb1b1}
 *{box-sizing:border-box}
+.view-hidden{display:none!important}
+.home-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:18px}
+.home-tile{min-height:100px;font-size:1.15rem;font-weight:750}
 body{margin:0;background:radial-gradient(ellipse at top,#263552 0%,var(--bg) 60%);color:var(--ink);font:18px/1.45 system-ui,-apple-system,Segoe UI,Arial,sans-serif}
 main{max-width:1120px;margin:auto;padding:16px}
 h1{font-size:clamp(2rem,5vw,3.5rem);text-align:center;line-height:1.08;margin:8px 0;color:var(--gold)}
@@ -66,12 +69,19 @@ input{font:inherit}
 </head>
 <body>
 <main>
-<h1>🗺️ Multi-Step Mission</h1>
+<h1>🌟 Mission Station</h1>
+<section class="panel" id="homeScreen">
+ <h2 style="text-align:center">Welcome to Mission Station!</h2>
+ <p style="text-align:center">Choose an activity, manage student profiles, or visit the Silly Prize Store.</p>
+ <div class="home-grid">
+  <button id="openMission" class="primary home-tile" type="button">🗺️ Multi-Step Mission</button>
+  <button id="openProfiles" class="home-tile" type="button">👩‍🎓 Save / Choose Student</button>
+  <button id="openStore" class="home-tile" type="button">⭐ Silly Prize Store</button>
+ </div>
+ <div id="homeStudentStatus" class="status" role="status" style="text-align:center;margin-top:14px">Choose or save a student profile to keep their stars and prizes organized.</div>
+</section>
 
-
-
-
-<section class="panel">
+<section class="panel view-hidden" id="missionPanel">
  <div class="statrow">
   <span class="badge" id="levelBadge">Level 1</span>
   <span class="badge" id="missionCount">Missions completed: 0</span>
@@ -85,7 +95,7 @@ input{font:inherit}
  <div id="board" aria-label="Picture choices"></div>
 </section>
 
-<section class="panel">
+<section class="panel view-hidden" id="controlsPanel">
  <div class="controls">
   <div><label for="difficulty">Level</label><select id="difficulty">
    <option value="0">Level 1 · One step</option>
@@ -337,7 +347,22 @@ $('saveProfile').addEventListener('click',saveProfile);
 $('loadProfile').addEventListener('click',loadProfile);
 $('deleteProfile').addEventListener('click',deleteProfile);
 refreshProfileList();renderStore();
-document.addEventListener('keydown',event=>{
+ const viewIds=['homeScreen','missionPanel','controlsPanel','profilePanel','storePanel','levelNavPanel'];
+ function showView(view){
+  viewIds.forEach(id=>$(id).classList.toggle('view-hidden', id!=='homeScreen' && id!==view));
+  $('homeScreen').classList.toggle('view-hidden',view!=='homeScreen');
+  if(view==='missionPanel'){
+   $('controlsPanel').classList.remove('view-hidden');
+   $('levelNavPanel').classList.remove('view-hidden');
+  }
+  if(view==='profilePanel')refreshProfileList();
+  if(view==='storePanel')renderStore();
+ }
+ $('openMission').addEventListener('click',()=>{showView('missionPanel');newMission();});
+ $('openProfiles').addEventListener('click',()=>showView('profilePanel'));
+ $('openStore').addEventListener('click',()=>showView('storePanel'));
+ document.querySelectorAll('.backHome').forEach(btn=>btn.addEventListener('click',()=>showView('homeScreen')));
+ document.addEventListener('keydown',event=>{
  if(event.code==='Space'&&!event.repeat){
   const tag=(event.target&&event.target.tagName||'').toLowerCase();
   if(tag==='input'||tag==='select'||tag==='textarea')return;
