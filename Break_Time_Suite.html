@@ -53,7 +53,7 @@ function drawHome(){
  const total=bw*cols+gx*2,x0=W/2-total/2,y0=H*.20;
  modes.forEach((a,i)=>{const r=Math.floor(i/cols),col=i%cols,x=x0+col*(bw+gx),y=y0+r*(bh+gy);drawButton(x,y,bw,bh,a[0],a[1],a[2]);if(autoScan&&i===homeScanIndex){ctx.strokeStyle="#00ffff";ctx.lineWidth=7;ctx.strokeRect(x-4,y-4,bw+8,bh+8);ctx.fillStyle="#00ffff";ctx.font="bold 18px Arial";ctx.textAlign="left";ctx.textAlign="center";}});
  const tw=Math.min(330,W*.48),th=54,tx=W/2-tw/2,ty=H*.735;ctx.fillStyle=autoScan?"#075b43":"#252535";ctx.strokeStyle=autoScan?"#00ffb3":"#77778b";ctx.lineWidth=3;ctx.fillRect(tx,ty,tw,th);ctx.strokeRect(tx,ty,tw,th);ctx.fillStyle="#fff";ctx.textAlign="center";ctx.font="bold 21px Arial";ctx.fillText("AUTO SCANNING: "+(autoScan?"ON":"OFF"),W/2,ty+34);
- document.getElementById("homeHint").textContent=autoScan?"SPACE = select highlighted option   F = full screen   ESC = Home":"Click an option, or turn Auto Scanning on   F = full screen   ESC = Home";
+ document.getElementById("homeHint").textContent="";
 }
 function label(t){ctx.textAlign="left";ctx.fillStyle="#fff";ctx.font="bold 22px Arial";ctx.fillText(t,18,30);ctx.textAlign="right";ctx.fillStyle="#9696a6";ctx.font="16px Arial";ctx.fillText("F = Full Screen   ESC = Home",W-18,30)}
 
