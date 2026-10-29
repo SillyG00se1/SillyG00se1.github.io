@@ -76,14 +76,23 @@ function reportIds(d, kind) {
  return [...new Set(d.collections.flatMap(c => (c[kind] || []).map(r => r.reportId)))];
 }
 function renderCollections(d) {
- const list=document.createElement("ol");
+ const list=document.createElement("div");
+ const reportSummary=(reports)=>reports.length ? reports.map(r=>{
+   const fields=(r.items||[]).map(it=>{
+     const usages=(it.usages||[]).map(u=>"0x"+u.toString(16)).join(",");
+     return "size="+it.reportSize+" bits × count="+it.reportCount+(it.isAbsolute===undefined?"":"; absolute="+it.isAbsolute)+(it.isArray===undefined?"":"; array="+it.isArray)+(it.isRange?"; usage range":"")+(usages?"; usages="+usages:"");
+   }).join(" | ");
+   return "ID "+r.reportId+" (items "+(r.items||[]).length+(fields?"; "+fields:"")+")";
+ }).join("; ") : "none";
  d.collections.forEach((c,i)=>{
-   const li=document.createElement("li");
-   const ids=a=>a.map(r=>r.reportId).join(", ") || "none";
-   li.textContent="Collection "+(i+1)+": usage page 0x"+c.usagePage.toString(16)+"; usage 0x"+c.usage.toString(16)+"; input IDs ["+ids(c.inputReports||[]) +"]; output IDs ["+ids(c.outputReports||[]) +"]; feature IDs ["+ids(c.featureReports||[])+"]";
+   const li=document.createElement("div"); li.className="info"; li.style.margin="8px 0";
+   li.textContent="Collection "+(i+1)+" — usage page 0x"+Number(c.usagePage).toString(16).toUpperCase()+"; usage 0x"+Number(c.usage).toString(16).toUpperCase()+"; input: "+reportSummary(c.inputReports||[])+"; output: "+reportSummary(c.outputReports||[])+"; feature: "+reportSummary(c.featureReports||[]);
    list.appendChild(li);
  });
+ if(!d.collections.length) list.textContent="No HID collections reported by the browser.";
  $("collections").replaceChildren(list);
+ log("Device details: name="+(d.productName||"(none)")+"; manufacturer="+(d.manufacturerName||"(not exposed)")+"; serial="+(d.serialNumber||"(not exposed)")+"; opened="+d.opened+"; collections="+d.collections.length+".");
+ d.collections.forEach((c,i)=>log("Collection "+(i+1)+": usagePage=0x"+Number(c.usagePage).toString(16).toUpperCase()+", usage=0x"+Number(c.usage).toString(16).toUpperCase()+", inputReports="+(c.inputReports||[]).length+", outputReports="+(c.outputReports||[]).length+", featureReports="+(c.featureReports||[]).length+"."));
  const outs=reportIds(d,"outputReports");
  const features=reportIds(d,"featureReports");
  const ids=outs.length?outs:features;
@@ -213,9 +222,15 @@ async function connect() {
  });
 }
 async function refreshDetails() {
- if(!device) return;
+ if(!device) { setStatus("Connect a device first.","warn"); return; }
+ log("---- Refreshing HID device details ----");
+ $("name").textContent=device.productName || "(unnamed HID device)";
+ $("vid").textContent="0x"+device.vendorId.toString(16).toUpperCase().padStart(4,"0");
+ $("pid").textContent="0x"+device.productId.toString(16).toUpperCase().padStart(4,"0");
  renderCollections(device);
+ log("Report IDs: input ["+reportIds(device,"inputReports").join(", ")+"], output ["+reportIds(device,"outputReports").join(", ")+"], feature ["+reportIds(device,"featureReports").join(", ")+ "].");
  if(canWrite) await guarded(async()=>{await readModel();});
+ else { $("model").textContent="Not available (no output/feature reports)"; log("No output or feature reports are exposed by WebHID; no device command can be sent through this page."); setStatus("Connected; HID details refreshed. No output or feature reports are exposed.","warn"); }
 }
 async function readAssignments() {
  if(!device || !canWrite) return;
