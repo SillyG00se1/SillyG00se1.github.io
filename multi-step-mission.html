@@ -26,6 +26,11 @@ label{display:block;font-weight:750;margin-bottom:6px}
 select{width:100%;min-height:48px;padding:10px;border-radius:10px;background:#111827;color:white;border:2px solid #53617b}
 .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
 #instruction{font-size:clamp(1.45rem,3.6vw,2.4rem);font-weight:900;text-align:center;color:var(--gold);min-height:2.2em;display:flex;align-items:center;justify-content:center}
+#instruction.memory-hidden{visibility:hidden}
+.stepDot.memory-hidden .stepEmoji{visibility:hidden}
+.stepDot.memory-hidden .stepLabel{visibility:hidden}
+.stepDot.revealed .stepEmoji,#progressSteps .stepDot.done .stepEmoji{visibility:visible}
+.stepDot.revealed .stepLabel,#progressSteps .stepDot.done .stepLabel{visibility:visible}
 #progressSteps{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:12px 0}
 .stepDot{display:flex;align-items:center;justify-content:center;gap:10px;min-width:120px;min-height:100px;padding:10px 16px;border-radius:16px;background:#121a29;border:3px solid #52617c;color:var(--muted);font-weight:900;font-size:1.25rem}
 .stepDot .stepEmoji{font-size:clamp(2.5rem,6vw,4rem);line-height:1}
@@ -59,8 +64,15 @@ footer{text-align:center;color:var(--muted);font-size:.9rem;padding:10px}
    <option value="0">Level 1 · One step</option>
    <option value="1">Level 2 · Two steps</option>
    <option value="2">Level 3 · Two steps + more choices</option>
-   <option value="3">Level 4 · Three steps</option>
-   <option value="4">Level 5 · Three steps + order words</option>
+   <option value="3">Level 4 · Memory: two steps</option>
+   <option value="4">Level 5 · Three steps</option>
+   <option value="5">Level 6 · Three steps + order words</option>
+   <option value="6">Level 7 · Memory: three steps</option>
+   <option value="7">Level 8 · Four steps</option>
+   <option value="8">Level 9 · Memory: four steps</option>
+   <option value="9">Level 10 · Five steps</option>
+   <option value="10">Level 11 · Memory: five steps</option>
+   <option value="11">Level 12 · Six steps</option>
   </select></div>
 
  </div>
@@ -101,35 +113,74 @@ const ITEMS=[
  {id:'car',name:'car',emoji:'🚗'},{id:'fish',name:'fish',emoji:'🐠'},{id:'moon',name:'moon',emoji:'🌙'},
  {id:'pizza',name:'pizza',emoji:'🍕'},{id:'duck',name:'duck',emoji:'🦆'},{id:'heart',name:'heart',emoji:'❤️'},
  {id:'tree',name:'tree',emoji:'🌳'},{id:'gift',name:'gift',emoji:'🎁'},{id:'sun',name:'sun',emoji:'☀️'},
- {id:'cup',name:'cup',emoji:'🥤'},{id:'shoe',name:'shoe',emoji:'👟'},{id:'frog',name:'frog',emoji:'🐸'}
+ {id:'cup',name:'cup',emoji:'🥤'},{id:'shoe',name:'shoe',emoji:'👟'},{id:'frog',name:'frog',emoji:'🐸'},
+ {id:'unicorn',name:'unicorn',emoji:'🦄'},{id:'button',name:'button',emoji:'🔘'},
+ {id:'dragon',name:'dragon',emoji:'🐉'},{id:'cupcake',name:'cupcake',emoji:'🧁'},
+ {id:'cookie',name:'cookie',emoji:'🍪'},{id:'dinosaur',name:'dinosaur',emoji:'🦖'},
+ {id:'rainbow',name:'rainbow',emoji:'🌈'},{id:'teddy bear',name:'teddy bear',emoji:'🧸'},
+ {id:'butterfly',name:'butterfly',emoji:'🦋'},{id:'rocket',name:'rocket',emoji:'🚀'},
+ {id:'crown',name:'crown',emoji:'👑'},{id:'ice cream',name:'ice cream',emoji:'🍦'},
+ {id:'train',name:'train',emoji:'🚂'},{id:'ladybug',name:'ladybug',emoji:'🐞'}
 ];
 const $=id=>document.getElementById(id);
-let level=0,sequence=[],boardItems=[],step=0,missionsCompleted=0,stars=0,attempts=[],locked=false,missionActive=false,currentMissionHadError=false;
+let level=0,sequence=[],boardItems=[],step=0,missionsCompleted=0,stars=0,attempts=[],locked=false,missionActive=false,currentMissionHadError=false,memoryTimer=null,memoryHidden=false;
 function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-function settings(){return [{steps:1,choices:4,orderWords:false},{steps:2,choices:4,orderWords:false},{steps:2,choices:6,orderWords:false},{steps:3,choices:6,orderWords:false},{steps:3,choices:8,orderWords:true}][level];}
+function settings(){return [
+ {steps:1,choices:4,memory:false},
+ {steps:2,choices:4,memory:false},
+ {steps:2,choices:6,memory:false},
+ {steps:2,choices:6,memory:true},
+ {steps:3,choices:6,memory:false},
+ {steps:3,choices:8,memory:false},
+ {steps:3,choices:8,memory:true},
+ {steps:4,choices:8,memory:false},
+ {steps:4,choices:8,memory:true},
+ {steps:5,choices:10,memory:false},
+ {steps:5,choices:10,memory:true},
+ {steps:6,choices:12,memory:false}
+][level];}
 function item(id){return ITEMS.find(x=>x.id===id);}
-function makeInstruction(seq){
- if(level===0)return 'Touch the '+item(seq[0]).name+'.';
- if(level===1||level===2)return 'Touch the '+item(seq[0]).name+', then touch the '+item(seq[1]).name+'.';
- if(level===3)return 'Touch the '+item(seq[0]).name+', then the '+item(seq[1]).name+', then the '+item(seq[2]).name+'.';
- return 'First, touch the '+item(seq[0]).name+'. Next, touch the '+item(seq[1]).name+'. Last, touch the '+item(seq[2]).name+'.';
+function orderLabel(i,total){
+ if(total===1)return 'First';
+ if(i===0)return 'First';
+ if(i===total-1)return 'Last';
+ return 'Next';
 }
+function makeInstruction(seq){
+ if(seq.length===1)return 'Touch the '+item(seq[0]).name+'.';
+ return seq.map((id,i)=>orderLabel(i,seq.length)+', touch the '+item(id).name+'.').join(' ');
+}
+function clearMemoryTimer(){if(memoryTimer!==null){clearTimeout(memoryTimer);memoryTimer=null;}}
 function newMission(){
- locked=false;missionActive=true;step=0;currentMissionHadError=false;
+ clearMemoryTimer();
+ locked=false;missionActive=true;step=0;currentMissionHadError=false;memoryHidden=false;
  const s=settings();sequence=shuffle(ITEMS).slice(0,s.steps).map(x=>x.id);
  const pool=shuffle(ITEMS.filter(x=>!sequence.includes(x.id))).slice(0,s.choices-s.steps);
  boardItems=shuffle([...sequence.map(id=>item(id)),...pool]);
+ $('instruction').classList.remove('memory-hidden');
  $('instruction').textContent=makeInstruction(sequence);
  $('feedback').className='';$('feedback').textContent='';
  renderSteps();renderBoard();
+ if(s.memory){
+  $('feedback').textContent='Remember the order!';
+  memoryTimer=setTimeout(()=>{
+   if(!missionActive)return;
+   memoryHidden=true;
+   $('instruction').classList.add('memory-hidden');
+   renderSteps();
+   $('feedback').textContent='Your turn!';
+   memoryTimer=null;
+  },4000);
+ }
 }
 function renderSteps(){
  const s=settings();
- const labels=level===4?['First','Next','Last']:sequence.map((_,i)=>'Step '+(i+1));
  $('progressSteps').innerHTML=sequence.map((id,i)=>{
   const done=i<step;
   const current=i===step&&missionActive;
-  return '<div class="stepDot '+(done?'done':current?'current':'')+'"><span>'+labels[i]+':</span><span class="stepEmoji" aria-hidden="true">'+item(id).emoji+'</span>'+(done?'<span class="check" aria-label="complete">✓</span>':'')+'</div>';
+  const label=orderLabel(i,sequence.length);
+  const hidden=s.memory&&memoryHidden&&!done;
+  return '<div class="stepDot '+(done?'done':current?'current':'')+(hidden?' memory-hidden':'')+(done?' revealed':'')+'"><span class="stepLabel">'+label+':</span><span class="stepEmoji" aria-hidden="true">'+item(id).emoji+'</span>'+(done?'<span class="check" aria-label="complete">✓</span>':'')+'</div>';
  }).join('');
 }
 function renderBoard(){
@@ -145,7 +196,13 @@ function choose(id,button){
   return;
  }
  $('board').querySelectorAll('.choice.wrong').forEach(b=>b.classList.remove('wrong'));
- button.classList.add('correct');button.disabled=true;step++;renderSteps();
+ button.classList.add('correct');button.disabled=true;step++;
+ if(settings().memory&&memoryHidden){
+  const completedId=sequence[step-1];
+  const stepCard=$('progressSteps').children[step-1];
+  if(stepCard){stepCard.classList.remove('memory-hidden');stepCard.classList.add('revealed');}
+ }
+ renderSteps();
  if(step>=sequence.length){
   locked=true;missionActive=false;missionsCompleted++;stars++;attempts.push(!currentMissionHadError);attempts=attempts.slice(-10);
   $('feedback').className='success';$('feedback').textContent='🎉 Mission complete!';
@@ -153,7 +210,7 @@ function choose(id,button){
   $('board').querySelectorAll('.choice').forEach(b=>b.disabled=true);
   $('newMission').textContent='Next mission';
  }else{
-  $('feedback').className='success';$('feedback').textContent='✓ Find the next picture.';
+  $('feedback').className='success';$('feedback').textContent=settings().memory&&memoryHidden?'✓ Correct! Remember the next one.':'✓ Find the next picture.';
  }
 }
 function updateStats(){
@@ -162,7 +219,7 @@ function updateStats(){
  $('starCount').textContent='⭐ Stars: '+stars;
  const n=attempts.length,ok=attempts.filter(Boolean).length;
  $('accuracy').textContent='Recent success: '+(n?Math.round(ok/n*100)+'% ('+ok+'/'+n+')':'—');
- $('prevLevel').disabled=level===0;$('nextLevel').disabled=level===4;
+ $('prevLevel').disabled=level===0;$('nextLevel').disabled=level===11;
 }
 $('difficulty').addEventListener('change',()=>{level=Number($('difficulty').value);updateStats();newMission();});
 $('newMission').addEventListener('click',newMission);
