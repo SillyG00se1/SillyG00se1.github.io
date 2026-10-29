@@ -114,7 +114,9 @@ function onInputReport(event) {
  const bytes=Array.from(new Uint8Array(event.data.buffer,event.data.byteOffset,event.data.byteLength));
  const item={id:event.reportId,bytes};
  log("RX report ID "+event.reportId+": "+hex(bytes));
- if(inputTestActive) captureInputReport(item);
+ // Keep the live input monitor running whenever connected, so reports arriving
+ // just before/after the test button is toggled are still decoded and recorded.
+ captureInputReport(item);
  if(waiters.length) waiters.shift()(item); else inputQueue.push(item);
 }
 function captureInputReport(item) {
@@ -303,7 +305,7 @@ $("inputTest").addEventListener("click",()=>{
  inputTestActive=!inputTestActive;
  $("inputTest").textContent=inputTestActive?"Stop pedal input test":"Start pedal input test";
  $("inputStatus").textContent=inputTestActive?"Listening for pedal input. Press and release the left, middle, and right pedals separately.":"Input test paused. Captured reports remain visible.";
- log(inputTestActive?"Input test started. Press and release left, middle, and right pedals separately.":"Input test stopped.");
+ log(inputTestActive?"Input test marked active; live input monitoring is already running.":"Input test marker stopped; live input monitoring continues.");
 });
 $("clearInput").addEventListener("click",()=>{
  capturedInputCount=0;$("inputCount").textContent="0 reports captured";$("inputReports").innerHTML='<tr><td colspan="4" class="muted">No input reports captured yet.</td></tr>';$("inputStatus").textContent="Captured reports cleared. Start the test and press each pedal.";
