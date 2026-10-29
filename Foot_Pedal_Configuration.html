@@ -304,7 +304,7 @@ $("inputTest").addEventListener("click",()=>{
  if(!device) return;
  inputTestActive=!inputTestActive;
  $("inputTest").textContent=inputTestActive?"Stop pedal input test":"Start pedal input test";
- $("inputStatus").textContent=inputTestActive?"Listening for pedal input. Press and release the left, middle, and right pedals separately.":"Input test paused. Captured reports remain visible.";
+ $("inputStatus").textContent=inputTestActive?"Input test active. Reports are monitored continuously while connected; press and release each pedal separately.":"Test marker stopped; live input monitoring continues while connected.";
  log(inputTestActive?"Input test marked active; live input monitoring is already running.":"Input test marker stopped; live input monitoring continues.");
 });
 $("clearInput").addEventListener("click",()=>{
