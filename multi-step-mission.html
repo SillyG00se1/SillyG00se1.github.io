@@ -257,10 +257,9 @@ function itemVisual(it, className){
   : '<span class="'+className+'" aria-hidden="true">'+it.emoji+'</span>';
 }
 function orderLabel(i,total){
- if(total===1)return 'First';
- if(i===0)return 'First';
- if(i===total-1)return 'Last';
- return 'Next';
+  if(i===0)return 'First';
+  return 'Then';
+}
 }
 function makeInstruction(seq){
  if(seq.length===1)return 'Touch the '+item(seq[0]).name+'.';
