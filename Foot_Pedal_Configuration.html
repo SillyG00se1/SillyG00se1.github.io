@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Foot Pedal Configuration</title>
+<style>
+:root{color-scheme:light dark;--bg:#f3f5f8;--fg:#17202b;--card:#fff;--line:#d4dbe5;--muted:#526174;--blue:#175fc1;--good:#167449;--warn:#8a5700;--bad:#b42318}
+@media(prefers-color-scheme:dark){:root{--bg:#11151b;--fg:#e8edf4;--card:#1b222c;--line:#354150;--muted:#aab7c7;--blue:#79aaff;--good:#6fdaa0;--warn:#ffd17b;--bad:#ff9289}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,sans-serif}main{max-width:900px;margin:auto;padding:20px 14px 36px}h1{font-size:clamp(1.5rem,4vw,2rem);margin:0}h2{font-size:1.1rem;margin:0 0 10px}.sub{color:var(--muted);margin:5px 0 0}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:14px 0}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:9px 0}button,select,input{font:inherit}button{padding:9px 14px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);cursor:pointer}button.primary{background:var(--blue);border-color:var(--blue);color:white}button:disabled{opacity:.5;cursor:not-allowed}select,input[type=text]{padding:8px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--fg)}label{display:inline-flex;gap:7px;align-items:center;flex-wrap:wrap}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}.info{border:1px solid var(--line);border-radius:8px;padding:10px;overflow-wrap:anywhere}.label{font-size:.78rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}.value{font-weight:650;margin-top:3px}.status{padding:10px 12px;border-radius:8px;background:var(--bg);border:1px solid var(--line);white-space:pre-wrap;overflow-wrap:anywhere}.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}.muted{color:var(--muted)}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:270px;overflow:auto;padding:12px;border-radius:8px;background:var(--bg);border:1px solid var(--line);font:12px/1.5 ui-monospace,Consolas,monospace}table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}.small{font-size:.9rem}
+</style>
+</head>
+<body><main>
+<header><h1>Foot Pedal Configuration</h1><p class="sub">Inspect the IKKEGOL pedal and, when the browser exposes a writable HID report, read or change simple keyboard assignments.</p></header>
+<section class="card">
+<h2>Device</h2>
+<div class="row"><button class="primary" id="connect">Connect foot pedal</button><button id="disconnect" disabled>Disconnect</button><button id="refresh" disabled>Refresh device details</button></div>
+<div id="status" class="status" role="status">Not connected.</div>
+<div class="grid" style="margin-top:10px">
+<div class="info"><div class="label">Device</div><div class="value" id="name">—</div></div>
+<div class="info"><div class="label">Vendor ID</div><div class="value" id="vid">—</div></div>
+<div class="info"><div class="label">Product ID</div><div class="value" id="pid">—</div></div>
+<div class="info"><div class="label">Model reported by pedal</div><div class="value" id="model">Not read</div></div>
+</div>
+<h2 style="margin-top:16px">HID report support</h2>
+<div id="collections" class="muted">Connect to inspect the device's input, output, and feature reports.</div>
+</section>
+<section class="card">
+<h2>Current keyboard assignments</h2>
+<p class="muted small">For the known two-pedal FootSwitch2, key numbers 1 and 2 correspond to pedal 1 and pedal 2. Reading requires a writable command path and a response from the device.</p>
+<div class="row"><button id="read" disabled>Read pedal assignments</button></div>
+<table><thead><tr><th>Pedal</th><th>Current assignment</th><th>Raw reply</th></tr></thead><tbody id="assignments"><tr><td colspan="3" class="muted">No assignments read yet.</td></tr></tbody></table>
+</section>
+<section class="card">
+<h2>Change an assignment</h2>
+<div class="row"><label>Pedal <select id="pedal"><option value="1">Pedal 1</option><option value="2">Pedal 2</option></select></label>
+<label>Keyboard key <select id="key"></select></label>
+<label>Action <select id="mode"><option value="1">Press once</option><option value="2">Hold while pedal is held</option></select></label></div>
+<div class="row"><label><input id="confirmWrite" type="checkbox"> I understand this will change the selected pedal's stored assignment.</label></div>
+<div class="row"><button class="primary" id="write" disabled>Write and verify assignment</button></div>
+<div id="writeStatus" class="status">No write attempted.</div>
+</section>
+<section class="card">
+<h2>Diagnostic log</h2>
+<div class="row"><button id="copy">Copy log</button><button id="clear">Clear log</button></div>
+<pre id="log">Ready.</pre>
+</section>
+<p class="muted small">This page never sends a command unless the selected HID device declares output report ID 0. If the browser does not expose that report, the page will remain in diagnostic mode rather than repeatedly sending a command that the browser rejects. It cannot bypass operating-system or browser HID restrictions.</p>
+</main>
+<script>
+(() => {
+"use strict";
+const $ = id => document.getElementById(id);
+const KNOWN_VID = 0x1A86, KNOWN_PID = 0xE026;
+const HID_KEYS = [
+ ["a",4],["b",5],["c",6],["d",7],["e",8],["f",9],["g",10],["h",11],["i",12],["j",13],["k",14],["l",15],["m",16],["n",17],["o",18],["p",19],["q",20],["r",21],["s",22],["t",23],["u",24],["v",25],["w",26],["x",27],["y",28],["z",29],
+ ["1",30],["2",31],["3",32],["4",33],["5",34],["6",35],["7",36],["8",37],["9",38],["0",39],
+ ["Enter",40],["Escape",41],["Backspace",42],["Tab",43],["Space",44],["-",45],["=",46],["[",47],["]",48],["\\",49],[";",51],["'",52],[ "`",53],[",",54],[".",55],["/",56],["Caps Lock",57],
+ ["F1",58],["F2",59],["F3",60],["F4",61],["F5",62],["F6",63],["F7",64],["F8",65],["F9",66],["F10",67],["F11",68],["F12",69],
+ ["Print Screen",70],["Scroll Lock",71],["Pause",72],["Insert",73],["Home",74],["Page Up",75],["Delete",76],["End",77],["Page Down",78],["Right Arrow",79],["Left Arrow",80],["Down Arrow",81],["Up Arrow",82]
+];
+for (const [label, usage] of HID_KEYS) $("key").add(new Option(label, String(usage)));
+let device = null, reportId = 0, canWrite = false, modelName = "", inputQueue = [], waiters = [], busy = false;
+function log(message) {
+ const line = "[" + new Date().toLocaleTimeString() + "] " + message;
+ $("log").textContent += "\n" + line;
+ if ($("log").textContent.length > 16000) $("log").textContent = $("log").textContent.slice(-16000);
+ $("log").scrollTop = $("log").scrollHeight;
+}
+function hex(bytes) { return Array.from(bytes, n => Number(n).toString(16).padStart(2,"0")).join(" ").toUpperCase(); }
+function setStatus(message, kind="") { $("status").textContent=message; $("status").className="status "+kind; }
+function setConnectedControls(on) {
+ $("connect").disabled=on; $("disconnect").disabled=!on; $("refresh").disabled=!on;
+ $("read").disabled=!on || !canWrite; updateWriteButton();
+}
+function updateWriteButton() { $("write").disabled=!device || !canWrite || !$("confirmWrite").checked || busy; }
+function outputReportIds(d) {
+ return [...new Set(d.collections.flatMap(c => (c.outputReports || []).map(r => r.reportId)))];
+}
+function renderCollections(d) {
+ const list=document.createElement("ol");
+ d.collections.forEach((c,i)=>{
+   const li=document.createElement("li");
+   const ids=a=>a.map(r=>r.reportId).join(", ") || "none";
+   li.textContent="Collection "+(i+1)+": usage page 0x"+c.usagePage.toString(16)+"; usage 0x"+c.usage.toString(16)+"; input IDs ["+ids(c.inputReports||[]) +"]; output IDs ["+ids(c.outputReports||[]) +"]; feature IDs ["+ids(c.featureReports||[])+"]";
+   list.appendChild(li);
+ });
+ $("collections").replaceChildren(list);
+ const outs=outputReportIds(d);
+ canWrite=outs.includes(0);
+ if(canWrite) {
+   setStatus("Connected. Output report ID 0 is declared; safe protocol discovery can be attempted.", "good");
+ } else {
+   setStatus("Connected, but this browser does not expose output report ID 0 for this device. The ElfKey protocol uses report ID 0 for this model, so configuration commands are disabled here. No command has been sent.", "warn");
+ }
+ $("read").disabled=!canWrite;
+ updateWriteButton();
+}
+function onInputReport(event) {
+ const bytes=Array.from(new Uint8Array(event.data.buffer,event.data.byteOffset,event.data.byteLength));
+ const item={id:event.reportId,bytes};
+ log("RX report ID "+event.reportId+": "+hex(bytes));
+ if(waiters.length) waiters.shift()(item); else inputQueue.push(item);
+}
+function nextReport(timeout=1000) {
+ if(inputQueue.length) return Promise.resolve(inputQueue.shift());
+ return new Promise(resolve=>{
+   let done=false;
+   const finish=value=>{if(done)return;done=true;clearTimeout(timer);const i=waiters.indexOf(finish);if(i>=0)waiters.splice(i,1);resolve(value);};
+   const timer=setTimeout(()=>finish(null),timeout);
+   waiters.push(finish);
+ });
+}
+async function sendCommand(bytes, delay=30) {
+ if(!device || !device.opened) throw new Error("Connect to the pedal first.");
+ if(!canWrite) throw new Error("The browser does not expose output report ID 0. No command was sent.");
+ await new Promise(resolve=>setTimeout(resolve,delay));
+ log("TX id=0 "+hex(bytes));
+ await device.sendReport(0,new Uint8Array(bytes));
+}
+function clearInputQueue(){inputQueue.length=0;}
+async function readModel() {
+ clearInputQueue();
+ await sendCommand([1,131,8,0,0,0,0,0]);
+ let name="";
+ for(let i=0;i<12;i++) {
+   const report=await nextReport(800);
+   if(!report) { if(!name) break; else continue; }
+   const text=report.bytes.filter(v=>v!==0).map(v=>String.fromCharCode(v)).join("");
+   if(text && [...report.bytes].every(v=>v===0 || (v>=32 && v<=126))) name+=text;
+   else log("Model request received non-text reply: "+hex(report.bytes));
+   if(name.includes(".") && !Number.isNaN(Number(name.slice(-3)))) break;
+ }
+ modelName=name.trim();
+ $("model").textContent=modelName || "No model reply";
+ log(modelName ? "Model reply: "+modelName : "No model reply received.");
+ return modelName;
+}
+async function readKey(number) {
+ clearInputQueue();
+ await sendCommand([1,130,8,number,0,0,0,0]);
+ let report=null;
+ for(let i=0;i<4;i++) {
+   report=await nextReport(1000);
+   if(!report) break;
+   const b=report.bytes;
+   if(b.length>=2 && !(b[0]===129 && b[1]===85)) break;
+ }
+ if(!report) return {text:"No reply",raw:""};
+ const b=report.bytes, mode=b[1], len=b[0];
+ let text="Unknown assignment (mode "+mode+")";
+ if([1,129,6,134,18].includes(mode)) {
+   const modifier=b[mode===18?6:2]||0, names=[];
+   const modNames=["Ctrl","Shift","Alt","Meta","Right Ctrl","Right Shift","Right Alt","Right Meta"];
+   for(let i=0;i<8;i++) if(modifier & (1<<i)) names.push(modNames[i]);
+   let usages=[];
+   if(mode===1 || mode===129) usages=[b[3]||0];
+   else {
+     const start=mode===18?7:3, end=Math.min(len,8)-1;
+     for(let i=start;i<=end;i++) if(b[i]) usages.push(b[i]);
+     if(len>8) {
+       const extra=await nextReport(800);
+       if(extra) for(let i=0;i<len-8;i++) if(extra.bytes[i]) usages.push(extra.bytes[i]);
+     }
+   }
+   const labels=new Map(HID_KEYS.map(([label,usage])=>[usage,label]));
+   text=[...names,...usages.map(u=>labels.get(u)||("HID "+u))].join(" + ") || "(no key assigned)";
+ } else if(mode===7) text="Media code "+b[2];
+ return {text,raw:hex(b)};
+}
+function renderAssignment(number,result) {
+ let row=document.querySelector('tr[data-pedal="'+number+'"]');
+ if(!row) {
+   if($("assignments").querySelector("td[colspan]")) $("assignments").innerHTML="";
+   row=document.createElement("tr");row.dataset.pedal=String(number);
+   for(let i=0;i<3;i++) row.appendChild(document.createElement("td"));
+   row.children[0].textContent="Pedal "+number;
+   $("assignments").appendChild(row);
+ }
+ row.children[1].textContent=result.text;
+ row.children[2].textContent=result.raw || "—";
+}
+async function guarded(action) {
+ if(busy) return;
+ busy=true; updateWriteButton(); $("read").disabled=true;
+ try { await action(); }
+ catch(error) {
+   log("ERROR "+(error.name||"Error")+": "+error.message);
+   setStatus((error.name||"Error")+": "+error.message,"bad");
+ }
+ finally { busy=false; $("read").disabled=!device || !canWrite; updateWriteButton(); }
+}
+async function connect() {
+ if(!("hid" in navigator)) {
+   setStatus("WebHID is unavailable in this browser. Use current Chrome or Edge over HTTPS.", "bad");
+   return;
+ }
+ await guarded(async()=>{
+   const picked=await navigator.hid.requestDevice({filters:[{vendorId:KNOWN_VID,productId:KNOWN_PID}]});
+   if(!picked.length) { setStatus("No device selected."); return; }
+   device=picked[0];
+   if(!device.opened) await device.open();
+   device.addEventListener("inputreport",onInputReport);
+   $("name").textContent=device.productName || "(unnamed HID device)";
+   $("vid").textContent="0x"+device.vendorId.toString(16).toUpperCase().padStart(4,"0");
+   $("pid").textContent="0x"+device.productId.toString(16).toUpperCase().padStart(4,"0");
+   log("Opened "+device.productName+" VID 0x"+device.vendorId.toString(16).toUpperCase()+" PID 0x"+device.productId.toString(16).toUpperCase()+".");
+   renderCollections(device);
+   setConnectedControls(true);
+   if(canWrite) {
+     try { await readModel(); }
+     catch(error) { log("Model read failed: "+error.name+": "+error.message); setStatus("Connected, but the model request failed: "+error.name+": "+error.message,"warn"); }
+   }
+ });
+}
+async function refreshDetails() {
+ if(!device) return;
+ renderCollections(device);
+ if(canWrite) await guarded(async()=>{await readModel();});
+}
+async function readAssignments() {
+ if(!device || !canWrite) return;
+ await guarded(async()=>{
+   $("assignments").innerHTML="";
+   for(const n of [1,2]) {
+     const result=await readKey(n);
+     renderAssignment(n,result);
+   }
+   setStatus("Read attempt finished. Check the assignment table and diagnostic log.", "good");
+ });
+}
+async function writeAssignment() {
+ if(!device || !canWrite || !$("confirmWrite").checked) return;
+ const number=Number($("pedal").value), usage=Number($("key").value), mode=Number($("mode").value);
+ const label=HID_KEYS.find(k=>k[1]===usage)?.[0] || ("HID "+usage);
+ if(!confirm("Change Pedal "+number+" to "+label+"?")) return;
+ await guarded(async()=>{
+   $("writeStatus").textContent="Writing and checking the stored assignment…";
+   const header=[1,129,8,number,0,0,0,0];
+   const payload=[8,mode===2?1:129,0,usage,0,0,0,0];
+   await sendCommand(header);
+   await sendCommand(payload);
+   await new Promise(resolve=>setTimeout(resolve,180));
+   const result=await readKey(number);
+   renderAssignment(number,result);
+   const expectedMode=mode===2?1:129;
+   const b=result.raw.split(" ").map(x=>parseInt(x,16));
+   const verified=b.length>=4 && b[1]===expectedMode && (b[3]||0)===usage;
+   $("writeStatus").textContent=verified ? "Verified: the pedal reports "+result.text+"." : "A write was sent, but read-back did not confirm the requested key. Reported assignment: "+result.text+". Check the log; do not assume the change succeeded.";
+   $("writeStatus").className="status "+(verified?"good":"warn");
+   log("Verification "+(verified?"passed":"not confirmed")+" for pedal "+number+"; requested "+label+".");
+ });
+}
+$("connect").addEventListener("click",connect);
+$("disconnect").addEventListener("click",async()=>{
+ if(!device) return;
+ try {device.removeEventListener("inputreport",onInputReport);if(device.opened)await device.close();}catch(error){log("Disconnect warning: "+error.message);}
+ device=null;canWrite=false;modelName="";setConnectedControls(false);$("model").textContent="Not read";setStatus("Not connected.");$("collections").textContent="Connect to inspect the device's input, output, and feature reports.";log("Disconnected.");
+});
+$("refresh").addEventListener("click",refreshDetails);
+$("read").addEventListener("click",readAssignments);
+$("write").addEventListener("click",writeAssignment);
+$("confirmWrite").addEventListener("change",updateWriteButton);
+$("copy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("log").textContent);setStatus("Log copied.");}catch(e){setStatus("Copy was blocked by the browser. Select and copy the log manually.","warn");}});
+$("clear").addEventListener("click",()=>$("log").textContent="Log cleared.");
+navigator.hid?.addEventListener("disconnect",event=>{if(device && event.device===device){device=null;canWrite=false;setConnectedControls(false);setStatus("The device disconnected.","warn");log("Device disconnected.");}});
+})();
+</script></body></html>
