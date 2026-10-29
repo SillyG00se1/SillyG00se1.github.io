@@ -28,7 +28,7 @@
 <section class="card">
 <h2>Pedal input test</h2>
 <div class="row"><button class="primary" id="inputTest" disabled>Start pedal input test</button><button id="clearInput" disabled>Clear captured reports</button><span id="inputCount" class="muted">0 reports captured</span></div>
-<div id="inputStatus" class="status">Connect the 3-pedal VEC, start the test, then press and release left, middle, and right pedals separately.</div>
+<div id="inputStatus" class="status">Connect the 3-pedal VEC and start the test. Current key settings: Pedal 1 = Left Arrow, Pedal 2 = Space, Pedal 3 = Enter.</div>
 <table><thead><tr><th>#</th><th>Report ID</th><th>Raw bytes (hex)</th><th>Decoded bytes</th></tr></thead><tbody id="inputReports"><tr><td colspan="4" class="muted">No input reports captured yet.</td></tr></tbody></table>
 </section>
 <section class="card">
@@ -118,13 +118,19 @@ function onInputReport(event) {
  if(waiters.length) waiters.shift()(item); else inputQueue.push(item);
 }
 function captureInputReport(item) {
+ const mask=item.bytes[0]||0;
+ const pressed=[];
+ if(mask & 0x01) pressed.push("Pedal 1 / Left Arrow");
+ if(mask & 0x02) pressed.push("Pedal 2 / Space");
+ if(mask & 0x04) pressed.push("Pedal 3 / Enter");
+ const detected=pressed.length ? "Detected: "+pressed.join(" + ") : "Detected: all pedals released";
  capturedInputCount++;
  $("inputCount").textContent=capturedInputCount+" report"+(capturedInputCount===1?"":"s")+" captured";
  $("inputStatus").textContent="Receiving input reports. Press and release each of the three pedals separately; compare the raw bytes below.";
  const body=$("inputReports");
  if(body.querySelector("td[colspan]")) body.innerHTML="";
  const row=document.createElement("tr");
- const cells=[String(capturedInputCount),String(item.id),hex(item.bytes),item.bytes.map((b,i)=>"byte "+i+"="+b+" (0x"+b.toString(16).toUpperCase().padStart(2,"0")+")").join("; ")||"(empty report)"];
+ const cells=[String(capturedInputCount),String(item.id),hex(item.bytes),detected+"; "+item.bytes.map((b,i)=>"byte "+i+"="+b+" (0x"+b.toString(16).toUpperCase().padStart(2,"0")+")").join("; ")||"(empty report)"];
  cells.forEach(value=>{const td=document.createElement("td");td.textContent=value;row.appendChild(td);});
  body.prepend(row);
  while(body.rows.length>40) body.deleteRow(body.rows.length-1);
