@@ -197,7 +197,7 @@ async function connect() {
    return;
  }
  await guarded(async()=>{
-   const picked=await navigator.hid.requestDevice({acceptAllDevices:true});
+   const picked=await navigator.hid.requestDevice({filters:[{usagePage:0x01},{usagePage:0x0C}]});
    if(!picked.length) { setStatus("No device selected."); return; }
    device=picked[0];
    if(!device.opened) await device.open();
