@@ -11,7 +11,7 @@
 </style>
 </head>
 <body><main>
-<header><h1>Foot Pedal Configuration</h1><p class="sub">Inspect compatible USB HID pedals. Configuration commands are limited to the verified IKKEGOL model until another pedal protocol is identified.</p></header>
+<header><h1>Foot Pedal Configuration</h1></header>
 <section class="card">
 <h2>Device</h2>
 <div class="row"><button class="primary" id="connect">Connect foot pedal</button><button id="disconnect" disabled>Disconnect</button><button id="refresh" disabled>Refresh device details</button></div>
@@ -27,7 +27,7 @@
 </section>
 <section class="card">
 <h2>Current keyboard assignments</h2>
-<p class="muted small">For the verified IKKEGOL FootSwitch2 only. Other pedals can be inspected safely, but their assignments remain disabled until their protocol is identified.</p>
+ 
 <div class="row"><button id="read" disabled>Read pedal assignments</button></div>
 <table><thead><tr><th>Pedal</th><th>Current assignment</th><th>Raw reply</th></tr></thead><tbody id="assignments"><tr><td colspan="3" class="muted">No assignments read yet.</td></tr></tbody></table>
 </section>
@@ -36,8 +36,7 @@
 <div class="row"><label>Pedal <select id="pedal"><option value="1">Pedal 1</option><option value="2">Pedal 2</option></select></label>
 <label>Keyboard key <select id="key"></select></label>
 <label>Action <select id="mode"><option value="1">Press once</option><option value="2">Hold while pedal is held</option></select></label></div>
-<div class="row"><label><input id="confirmWrite" type="checkbox"> I understand this will change the selected pedal's stored assignment.</label></div>
-<div class="row"><button class="primary" id="write" disabled>Write and verify assignment</button></div>
+ <div class="row"><button class="primary" id="write" disabled>Write and verify assignment</button></div>
 <div id="writeStatus" class="status">No write attempted.</div>
 </section>
 <section class="card">
@@ -45,7 +44,7 @@
 <div class="row"><button id="copy">Copy log</button><button id="clear">Clear log</button></div>
 <pre id="log">Ready.</pre>
 </section>
-<p class="muted small">All HID devices are offered in the picker. Unknown devices are inspection-only: this page will not send IKKEGOL commands to them. It cannot bypass operating-system or browser HID restrictions.</p>
+<p class="muted small"> </p>
 </main>
 <script>
 (() => {
@@ -73,7 +72,7 @@ function setConnectedControls(on) {
  $("connect").disabled=on; $("disconnect").disabled=!on; $("refresh").disabled=!on;
  $("read").disabled=!on || !canWrite; updateWriteButton();
 }
-function updateWriteButton() { $("write").disabled=!device || !canWrite || !$("confirmWrite").checked || busy; }
+function updateWriteButton() { $("write").disabled=!device || !canWrite || busy; }
 function outputReportIds(d) {
  return [...new Set(d.collections.flatMap(c => (c.outputReports || []).map(r => r.reportId)))];
 }
@@ -234,7 +233,7 @@ async function readAssignments() {
  });
 }
 async function writeAssignment() {
- if(!device || !canWrite || !$("confirmWrite").checked) return;
+ if(!device || !canWrite) return;
  const number=Number($("pedal").value), usage=Number($("key").value), mode=Number($("mode").value);
  const label=HID_KEYS.find(k=>k[1]===usage)?.[0] || ("HID "+usage);
  if(!confirm("Change Pedal "+number+" to "+label+"?")) return;
@@ -264,8 +263,7 @@ $("disconnect").addEventListener("click",async()=>{
 $("refresh").addEventListener("click",refreshDetails);
 $("read").addEventListener("click",readAssignments);
 $("write").addEventListener("click",writeAssignment);
-$("confirmWrite").addEventListener("change",updateWriteButton);
-$("copy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("log").textContent);setStatus("Log copied.");}catch(e){setStatus("Copy was blocked by the browser. Select and copy the log manually.","warn");}});
+ $("copy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("log").textContent);setStatus("Log copied.");}catch(e){setStatus("Copy was blocked by the browser. Select and copy the log manually.","warn");}});
 $("clear").addEventListener("click",()=>$("log").textContent="Log cleared.");
 navigator.hid?.addEventListener("disconnect",event=>{if(device && event.device===device){device=null;canWrite=false;setConnectedControls(false);setStatus("The device disconnected.","warn");log("Device disconnected.");}});
 })();
