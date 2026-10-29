@@ -48,6 +48,17 @@ select{width:100%;min-height:48px;padding:10px;border-radius:10px;background:#11
 #feedback.success{color:var(--green)}#feedback.try{color:var(--gold)}
 .statrow{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
 footer{text-align:center;color:var(--muted);font-size:.9rem;padding:10px}
+input{font:inherit}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.storeItem{background:#121a29;border:2px solid #445571;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.storeItem .prizeIcon{font-size:2.6rem}
+.storeItem .cost{color:var(--gold);font-weight:900}
+.storeItem button{margin-top:auto}
+.button-art{width:1em;height:1em;display:inline-block;position:relative;border-radius:50%;background:#e9b6d7;border:0.07em solid #9b6591;box-shadow:inset -0.07em -0.07em 0 #c38db6}
+.button-art:before{content:"";position:absolute;left:25%;top:25%;width:18%;height:18%;border-radius:50%;background:#62456a;box-shadow:0.28em 0 #62456a,0 0.28em #62456a,0.28em 0.28em #62456a}
+.stepDot .button-art{font-size:3rem}
+.choice .button-art{font-size:5.8rem}
+@media(max-width:680px){.choice .button-art{font-size:4.8rem}}
 @keyframes nudge{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 @media(max-width:680px){main{padding:9px}.panel{padding:13px}#board{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.choice{min-height:165px}.choice .emoji{font-size:clamp(3.5rem,15vw,5.5rem)}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
@@ -57,6 +68,22 @@ footer{text-align:center;color:var(--muted);font-size:.9rem;padding:10px}
 <main>
 <h1>🗺️ Multi-Step Mission</h1>
 
+
+
+
+<section class="panel">
+ <div class="statrow">
+  <span class="badge" id="levelBadge">Level 1</span>
+  <span class="badge" id="missionCount">Missions completed: 0</span>
+  <span class="badge" id="starCount">⭐ Stars: 0</span>
+  <span class="badge" id="accuracy">Recent success: —</span>
+ </div>
+ <h2 style="text-align:center;margin-top:16px">Your mission</h2>
+ <div id="instruction" aria-live="polite">Press New mission to begin!</div>
+ <div id="progressSteps" aria-label="Instruction step progress"></div>
+ <div id="feedback" role="status" aria-live="polite"></div>
+ <div id="board" aria-label="Picture choices"></div>
+</section>
 
 <section class="panel">
  <div class="controls">
@@ -83,23 +110,33 @@ footer{text-align:center;color:var(--muted);font-size:.9rem;padding:10px}
 </section>
 
 <section class="panel">
- <div class="statrow">
-  <span class="badge" id="levelBadge">Level 1</span>
-  <span class="badge" id="missionCount">Missions completed: 0</span>
-  <span class="badge" id="starCount">⭐ Stars: 0</span>
-  <span class="badge" id="accuracy">Recent success: —</span>
+ <h2>Student profile</h2>
+ <p>Save this student's level, stars, missions, and purchased prizes in this browser.</p>
+ <div class="controls">
+  <div><label for="studentName">Student name</label><input id="studentName" type="text" maxlength="60" placeholder="Enter student name" style="width:100%;min-height:48px;padding:10px;border-radius:10px;background:#111827;color:white;border:2px solid #53617b"></div>
+  <div><label for="savedProfiles">Saved profiles on this device</label><select id="savedProfiles"><option value="">Choose a saved student</option></select></div>
  </div>
- <h2 style="text-align:center;margin-top:16px">Your mission</h2>
- <div id="instruction" aria-live="polite">Press New mission to begin!</div>
- <div id="progressSteps" aria-label="Instruction step progress"></div>
- <div id="feedback" role="status" aria-live="polite"></div>
- <div id="board" aria-label="Picture choices"></div>
+ <div class="actions">
+  <button id="saveProfile" class="primary" type="button">Save student profile</button>
+  <button id="loadProfile" type="button">Load selected profile</button>
+  <button id="deleteProfile" type="button">Delete selected profile</button>
+ </div>
+ <div id="profileStatus" class="status" role="status">Profiles are saved only in this browser on this device.</div>
 </section>
+<section class="panel">
+ <h2>⭐ Silly Prize Store</h2>
+ <p>Spend earned stars on fun badges and silly prizes. Purchased prizes are saved with the student's profile.</p>
+ <div id="storeBalance" class="statrow"></div>
+ <div id="storeItems" class="grid"></div>
+ <h2 style="margin-top:18px">Your collection</h2>
+ <div id="collection" class="statrow"><span class="badge">No prizes purchased yet.</span></div>
+</section>
+
 
 <section class="panel">
  <div class="actions" style="justify-content:center">
   <button id="prevLevel" type="button">← Easier level</button>
-  <button id="nextLevel" type="button">Next difficulty →</button>
+  <button id="nextLevel" type="button">Next level → (or press Space)</button>
  </div>
 </section>
 
@@ -125,6 +162,70 @@ const ITEMS=[
 const $=id=>document.getElementById(id);
 let level=0,sequence=[],boardItems=[],step=0,missionsCompleted=0,stars=0,attempts=[],locked=false,missionActive=false,currentMissionHadError=false,memoryTimer=null,memoryHidden=false;
 function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const PROFILE_KEY='multiStepMissionProfilesV1';
+const PRIZES=[
+ {id:'unicorn-badge',name:'Unicorn Badge',icon:'🦄',cost:3,desc:'A magical badge'},
+ {id:'dragon-pet',name:'Tiny Dragon',icon:'🐉',cost:5,desc:'A pocket-sized dragon'},
+ {id:'cupcake-crown',name:'Cupcake Crown',icon:'🧁',cost:4,desc:'Royal frosting'},
+ {id:'rainbow-star',name:'Rainbow Star',icon:'🌈',cost:6,desc:'Extra colorful'},
+ {id:'silly-glasses',name:'Silly Glasses',icon:'🤓',cost:3,desc:'Maximum silliness'},
+ {id:'rocket-ride',name:'Rocket Ride',icon:'🚀',cost:8,desc:'Zoom to the moon'}
+];
+let ownedPrizes=[];
+function getProfiles(){try{return JSON.parse(localStorage.getItem(PROFILE_KEY)||'{}');}catch(e){return {};}}
+function putProfiles(profiles){try{localStorage.setItem(PROFILE_KEY,JSON.stringify(profiles));return true;}catch(e){$('profileStatus').textContent='Could not save in this browser. Storage may be disabled.';return false;}}
+function refreshProfileList(selected=''){
+ const profiles=getProfiles(),select=$('savedProfiles'),old=selected||select.value;
+ select.innerHTML='<option value="">Choose a saved student</option>';
+ Object.keys(profiles).sort((a,b)=>a.localeCompare(b)).forEach(name=>select.add(new Option(name,name)));
+ if(profiles[old])select.value=old;
+}
+function saveProfile(){
+ const name=$('studentName').value.trim();
+ if(!name){$('profileStatus').textContent='Enter a student name before saving.';return;}
+ const profiles=getProfiles();
+ profiles[name]={level,missionsCompleted,stars,attempts:attempts.slice(-10),ownedPrizes,updated:new Date().toISOString()};
+ if(putProfiles(profiles)){refreshProfileList(name);$('savedProfiles').value=name;$('profileStatus').textContent='Saved profile for '+name+'.';}
+}
+function loadProfile(){
+ const name=$('savedProfiles').value,profiles=getProfiles(),p=profiles[name];
+ if(!p){$('profileStatus').textContent='Choose a saved profile first.';return;}
+ level=Math.max(0,Math.min(11,Number(p.level)||0));missionsCompleted=Number(p.missionsCompleted)||0;stars=Number(p.stars)||0;attempts=Array.isArray(p.attempts)?p.attempts.slice(-10):[];ownedPrizes=Array.isArray(p.ownedPrizes)?p.ownedPrizes:[];
+ $('studentName').value=name;$('difficulty').value=String(level);updateStats();renderStore();newMission();
+ $('profileStatus').textContent='Loaded '+name+' and their saved progress.';
+}
+function deleteProfile(){
+ const name=$('savedProfiles').value;
+ if(!name){$('profileStatus').textContent='Choose a saved profile first.';return;}
+ if(!confirm('Delete the saved profile for '+name+' from this browser?'))return;
+ const profiles=getProfiles();delete profiles[name];putProfiles(profiles);refreshProfileList();$('profileStatus').textContent='Deleted saved profile '+name+'. Current session is unchanged.';
+}
+function saveActiveProfileSilently(){
+ const name=$('studentName').value.trim();
+ if(!name)return;
+ const profiles=getProfiles();
+ profiles[name]={level,missionsCompleted,stars,attempts:attempts.slice(-10),ownedPrizes,updated:new Date().toISOString()};
+ putProfiles(profiles);refreshProfileList(name);
+}
+function renderStore(){
+ $('storeBalance').innerHTML='<span class="badge">⭐ Available stars: '+stars+'</span>';
+ $('storeItems').innerHTML=PRIZES.map(p=>{
+  const owned=ownedPrizes.includes(p.id);
+  return '<div class="storeItem"><div class="prizeIcon" aria-hidden="true">'+p.icon+'</div><strong>'+p.name+'</strong><span>'+p.desc+'</span><span class="cost">'+p.cost+' ⭐</span><button type="button" data-prize="'+p.id+'" '+(owned||stars<p.cost?'disabled':'')+'>'+(owned?'Purchased ✓':'Buy prize')+'</button></div>';
+ }).join('');
+ $('storeItems').querySelectorAll('[data-prize]').forEach(b=>b.addEventListener('click',()=>buyPrize(b.dataset.prize)));
+ $('collection').innerHTML=ownedPrizes.length?ownedPrizes.map(id=>{const p=PRIZES.find(x=>x.id===id);return p?'<span class="badge">'+p.icon+' '+p.name+'</span>':'';}).join(''):'<span class="badge">No prizes purchased yet.</span>';
+}
+function buyPrize(id){
+ const p=PRIZES.find(x=>x.id===id);if(!p||ownedPrizes.includes(id)||stars<p.cost)return;
+ if(!confirm('Spend '+p.cost+' stars on '+p.name+'?'))return;
+ stars-=p.cost;ownedPrizes.push(id);updateStats();renderStore();saveActiveProfileSilently();
+ $('profileStatus').textContent='Purchased '+p.name+'.';
+}
+function advanceLevel(){
+ if(level>=11){$('feedback').textContent='You are already on the final level!';return;}
+ level++;$('difficulty').value=String(level);updateStats();newMission();saveActiveProfileSilently();
+}
 function settings(){return [
  {steps:1,choices:4,memory:false},
  {steps:2,choices:4,memory:false},
@@ -140,6 +241,11 @@ function settings(){return [
  {steps:6,choices:12,memory:false}
 ][level];}
 function item(id){return ITEMS.find(x=>x.id===id);}
+function itemVisual(it, className){
+ return it.id==='button'
+  ? '<span class="'+className+' button-art" role="img" aria-label="button with four holes"></span>'
+  : '<span class="'+className+'" aria-hidden="true">'+it.emoji+'</span>';
+}
 function orderLabel(i,total){
  if(total===1)return 'First';
  if(i===0)return 'First';
@@ -184,7 +290,7 @@ function renderSteps(){
  }).join('');
 }
 function renderBoard(){
- $('board').innerHTML=boardItems.map(it=>'<button type="button" class="choice" data-id="'+it.id+'" aria-label="'+it.name+'"><span class="emoji" aria-hidden="true">'+it.emoji+'</span><span class="name">'+it.name[0].toUpperCase()+it.name.slice(1)+'</span></button>').join('');
+ $('board').innerHTML=boardItems.map(it=>'<button type="button" class="choice" data-id="'+it.id+'" aria-label="'+it.name+'">'+itemVisual(it,'emoji')+'<span class="name">'+it.name[0].toUpperCase()+it.name.slice(1)+'</span></button>').join('');
  $('board').querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.id,b)));
 }
 function choose(id,button){
@@ -206,7 +312,7 @@ function choose(id,button){
  if(step>=sequence.length){
   locked=true;missionActive=false;missionsCompleted++;stars++;attempts.push(!currentMissionHadError);attempts=attempts.slice(-10);
   $('feedback').className='success';$('feedback').textContent='🎉 Mission complete!';
-  updateStats();
+  updateStats();saveActiveProfileSilently();
   $('board').querySelectorAll('.choice').forEach(b=>b.disabled=true);
   $('newMission').textContent='Next mission';
  }else{
@@ -220,12 +326,24 @@ function updateStats(){
  const n=attempts.length,ok=attempts.filter(Boolean).length;
  $('accuracy').textContent='Recent success: '+(n?Math.round(ok/n*100)+'% ('+ok+'/'+n+')':'—');
  $('prevLevel').disabled=level===0;$('nextLevel').disabled=level===11;
+ if($('storeBalance'))renderStore();
 }
-$('difficulty').addEventListener('change',()=>{level=Number($('difficulty').value);updateStats();newMission();});
+$('difficulty').addEventListener('change',()=>{level=Number($('difficulty').value);updateStats();newMission();saveActiveProfileSilently();});
 $('newMission').addEventListener('click',newMission);
-$('prevLevel').addEventListener('click',()=>{if(level>0){level--; $('difficulty').value=String(level);updateStats();newMission();}});
-$('nextLevel').addEventListener('click',()=>{if(level<4){level++;$('difficulty').value=String(level);updateStats();newMission();}});
-$('reset').addEventListener('click',()=>{if(!confirm('Reset the mission count, stars, and recent results?'))return;missionsCompleted=0;stars=0;attempts=[];updateStats();newMission();});
+$('prevLevel').addEventListener('click',()=>{if(level>0){level--; $('difficulty').value=String(level);updateStats();newMission();saveActiveProfileSilently();}});
+$('nextLevel').addEventListener('click',()=>advanceLevel());
+$('reset').addEventListener('click',()=>{if(!confirm('Reset the mission count, stars, and recent results?'))return;missionsCompleted=0;stars=0;attempts=[];ownedPrizes=[];updateStats();newMission();saveActiveProfileSilently();});
+$('saveProfile').addEventListener('click',saveProfile);
+$('loadProfile').addEventListener('click',loadProfile);
+$('deleteProfile').addEventListener('click',deleteProfile);
+refreshProfileList();renderStore();
+document.addEventListener('keydown',event=>{
+ if(event.code==='Space'&&!event.repeat){
+  const tag=(event.target&&event.target.tagName||'').toLowerCase();
+  if(tag==='input'||tag==='select'||tag==='textarea')return;
+  event.preventDefault();advanceLevel();
+ }
+});
 updateStats();newMission();
 })();
 </script>
