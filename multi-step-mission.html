@@ -294,7 +294,7 @@ function renderSteps(){
   const current=i===step&&missionActive;
   const label=orderLabel(i,sequence.length);
   const hidden=s.memory&&memoryHidden&&!done;
-  return '<div class="stepDot '+(done?'done':current?'current':'')+(hidden?' memory-hidden':'')+(done?' revealed':'')+'"><span class="stepLabel">'+label+':</span><span class="stepEmoji" aria-hidden="true">'+item(id).emoji+'</span>'+(done?'<span class="check" aria-label="complete">✓</span>':'')+'</div>';
+  return '<div class="stepDot '+(done?'done':current?'current':'')+(hidden?' memory-hidden':'')+(done?' revealed':'')+'"><span class="stepLabel">'+label+':</span>'+itemVisual(item(id),'stepEmoji')+(done?'<span class="check" aria-label="complete">✓</span>':'')+'</div>';
  }).join('');
 }
 function renderBoard(){
