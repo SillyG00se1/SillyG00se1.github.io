@@ -58,7 +58,7 @@ const HID_KEYS = [
  ["Print Screen",70],["Scroll Lock",71],["Pause",72],["Insert",73],["Home",74],["Page Up",75],["Delete",76],["End",77],["Page Down",78],["Right Arrow",79],["Left Arrow",80],["Down Arrow",81],["Up Arrow",82]
 ];
 for (const [label, usage] of HID_KEYS) $("key").add(new Option(label, String(usage)));
-let device = null, reportId = 0, canWrite = false, modelName = "", inputQueue = [], waiters = [], busy = false;
+let device = null, reportId = 0, reportMethod = "output", canWrite = false, modelName = "", inputQueue = [], waiters = [], busy = false;
 function log(message) {
  const line = "[" + new Date().toLocaleTimeString() + "] " + message;
  $("log").textContent += "\n" + line;
@@ -72,8 +72,8 @@ function setConnectedControls(on) {
  $("read").disabled=!on || !canWrite; updateWriteButton();
 }
 function updateWriteButton() { $("write").disabled=!device || !canWrite || busy; }
-function outputReportIds(d) {
- return [...new Set(d.collections.flatMap(c => (c.outputReports || []).map(r => r.reportId)))];
+function reportIds(d, kind) {
+ return [...new Set(d.collections.flatMap(c => (c[kind] || []).map(r => r.reportId)))];
 }
 function renderCollections(d) {
  const list=document.createElement("ol");
@@ -84,10 +84,13 @@ function renderCollections(d) {
    list.appendChild(li);
  });
  $("collections").replaceChildren(list);
- const outs=outputReportIds(d);
- reportId=outs.includes(0)?0:(outs.length?outs[0]:0);
- canWrite=outs.length>0;
- setStatus(canWrite ? "Connected. Output report ID "+reportId+" is available." : "Connected, but no output reports are exposed.", canWrite ? "good" : "warn");
+ const outs=reportIds(d,"outputReports");
+ const features=reportIds(d,"featureReports");
+ const ids=outs.length?outs:features;
+ reportMethod=outs.length?"output":"feature";
+ reportId=ids.includes(0)?0:(ids.length?ids[0]:0);
+ canWrite=ids.length>0;
+ setStatus(outs.length ? "Connected. Output report ID "+reportId+" is available." : features.length ? "No output reports. Trying feature report ID "+reportId+"." : "Connected, but no output or feature reports are exposed.", canWrite ? "good" : "warn");
  $("read").disabled=!canWrite;
  updateWriteButton();
 }
@@ -108,10 +111,11 @@ function nextReport(timeout=1000) {
 }
 async function sendCommand(bytes, delay=30) {
  if(!device || !device.opened) throw new Error("Connect to the pedal first.");
- if(!canWrite) throw new Error("The browser does not expose output report ID 0. No command was sent.");
+ if(!canWrite) throw new Error("The browser exposes no output or feature reports. No command was sent.");
  await new Promise(resolve=>setTimeout(resolve,delay));
- log("TX id="+reportId+" "+hex(bytes));
- await device.sendReport(reportId,new Uint8Array(bytes));
+ log("TX "+reportMethod+" report id="+reportId+" "+hex(bytes));
+ if(reportMethod==="feature") await device.sendFeatureReport(reportId,new Uint8Array(bytes));
+ else await device.sendReport(reportId,new Uint8Array(bytes));
 }
 function clearInputQueue(){inputQueue.length=0;}
 async function readModel() {
