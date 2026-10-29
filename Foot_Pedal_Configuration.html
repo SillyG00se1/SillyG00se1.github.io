@@ -11,7 +11,7 @@
 </style>
 </head>
 <body><main>
-<header><h1>Foot Pedal Configuration</h1><p class="sub">Inspect the IKKEGOL pedal and, when the browser exposes a writable HID report, read or change simple keyboard assignments.</p></header>
+<header><h1>Foot Pedal Configuration</h1><p class="sub">Inspect compatible USB HID pedals. Configuration commands are limited to the verified IKKEGOL model until another pedal protocol is identified.</p></header>
 <section class="card">
 <h2>Device</h2>
 <div class="row"><button class="primary" id="connect">Connect foot pedal</button><button id="disconnect" disabled>Disconnect</button><button id="refresh" disabled>Refresh device details</button></div>
@@ -27,7 +27,7 @@
 </section>
 <section class="card">
 <h2>Current keyboard assignments</h2>
-<p class="muted small">For the known two-pedal FootSwitch2, key numbers 1 and 2 correspond to pedal 1 and pedal 2. Reading requires a writable command path and a response from the device.</p>
+<p class="muted small">For the verified IKKEGOL FootSwitch2 only. Other pedals can be inspected safely, but their assignments remain disabled until their protocol is identified.</p>
 <div class="row"><button id="read" disabled>Read pedal assignments</button></div>
 <table><thead><tr><th>Pedal</th><th>Current assignment</th><th>Raw reply</th></tr></thead><tbody id="assignments"><tr><td colspan="3" class="muted">No assignments read yet.</td></tr></tbody></table>
 </section>
@@ -45,7 +45,7 @@
 <div class="row"><button id="copy">Copy log</button><button id="clear">Clear log</button></div>
 <pre id="log">Ready.</pre>
 </section>
-<p class="muted small">This page never sends a command unless the selected HID device declares output report ID 0. If the browser does not expose that report, the page will remain in diagnostic mode rather than repeatedly sending a command that the browser rejects. It cannot bypass operating-system or browser HID restrictions.</p>
+<p class="muted small">All HID devices are offered in the picker. Unknown devices are inspection-only: this page will not send IKKEGOL commands to them. It cannot bypass operating-system or browser HID restrictions.</p>
 </main>
 <script>
 (() => {
@@ -87,11 +87,13 @@ function renderCollections(d) {
  });
  $("collections").replaceChildren(list);
  const outs=outputReportIds(d);
- canWrite=outs.includes(0);
- if(canWrite) {
-   setStatus("Connected. Output report ID 0 is declared; safe protocol discovery can be attempted.", "good");
+ canWrite=(d.vendorId===KNOWN_VID && d.productId===KNOWN_PID && outs.includes(0));
+ if(d.vendorId!==KNOWN_VID || d.productId!==KNOWN_PID) {
+   setStatus("Connected for inspection only. This is not the verified IKKEGOL FootSwitch2, so configuration commands are disabled until its protocol is identified. No commands have been sent.", "warn");
+ } else if(canWrite) {
+   setStatus("Connected. Output report ID 0 is declared for the verified IKKEGOL model.", "good");
  } else {
-   setStatus("Connected, but this browser does not expose output report ID 0 for this device. The ElfKey protocol uses report ID 0 for this model, so configuration commands are disabled here. No command has been sent.", "warn");
+   setStatus("Connected, but this browser does not expose output report ID 0. Configuration commands are disabled. No command has been sent.", "warn");
  }
  $("read").disabled=!canWrite;
  updateWriteButton();
@@ -196,7 +198,7 @@ async function connect() {
    return;
  }
  await guarded(async()=>{
-   const picked=await navigator.hid.requestDevice({filters:[{vendorId:KNOWN_VID,productId:KNOWN_PID}]});
+   const picked=await navigator.hid.requestDevice({acceptAllDevices:true});
    if(!picked.length) { setStatus("No device selected."); return; }
    device=picked[0];
    if(!device.opened) await device.open();
@@ -210,6 +212,8 @@ async function connect() {
    if(canWrite) {
      try { await readModel(); }
      catch(error) { log("Model read failed: "+error.name+": "+error.message); setStatus("Connected, but the model request failed: "+error.name+": "+error.message,"warn"); }
+   } else {
+     log("Unknown HID device selected. Inspection only; no protocol commands sent.");
    }
  });
 }
