@@ -28,7 +28,7 @@
 <section class="card">
 <h2>Pedal input test</h2>
 <div class="row"><button class="primary" id="inputTest" disabled>Start pedal input test</button><button id="clearInput" disabled>Clear captured reports</button><span id="inputCount" class="muted">0 reports captured</span></div>
-<div id="inputStatus" class="status">Connect the pedal, start the test, then press and release each pedal.</div>
+<div id="inputStatus" class="status">Connect the 3-pedal VEC, start the test, then press and release left, middle, and right pedals separately.</div>
 <table><thead><tr><th>#</th><th>Report ID</th><th>Raw bytes (hex)</th><th>Decoded bytes</th></tr></thead><tbody id="inputReports"><tr><td colspan="4" class="muted">No input reports captured yet.</td></tr></tbody></table>
 </section>
 <section class="card">
@@ -120,7 +120,7 @@ function onInputReport(event) {
 function captureInputReport(item) {
  capturedInputCount++;
  $("inputCount").textContent=capturedInputCount+" report"+(capturedInputCount===1?"":"s")+" captured";
- $("inputStatus").textContent="Receiving input reports. Press and release each pedal separately; compare the raw bytes below.";
+ $("inputStatus").textContent="Receiving input reports. Press and release each of the three pedals separately; compare the raw bytes below.";
  const body=$("inputReports");
  if(body.querySelector("td[colspan]")) body.innerHTML="";
  const row=document.createElement("tr");
@@ -296,8 +296,8 @@ $("inputTest").addEventListener("click",()=>{
  if(!device) return;
  inputTestActive=!inputTestActive;
  $("inputTest").textContent=inputTestActive?"Stop pedal input test":"Start pedal input test";
- $("inputStatus").textContent=inputTestActive?"Listening for pedal input. Press and release pedal 1, then pedal 2.":"Input test paused. Captured reports remain visible.";
- log(inputTestActive?"Input test started. Press and release each pedal separately.":"Input test stopped.");
+ $("inputStatus").textContent=inputTestActive?"Listening for pedal input. Press and release the left, middle, and right pedals separately.":"Input test paused. Captured reports remain visible.";
+ log(inputTestActive?"Input test started. Press and release left, middle, and right pedals separately.":"Input test stopped.");
 });
 $("clearInput").addEventListener("click",()=>{
  capturedInputCount=0;$("inputCount").textContent="0 reports captured";$("inputReports").innerHTML='<tr><td colspan="4" class="muted">No input reports captured yet.</td></tr>';$("inputStatus").textContent="Captured reports cleared. Start the test and press each pedal.";
