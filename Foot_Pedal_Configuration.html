@@ -17,7 +17,7 @@
 <div class="row"><button class="primary" id="connect">Connect Infinity pedal</button><button id="disconnect" disabled>Disconnect</button></div>
 <div id="status" class="status">Not connected. Use Chrome or Edge on an HTTPS page, then choose the VEC Infinity device.</div>
 <div class="row small muted"><span id="deviceName">Device: —</span><span id="deviceId">VID/PID: —</span></div>
-<p class="small muted">The Infinity does not have writable assignment memory. This page translates its three signals into the keys you choose. After you authorize it once, Chrome can reconnect automatically when the pedal is plugged in while this page is open.</p>
+<p class="small muted">The Infinity does not have writable assignment memory. This page translates its three signals into the keys you choose. The page will not claim the device automatically. This preserves the pedal's normal keyboard behavior on other webpages.</p>
 </section>
 <section class="card">
 <h2>2. Assign each pedal</h2>
@@ -167,12 +167,12 @@ $("copyCode").addEventListener("click",async()=>{try{await navigator.clipboard.w
 $("copyLog").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("log").textContent);}catch(e){log("Clipboard copy blocked.");}});
 $("clearLog").addEventListener("click",()=>$("log").textContent="Log cleared.");
 if(navigator.hid){
- navigator.hid.addEventListener("connect",e=>{if(e.device.vendorId===0x05F3&&e.device.productId===0x00FF){log("Infinity plugged in; attempting automatic connection.");openDevice(e.device);}});
+ navigator.hid.addEventListener("connect",e=>{if(e.device.vendorId===0x05F3&&e.device.productId===0x00FF){log("Infinity detected. It is not being opened automatically so normal keyboard behavior remains available.");$("status").textContent="Infinity detected. Click Connect only when you want to test pedal signals here.";}});
  navigator.hid.addEventListener("disconnect",e=>{if(device&&e.device===device){device.removeEventListener("inputreport",onReport);device=null;previousMask=0;setConnected(false);$("status").textContent="Pedal unplugged. Reconnect it to resume.";log("Infinity disconnected.");}});
 }
 renderSettings();
 if(navigator.hid){
- navigator.hid.getDevices().then(ds=>{const known=ds.find(d=>d.vendorId===0x05F3&&d.productId===0x00FF);if(known)openDevice(known);else $("status").textContent="No previously authorized Infinity found. Connect once using the button; future visits can reconnect automatically."}).catch(e=>log("Automatic detection unavailable: "+e.message));
+ $("status").textContent="Ready. The pedal is not opened by this page, so its normal keyboard behavior on other webpages is left alone. Click Connect only to run a temporary test.";
 }else $("status").textContent="WebHID is unavailable. Use Chrome or Edge on an HTTPS page.";
 })();
 </script></body></html>
