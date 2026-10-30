@@ -39,10 +39,11 @@
 <h2>4. How to use these assignments in an activity</h2>
 <p class="small">When a pedal activates, this page sends an in-page keyboard event and a custom <code>infinitypedal</code> event. The assignments work in this page and activities that include the integration code; they do not change system-wide keys in unrelated programs.</p>
 <div class="row"><button id="copyCode">Copy activity integration code</button><span class="small muted">Use this listener in an activity page to receive pedal events.</span></div>
-<pre id="integration">document.addEventListener('infinitypedal', function(event) {
-  const pedal = event.detail.pedal; // 1 = left, 2 = center, 3 = right
-  const action = event.detail.action; // key name, e.g. "Space"
-  const phase = event.detail.phase; // "press", "longpress", or "up"
+<pre id="integration">const pedalChannel = new BroadcastChannel("vecInfinityPedalEvents");
+pedalChannel.addEventListener("message", function(event) {
+  const pedal = event.data.pedal; // 1 = left, 2 = center, 3 = right
+  const action = event.data.action; // assigned key name, e.g. "Space"
+  const phase = event.data.phase; // "press", "longpress", or "up"
   // Connect these values to the activity's switch action.
 });</pre>
 </section>
@@ -57,6 +58,7 @@ const KEYS=["None","Space","Enter","Tab","Escape","Backspace","Delete","ArrowLef
 const DEFAULTS=[{key:"ArrowLeft",mode:"single"},{key:"Space",mode:"single"},{key:"Enter",mode:"single"}];
 const names=["Left","Center","Right"];
 let settings=loadSettings(),device=null,previousMask=0,pressStarted=[0,0,0],longTimers=[null,null,null],longFired=[false,false,false],eventCount=0;
+const pedalChannel=("BroadcastChannel" in window)?new BroadcastChannel("vecInfinityPedalEvents"):null;
 function loadSettings(){
  try{const x=JSON.parse(localStorage.getItem(STORE));if(Array.isArray(x.pedals)&&x.pedals.length===3)return {pedals:x.pedals.map((p,i)=>({key:KEYS.includes(p.key)?p.key:DEFAULTS[i].key,mode:p.mode==="long"?"long":"single"})),threshold:[400,600,800,1000,1500].includes(Number(x.threshold))?Number(x.threshold):600};}catch(e){}
  return {pedals:DEFAULTS.map(x=>({...x})),threshold:600};
@@ -91,7 +93,9 @@ function dispatchKey(key,down){
 }
 function custom(n,phase){
  const p=settings.pedals[n-1];
- document.dispatchEvent(new CustomEvent("infinitypedal",{detail:{pedal:n,name:names[n-1],action:p.key,phase,mode:p.mode}}));
+ const detail={pedal:n,name:names[n-1],action:p.key,phase,mode:p.mode};
+ document.dispatchEvent(new CustomEvent("infinitypedal",{detail}));
+ if(pedalChannel)pedalChannel.postMessage(detail);
 }
 function activate(n,phase){
  const key=settings.pedals[n-1].key;
