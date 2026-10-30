@@ -11,20 +11,20 @@
 </style>
 </head>
 <body><main>
-<header><h1>Infinity Foot Pedal Setup</h1><p class="muted">Configure and test the VEC Infinity 3-pedal foot control in this browser.</p></header>
+<header><h1>Infinity Foot Pedal Setup</h1><p class="muted">Remap the three VEC Infinity pedals for supported browser activities — no Pedable installation needed.</p></header>
 <section class="card">
 <h2>1. Connect the pedal</h2>
 <div class="row"><button class="primary" id="connect">Connect Infinity pedal</button><button id="disconnect" disabled>Disconnect</button></div>
 <div id="status" class="status">Not connected. Use Chrome or Edge on an HTTPS page, then choose the VEC Infinity device.</div>
 <div class="row small muted"><span id="deviceName">Device: —</span><span id="deviceId">VID/PID: —</span></div>
-<p class="small muted">The Infinity sends pedal signals to the computer; it does not expose writable configuration reports. This page remaps those signals in the browser instead of trying to rewrite the pedal's firmware or memory.</p>
+<p class="small muted">The Infinity does not have writable assignment memory. This page translates its three signals into the keys you choose. After you authorize it once, Chrome can reconnect automatically when the pedal is plugged in while this page is open.</p>
 </section>
 <section class="card">
 <h2>2. Assign each pedal</h2>
-<p class="small muted">Choose a key and how it should behave. Settings are saved in this browser on this device.</p>
+<p class="small muted">Choose the key each pedal should send to a supported activity. Single press or long press can be set separately for each pedal. Settings are saved in this browser.</p>
 <div class="grid" id="pedalSettings"></div>
 <div class="row"><label>Long-press threshold <select id="threshold"><option value="400">0.4 seconds</option><option value="600" selected>0.6 seconds</option><option value="800">0.8 seconds</option><option value="1000">1 second</option><option value="1500">1.5 seconds</option></select></label><button id="save" class="primary">Save assignments</button><button id="reset">Restore defaults</button></div>
-<div id="saveStatus" class="status">Defaults: Left = Left Arrow, Center = Space, Right = Enter. Mode: Hold while pressed.</div>
+<div id="saveStatus" class="status">Defaults: Left = Left Arrow, Center = Space, Right = Enter. Each uses single press.</div>
 </section>
 <section class="card">
 <h2>3. Test the pedals</h2>
@@ -37,7 +37,7 @@
 </section>
 <section class="card">
 <h2>4. How to use these assignments in an activity</h2>
-<p class="small">When a pedal is pressed, this page dispatches an in-page keyboard event and a custom <code>infinitypedal</code> event. Your scanning activity can listen for these events while this page is open. It cannot send system-wide keystrokes to unrelated tabs or programs.</p>
+<p class="small">When a pedal activates, this page sends an in-page keyboard event and a custom <code>infinitypedal</code> event. The assignments work in this page and activities that include the integration code; they do not change system-wide keys in unrelated programs.</p>
 <div class="row"><button id="copyCode">Copy activity integration code</button><span class="small muted">Use this listener in an activity page to receive pedal events.</span></div>
 <pre id="integration">document.addEventListener('infinitypedal', function(event) {
   const pedal = event.detail.pedal; // 1 = left, 2 = center, 3 = right
@@ -52,103 +52,123 @@
 (() => {
 "use strict";
 const $=id=>document.getElementById(id);
-const STORE="vecInfinityPedalSettingsV1";
+const STORE="vecInfinityPedalSettingsV2";
 const KEYS=["None","Space","Enter","Tab","Escape","Backspace","Delete","ArrowLeft","ArrowRight","ArrowUp","ArrowDown","PageUp","PageDown","Home","End","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"];
-const DEFAULTS=[
- {key:"ArrowLeft",mode:"hold"},
- {key:"Space",mode:"hold"},
- {key:"Enter",mode:"hold"}
-];
-let settings=loadSettings(),device=null,previousMask=0,pressStarted=[0,0,0],longTimers=[null,null,null],longFired=[false,false,false],eventCount=0;
+const DEFAULTS=[{key:"ArrowLeft",mode:"single"},{key:"Space",mode:"single"},{key:"Enter",mode:"single"}];
 const names=["Left","Center","Right"];
+let settings=loadSettings(),device=null,previousMask=0,pressStarted=[0,0,0],longTimers=[null,null,null],longFired=[false,false,false],eventCount=0;
 function loadSettings(){
- try{const x=JSON.parse(localStorage.getItem(STORE));if(Array.isArray(x.pedals)&&x.pedals.length===3)return {pedals:x.pedals,threshold:Number(x.threshold)||600};}catch(e){}
+ try{const x=JSON.parse(localStorage.getItem(STORE));if(Array.isArray(x.pedals)&&x.pedals.length===3)return {pedals:x.pedals.map((p,i)=>({key:KEYS.includes(p.key)?p.key:DEFAULTS[i].key,mode:p.mode==="long"?"long":"single"})),threshold:[400,600,800,1000,1500].includes(Number(x.threshold))?Number(x.threshold):600};}catch(e){}
  return {pedals:DEFAULTS.map(x=>({...x})),threshold:600};
 }
 function log(s){$("log").textContent+="\n["+new Date().toLocaleTimeString()+"] "+s;$("log").scrollTop=$("log").scrollHeight;}
-function saveSettings(){
- settings.threshold=Number($("threshold").value);
- settings.pedals=names.map((n,i)=>({key:$("key"+(i+1)).value,mode:$("mode"+(i+1)).value}));
- localStorage.setItem(STORE,JSON.stringify(settings));
- $("saveStatus").textContent="Saved on this device. Left: "+settings.pedals[0].key+"; Center: "+settings.pedals[1].key+"; Right: "+settings.pedals[2].key+".";
- log("Saved pedal assignments and press modes locally.");
-}
 function renderSettings(){
  $("pedalSettings").innerHTML="";
  names.forEach((name,i)=>{
   const n=i+1,box=document.createElement("div");box.className="pedal";
   const h=document.createElement("h3");h.textContent=name+" pedal";box.appendChild(h);
-  const kl=document.createElement("label");kl.textContent="Key";
-  const ks=document.createElement("select");ks.id="key"+n;
-  KEYS.forEach(k=>ks.add(new Option(k,k)));
-  ks.value=settings.pedals[i].key;kl.appendChild(ks);box.appendChild(kl);
-  const ml=document.createElement("label");ml.textContent="Press behavior";
-  const ms=document.createElement("select");ms.id="mode"+n;
-  ms.add(new Option("Single press","single"));ms.add(new Option("Long press","long"));
-  ms.value=settings.pedals[i].mode;ml.appendChild(ms);box.appendChild(ml);
-  const hint=document.createElement("p");hint.className="small muted";hint.textContent="Single press triggers immediately. Long press triggers only after the selected hold duration.";box.appendChild(hint);
+  const kl=document.createElement("label");kl.textContent="Send key";
+  const ks=document.createElement("select");ks.id="key"+n;KEYS.forEach(k=>ks.add(new Option(k,k)));ks.value=settings.pedals[i].key;kl.appendChild(ks);box.appendChild(kl);
+  const ml=document.createElement("label");ml.textContent="Activation";
+  const ms=document.createElement("select");ms.id="mode"+n;ms.add(new Option("Single press","single"));ms.add(new Option("Long press","long"));ms.value=settings.pedals[i].mode;ml.appendChild(ms);box.appendChild(ml);
+  const hint=document.createElement("p");hint.className="small muted";hint.textContent="Single press activates on release. Long press activates only after the hold threshold.";box.appendChild(hint);
   $("pedalSettings").appendChild(box);
  });
  $("threshold").value=String(settings.threshold);
 }
+function saveSettings(){
+ settings.threshold=Number($("threshold").value);
+ settings.pedals=names.map((n,i)=>({key:$("key"+(i+1)).value,mode:$("mode"+(i+1)).value}));
+ try{localStorage.setItem(STORE,JSON.stringify(settings));$("saveStatus").textContent="Saved in this browser. Left: "+settings.pedals[0].key+" ("+settings.pedals[0].mode+"); Center: "+settings.pedals[1].key+" ("+settings.pedals[1].mode+"); Right: "+settings.pedals[2].key+" ("+settings.pedals[2].mode+").";log("Assignments saved locally.");}
+ catch(e){$("saveStatus").textContent="Could not save settings: "+e.message;}
+}
 function setConnected(on){$("connect").disabled=on;$("disconnect").disabled=!on;}
-function emitPedal(n,phase){
- const config=settings.pedals[n-1],key=config.key;
+function keyCode(key){return key==="Space"?"Space":key.startsWith("Arrow")?key:key.length===1?"Key"+key.toUpperCase():key;}
+function dispatchKey(key,down){
  if(!key||key==="None")return;
- const detail={pedal:n,name:names[n-1],action:key,phase:config.mode==="single"?"press":phase,mode:config.mode};
- document.dispatchEvent(new CustomEvent("infinitypedal",{detail}));
- const keyName=key==="Space"?" ":key==="ArrowLeft"?"ArrowLeft":key==="ArrowRight"?"ArrowRight":key==="ArrowUp"?"ArrowUp":key==="ArrowDown"?"ArrowDown":key;
- document.dispatchEvent(new KeyboardEvent(phase==="down"?"keydown":"keyup",{key:keyName,code:key==="Space"?"Space":key, bubbles:true}));
+ const k=key==="Space"?" ":key;
+ document.dispatchEvent(new KeyboardEvent(down?"keydown":"keyup",{key:k,code:keyCode(key),bubbles:true,cancelable:true}));
+}
+function custom(n,phase){
+ const p=settings.pedals[n-1];
+ document.dispatchEvent(new CustomEvent("infinitypedal",{detail:{pedal:n,name:names[n-1],action:p.key,phase,mode:p.mode}}));
+}
+function activate(n,phase){
+ const key=settings.pedals[n-1].key;
+ if(key==="None")return;
+ dispatchKey(key,true);custom(n,phase);
+}
+function releaseOutput(n,phase){
+ const key=settings.pedals[n-1].key;
+ if(key!=="None")dispatchKey(key,false);
+ custom(n,phase);
+}
+function onPress(n){
+ pressStarted[n-1]=Date.now();longFired[n-1]=false;
+ $("pedalLive"+n).classList.add("active");$("live"+n).textContent="PRESSED";$("detail"+n).textContent="Press detected.";
+ if(settings.pedals[n-1].mode==="long"){
+  longTimers[n-1]=setTimeout(()=>{longFired[n-1]=true;activate(n,"longpress");$("detail"+n).textContent="Long press activated.";log(names[n-1]+" long press activated.");},settings.threshold);
+ }
+}
+function onRelease(n){
+ const i=n-1,duration=Date.now()-pressStarted[i];
+ clearTimeout(longTimers[i]);longTimers[i]=null;
+ $("pedalLive"+n).classList.remove("active");$("live"+n).textContent="Released";$("detail"+n).textContent="Held for "+(duration/1000).toFixed(2)+" seconds.";
+ if(settings.pedals[i].mode==="single"){
+  activate(n,"press");releaseOutput(n,"up");
+ }else if(longFired[i])releaseOutput(n,"up");
+ log(names[i]+" pedal released after "+duration+" ms.");
 }
 function onReport(e){
  const bytes=Array.from(new Uint8Array(e.data.buffer,e.data.byteOffset,e.data.byteLength));
  const mask=bytes[0]||0;eventCount++;
- log("Input report #"+eventCount+" ID "+e.reportId+" bytes "+bytes.map(x=>x.toString(16).padStart(2,"0")).join(" ").toUpperCase()+" mask=0x"+mask.toString(16).padStart(2,"0"));
- for(let i=0;i<3;i++){
-  const bit=1<<i,down=!!(mask&bit),wasDown=!!(previousMask&bit),n=i+1;
-  if(down&&!wasDown){
-   pressStarted[i]=Date.now();
-   $("pedalLive"+n).classList.add("active");$("live"+n).textContent="PRESSED";$("detail"+n).textContent="Press detected.";
-   if(settings.pedals[i].mode==="hold")emitPedal(n,"down");
-   else emitPedal(n,"down");
-  }else if(!down&&wasDown){
-   const duration=Date.now()-pressStarted[i];
-   $("pedalLive"+n).classList.remove("active");$("live"+n).textContent="Released";$("detail"+n).textContent="Held for "+(duration/1000).toFixed(2)+" seconds.";
-   if(settings.pedals[i].mode==="hold")emitPedal(n,"up");
-   log(names[i]+" pedal released after "+duration+" ms.");
-  }
- }
+ log("Input #"+eventCount+" report "+bytes.map(x=>x.toString(16).padStart(2,"0")).join(" ").toUpperCase()+" mask=0x"+mask.toString(16).padStart(2,"0"));
+ for(let i=0;i<3;i++){const down=!!(mask&(1<<i)),was=!!(previousMask&(1<<i));if(down&&!was)onPress(i+1);else if(!down&&was)onRelease(i+1);}
  previousMask=mask;
 }
-async function connect(){
- if(!navigator.hid){$("status").textContent="WebHID is unavailable. Use Chrome or Edge over HTTPS.";return;}
+async function openDevice(d){
  try{
-  const devices=await navigator.hid.requestDevice({filters:[{vendorId:0x05F3,productId:0x00FF}]});
-  if(!devices.length)return;
-  device=devices[0];if(!device.opened)await device.open();
+  if(device&&device!==d)await closeDevice();
+  device=d;if(!device.opened)await device.open();
   device.addEventListener("inputreport",onReport);
   $("deviceName").textContent="Device: "+(device.productName||"VEC Infinity");
   $("deviceId").textContent="VID/PID: 0x"+device.vendorId.toString(16).toUpperCase()+" / 0x"+device.productId.toString(16).toUpperCase();
-  $("status").textContent="Connected to "+(device.productName||"VEC Infinity")+". Press each pedal to test it.";
+  $("status").textContent="Connected automatically. Press each pedal to test it.";
   $("status").className="status good";setConnected(true);previousMask=0;
-  log("Connected "+device.productName+"; VID 0x"+device.vendorId.toString(16)+" PID 0x"+device.productId.toString(16)+".");
-  device.collections.forEach((c,i)=>log("Collection "+(i+1)+" usagePage=0x"+c.usagePage.toString(16)+" usage=0x"+c.usage.toString(16)+" input="+(c.inputReports||[]).length+" output="+(c.outputReports||[]).length+" feature="+(c.featureReports||[]).length));
-  $("testStatus").textContent="Connected. Press and release the left, center, and right pedals one at a time.";
+  log("Connected "+device.productName+" (05F3:00FF).");
+  device.collections.forEach((c,i)=>log("Collection "+(i+1)+": usagePage 0x"+c.usagePage.toString(16)+", usage 0x"+c.usage.toString(16)+", input reports "+(c.inputReports||[]).length+", output reports "+(c.outputReports||[]).length+"."));
+  $("testStatus").textContent="Connected. Press and release each pedal to test it.";
+ }catch(e){$("status").textContent="Could not open pedal: "+e.name+" — "+e.message;$("status").className="status bad";log("Open error: "+e.message);device=null;setConnected(false);}
+}
+async function connect(){
+ if(!navigator.hid){$("status").textContent="WebHID is unavailable. Use Chrome or Edge on an HTTPS page.";return;}
+ try{
+  const permitted=await navigator.hid.getDevices();
+  const known=permitted.find(d=>d.vendorId===0x05F3&&d.productId===0x00FF);
+  if(known){await openDevice(known);return;}
+  const chosen=await navigator.hid.requestDevice({filters:[{vendorId:0x05F3,productId:0x00FF}]});
+  if(chosen.length)await openDevice(chosen[0]);
  }catch(e){$("status").textContent=e.name+": "+e.message;$("status").className="status bad";log("Connect error "+e.name+": "+e.message);}
 }
-async function disconnect(){
+async function closeDevice(){
  if(!device)return;
- try{device.removeEventListener("inputreport",onReport);if(device.opened)await device.close();}catch(e){log("Disconnect issue: "+e.message);}
- device=null;previousMask=0;setConnected(false);$("status").textContent="Disconnected.";log("Disconnected.");
+ try{device.removeEventListener("inputreport",onReport);for(let i=0;i<3;i++)clearTimeout(longTimers[i]);if(device.opened)await device.close();}catch(e){log("Close issue: "+e.message);}
+ device=null;previousMask=0;setConnected(false);
 }
 $("connect").addEventListener("click",connect);
-$("disconnect").addEventListener("click",disconnect);
+$("disconnect").addEventListener("click",async()=>{await closeDevice();$("status").textContent="Disconnected.";$("status").className="status";log("Disconnected by user.");});
 $("save").addEventListener("click",saveSettings);
 $("reset").addEventListener("click",()=>{settings={pedals:DEFAULTS.map(x=>({...x})),threshold:600};renderSettings();saveSettings();});
-$("copyCode").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("integration").textContent);$("testStatus").textContent="Integration listener copied.";}catch(e){$("testStatus").textContent="Clipboard blocked; select and copy the code manually.";}});
+$("copyCode").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("integration").textContent);$("testStatus").textContent="Integration code copied.";}catch(e){$("testStatus").textContent="Clipboard blocked; select and copy the code manually.";}});
 $("copyLog").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("log").textContent);}catch(e){log("Clipboard copy blocked.");}});
 $("clearLog").addEventListener("click",()=>$("log").textContent="Log cleared.");
-navigator.hid?.addEventListener("disconnect",e=>{if(device&&e.device===device){device=null;setConnected(false);$("status").textContent="Pedal disconnected.";log("Device disconnected.");}});
+if(navigator.hid){
+ navigator.hid.addEventListener("connect",e=>{if(e.device.vendorId===0x05F3&&e.device.productId===0x00FF){log("Infinity plugged in; attempting automatic connection.");openDevice(e.device);}});
+ navigator.hid.addEventListener("disconnect",e=>{if(device&&e.device===device){device.removeEventListener("inputreport",onReport);device=null;previousMask=0;setConnected(false);$("status").textContent="Pedal unplugged. Reconnect it to resume.";log("Infinity disconnected.");}});
+}
 renderSettings();
+if(navigator.hid){
+ navigator.hid.getDevices().then(ds=>{const known=ds.find(d=>d.vendorId===0x05F3&&d.productId===0x00FF);if(known)openDevice(known);else $("status").textContent="No previously authorized Infinity found. Connect once using the button; future visits can reconnect automatically."}).catch(e=>log("Automatic detection unavailable: "+e.message));
+}else $("status").textContent="WebHID is unavailable. Use Chrome or Edge on an HTTPS page.";
 })();
 </script></body></html>
