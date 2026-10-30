@@ -3,317 +3,152 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Foot Pedal Configuration</title>
+<title>Infinity Foot Pedal Setup</title>
 <style>
 :root{color-scheme:light dark;--bg:#f3f5f8;--fg:#17202b;--card:#fff;--line:#d4dbe5;--muted:#526174;--blue:#175fc1;--good:#167449;--warn:#8a5700;--bad:#b42318}
 @media(prefers-color-scheme:dark){:root{--bg:#11151b;--fg:#e8edf4;--card:#1b222c;--line:#354150;--muted:#aab7c7;--blue:#79aaff;--good:#6fdaa0;--warn:#ffd17b;--bad:#ff9289}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,sans-serif}main{max-width:900px;margin:auto;padding:20px 14px 36px}h1{font-size:clamp(1.5rem,4vw,2rem);margin:0}h2{font-size:1.1rem;margin:0 0 10px}.sub{color:var(--muted);margin:5px 0 0}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:14px 0}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:9px 0}button,select,input{font:inherit}button{padding:9px 14px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);cursor:pointer}button.primary{background:var(--blue);border-color:var(--blue);color:white}button:disabled{opacity:.5;cursor:not-allowed}select,input[type=text]{padding:8px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--fg)}label{display:inline-flex;gap:7px;align-items:center;flex-wrap:wrap}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}.info{border:1px solid var(--line);border-radius:8px;padding:10px;overflow-wrap:anywhere}.label{font-size:.78rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}.value{font-weight:650;margin-top:3px}.status{padding:10px 12px;border-radius:8px;background:var(--bg);border:1px solid var(--line);white-space:pre-wrap;overflow-wrap:anywhere}.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}.muted{color:var(--muted)}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:270px;overflow:auto;padding:12px;border-radius:8px;background:var(--bg);border:1px solid var(--line);font:12px/1.5 ui-monospace,Consolas,monospace}table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}.small{font-size:.9rem}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,sans-serif}main{max-width:950px;margin:auto;padding:20px 14px 40px}h1{font-size:clamp(1.5rem,4vw,2rem);margin:0}h2{font-size:1.1rem;margin:0 0 10px}.muted{color:var(--muted)}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:14px 0}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0}button,select,input{font:inherit}button{padding:9px 14px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);cursor:pointer}button.primary{background:var(--blue);border-color:var(--blue);color:white}button:disabled{opacity:.5;cursor:not-allowed}select{padding:8px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--fg)}.status{padding:10px 12px;border-radius:8px;background:var(--bg);border:1px solid var(--line);white-space:pre-wrap;overflow-wrap:anywhere}.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.pedal{border:1px solid var(--line);border-radius:10px;padding:14px}.pedal.active{border:3px solid var(--good);background:color-mix(in srgb,var(--good) 10%,var(--card))}.pedal h3{margin:0 0 8px}.pedal label{display:flex;justify-content:space-between;gap:8px;align-items:center;margin:8px 0}.pedal select{max-width:60%}.pill{display:inline-block;padding:3px 9px;border-radius:20px;background:var(--bg);font-size:.85rem}.small{font-size:.9rem}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:250px;overflow:auto;padding:12px;border-radius:8px;background:var(--bg);border:1px solid var(--line);font:12px/1.5 ui-monospace,Consolas,monospace}
 </style>
 </head>
 <body><main>
-<header><h1>Foot Pedal Configuration</h1></header>
+<header><h1>Infinity Foot Pedal Setup</h1><p class="muted">Configure and test the VEC Infinity 3-pedal foot control in this browser.</p></header>
 <section class="card">
-<h2>Device</h2>
-<div class="row"><button class="primary" id="connect">Connect foot pedal</button><button id="disconnect" disabled>Disconnect</button><button id="refresh" disabled>Refresh device details</button></div>
-<div id="status" class="status" role="status">Not connected.</div>
-<div class="grid" style="margin-top:10px">
-<div class="info"><div class="label">Device</div><div class="value" id="name">—</div></div>
-<div class="info"><div class="label">Vendor ID</div><div class="value" id="vid">—</div></div>
-<div class="info"><div class="label">Product ID</div><div class="value" id="pid">—</div></div>
-<div class="info"><div class="label">Model reported by pedal</div><div class="value" id="model">Not read</div></div>
+<h2>1. Connect the pedal</h2>
+<div class="row"><button class="primary" id="connect">Connect Infinity pedal</button><button id="disconnect" disabled>Disconnect</button></div>
+<div id="status" class="status">Not connected. Use Chrome or Edge on an HTTPS page, then choose the VEC Infinity device.</div>
+<div class="row small muted"><span id="deviceName">Device: —</span><span id="deviceId">VID/PID: —</span></div>
+<p class="small muted">The Infinity sends pedal signals to the computer; it does not expose writable configuration reports. This page remaps those signals in the browser instead of trying to rewrite the pedal's firmware or memory.</p>
+</section>
+<section class="card">
+<h2>2. Assign each pedal</h2>
+<p class="small muted">Choose a key and how it should behave. Settings are saved in this browser on this device.</p>
+<div class="grid" id="pedalSettings"></div>
+<div class="row"><label>Long-press threshold <select id="threshold"><option value="400">0.4 seconds</option><option value="600" selected>0.6 seconds</option><option value="800">0.8 seconds</option><option value="1000">1 second</option><option value="1500">1.5 seconds</option></select></label><button id="save" class="primary">Save assignments</button><button id="reset">Restore defaults</button></div>
+<div id="saveStatus" class="status">Defaults: Left = Left Arrow, Center = Space, Right = Enter. Mode: Hold while pressed.</div>
+</section>
+<section class="card">
+<h2>3. Test the pedals</h2>
+<div class="grid">
+ <div class="pedal" id="pedalLive1"><h3>Left pedal</h3><div class="pill" id="live1">Waiting</div><p class="small muted" id="detail1">No press detected yet.</p></div>
+ <div class="pedal" id="pedalLive2"><h3>Center pedal</h3><div class="pill" id="live2">Waiting</div><p class="small muted" id="detail2">No press detected yet.</p></div>
+ <div class="pedal" id="pedalLive3"><h3>Right pedal</h3><div class="pill" id="live3">Waiting</div><p class="small muted" id="detail3">No press detected yet.</p></div>
 </div>
-<h2 style="margin-top:16px">HID report support</h2>
-<div id="collections" class="muted">Connect to inspect the device's input, output, and feature reports.</div>
+<div id="testStatus" class="status" style="margin-top:12px">Connect the pedal, then press and release each pedal. The live indicators will show which pedal was detected.</div>
 </section>
 <section class="card">
-<h2>Pedal input test</h2>
-<div class="row"><button class="primary" id="inputTest" disabled>Start pedal input test</button><button id="clearInput" disabled>Clear captured reports</button><span id="inputCount" class="muted">0 reports captured</span></div>
-<div id="inputStatus" class="status">Connect the 3-pedal VEC and start the test. Current key settings: Pedal 1 = Left Arrow, Pedal 2 = Space, Pedal 3 = Enter.</div>
-<table><thead><tr><th>#</th><th>Report ID</th><th>Raw bytes (hex)</th><th>Decoded bytes</th></tr></thead><tbody id="inputReports"><tr><td colspan="4" class="muted">No input reports captured yet.</td></tr></tbody></table>
+<h2>4. How to use these assignments in an activity</h2>
+<p class="small">When a pedal is pressed, this page dispatches an in-page keyboard event and a custom <code>infinitypedal</code> event. Your scanning activity can listen for these events while this page is open. It cannot send system-wide keystrokes to unrelated tabs or programs.</p>
+<div class="row"><button id="copyCode">Copy activity integration code</button><span class="small muted">Use this listener in an activity page to receive pedal events.</span></div>
+<pre id="integration">document.addEventListener('infinitypedal', function(event) {
+  const pedal = event.detail.pedal; // 1 = left, 2 = center, 3 = right
+  const action = event.detail.action; // key name, e.g. "Space"
+  const phase = event.detail.phase; // "down" or "up"
+  // Connect these values to the activity's switch action.
+});</pre>
 </section>
-<section class="card">
-<h2>Current keyboard assignments</h2>
- 
-<div class="row"><button id="read" disabled>Read pedal assignments</button></div>
-<table><thead><tr><th>Pedal</th><th>Current assignment</th><th>Raw reply</th></tr></thead><tbody id="assignments"><tr><td colspan="3" class="muted">No assignments read yet.</td></tr></tbody></table>
-</section>
-<section class="card">
-<h2>Change an assignment</h2>
-<div class="row"><label>Pedal <select id="pedal"><option value="1">Pedal 1</option><option value="2">Pedal 2</option></select></label>
-<label>Keyboard key <select id="key"></select></label>
-<label>Action <select id="mode"><option value="1">Press once</option><option value="2">Hold while pedal is held</option></select></label></div>
- <div class="row"><button class="primary" id="write" disabled>Write and verify assignment</button></div>
-<div id="writeStatus" class="status">No write attempted.</div>
-</section>
-<section class="card">
-<h2>Diagnostic log</h2>
-<div class="row"><button id="copy">Copy log</button><button id="clear">Clear log</button></div>
-<pre id="log">Ready.</pre>
-</section>
-<p class="muted small"> </p>
+<section class="card"><h2>Diagnostic log</h2><div class="row"><button id="copyLog">Copy log</button><button id="clearLog">Clear log</button></div><pre id="log">Ready.</pre></section>
 </main>
 <script>
 (() => {
 "use strict";
-const $ = id => document.getElementById(id);
-const HID_KEYS = [
- ["a",4],["b",5],["c",6],["d",7],["e",8],["f",9],["g",10],["h",11],["i",12],["j",13],["k",14],["l",15],["m",16],["n",17],["o",18],["p",19],["q",20],["r",21],["s",22],["t",23],["u",24],["v",25],["w",26],["x",27],["y",28],["z",29],
- ["1",30],["2",31],["3",32],["4",33],["5",34],["6",35],["7",36],["8",37],["9",38],["0",39],
- ["Enter",40],["Escape",41],["Backspace",42],["Tab",43],["Space",44],["-",45],["=",46],["[",47],["]",48],["\\",49],[";",51],["'",52],[ "`",53],[",",54],[".",55],["/",56],["Caps Lock",57],
- ["F1",58],["F2",59],["F3",60],["F4",61],["F5",62],["F6",63],["F7",64],["F8",65],["F9",66],["F10",67],["F11",68],["F12",69],
- ["Print Screen",70],["Scroll Lock",71],["Pause",72],["Insert",73],["Home",74],["Page Up",75],["Delete",76],["End",77],["Page Down",78],["Right Arrow",79],["Left Arrow",80],["Down Arrow",81],["Up Arrow",82]
+const $=id=>document.getElementById(id);
+const STORE="vecInfinityPedalSettingsV1";
+const KEYS=["None","Space","Enter","Tab","Escape","Backspace","Delete","ArrowLeft","ArrowRight","ArrowUp","ArrowDown","PageUp","PageDown","Home","End","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"];
+const DEFAULTS=[
+ {key:"ArrowLeft",mode:"hold"},
+ {key:"Space",mode:"hold"},
+ {key:"Enter",mode:"hold"}
 ];
-for (const [label, usage] of HID_KEYS) $("key").add(new Option(label, String(usage)));
-let device = null, reportId = 0, reportMethod = "output", canWrite = false, modelName = "", inputQueue = [], waiters = [], busy = false, inputTestActive = false, capturedInputCount = 0;
-function log(message) {
- const line = "[" + new Date().toLocaleTimeString() + "] " + message;
- $("log").textContent += "\n" + line;
- if ($("log").textContent.length > 16000) $("log").textContent = $("log").textContent.slice(-16000);
- $("log").scrollTop = $("log").scrollHeight;
+let settings=loadSettings(),device=null,previousMask=0,pressStarted=[0,0,0],eventCount=0;
+const names=["Left","Center","Right"];
+function loadSettings(){
+ try{const x=JSON.parse(localStorage.getItem(STORE));if(Array.isArray(x.pedals)&&x.pedals.length===3)return {pedals:x.pedals,threshold:Number(x.threshold)||600};}catch(e){}
+ return {pedals:DEFAULTS.map(x=>({...x})),threshold:600};
 }
-function hex(bytes) { return Array.from(bytes, n => Number(n).toString(16).padStart(2,"0")).join(" ").toUpperCase(); }
-function setStatus(message, kind="") { $("status").textContent=message; $("status").className="status "+kind; }
-function setConnectedControls(on) {
- $("connect").disabled=on; $("disconnect").disabled=!on; $("refresh").disabled=!on;
- $("inputTest").disabled=!on; $("clearInput").disabled=!on;
- $("read").disabled=!on || !canWrite; updateWriteButton();
+function log(s){$("log").textContent+="\n["+new Date().toLocaleTimeString()+"] "+s;$("log").scrollTop=$("log").scrollHeight;}
+function saveSettings(){
+ settings.threshold=Number($("threshold").value);
+ settings.pedals=names.map((n,i)=>({key:$("key"+(i+1)).value,mode:$("mode"+(i+1)).value}));
+ localStorage.setItem(STORE,JSON.stringify(settings));
+ $("saveStatus").textContent="Saved on this device. Left: "+settings.pedals[0].key+"; Center: "+settings.pedals[1].key+"; Right: "+settings.pedals[2].key+".";
+ log("Saved pedal assignments and press modes locally.");
 }
-function updateWriteButton() { $("write").disabled=!device || !canWrite || busy; }
-function reportIds(d, kind) {
- return [...new Set(d.collections.flatMap(c => (c[kind] || []).map(r => r.reportId)))];
-}
-function renderCollections(d) {
- const list=document.createElement("div");
- const reportSummary=(reports)=>reports.length ? reports.map(r=>{
-   const fields=(r.items||[]).map(it=>{
-     const usages=(it.usages||[]).map(u=>"0x"+u.toString(16)).join(",");
-     return "size="+it.reportSize+" bits × count="+it.reportCount+(it.isAbsolute===undefined?"":"; absolute="+it.isAbsolute)+(it.isArray===undefined?"":"; array="+it.isArray)+(it.isRange?"; usage range":"")+(usages?"; usages="+usages:"");
-   }).join(" | ");
-   return "ID "+r.reportId+" (items "+(r.items||[]).length+(fields?"; "+fields:"")+")";
- }).join("; ") : "none";
- d.collections.forEach((c,i)=>{
-   const li=document.createElement("div"); li.className="info"; li.style.margin="8px 0";
-   li.textContent="Collection "+(i+1)+" — usage page 0x"+Number(c.usagePage).toString(16).toUpperCase()+"; usage 0x"+Number(c.usage).toString(16).toUpperCase()+"; input: "+reportSummary(c.inputReports||[])+"; output: "+reportSummary(c.outputReports||[])+"; feature: "+reportSummary(c.featureReports||[]);
-   list.appendChild(li);
+function renderSettings(){
+ $("pedalSettings").innerHTML="";
+ names.forEach((name,i)=>{
+  const n=i+1,box=document.createElement("div");box.className="pedal";
+  const h=document.createElement("h3");h.textContent=name+" pedal";box.appendChild(h);
+  const kl=document.createElement("label");kl.textContent="Key";
+  const ks=document.createElement("select");ks.id="key"+n;
+  KEYS.forEach(k=>ks.add(new Option(k,k)));
+  ks.value=settings.pedals[i].key;kl.appendChild(ks);box.appendChild(kl);
+  const ml=document.createElement("label");ml.textContent="Press behavior";
+  const ms=document.createElement("select");ms.id="mode"+n;
+  ms.add(new Option("Single press","single"));ms.add(new Option("Hold while pressed","hold"));
+  ms.value=settings.pedals[i].mode;ml.appendChild(ms);box.appendChild(ml);
+  const hint=document.createElement("p");hint.className="small muted";hint.textContent="Single press sends one action when you press the pedal. Hold sends a key-down on press and key-up on release.";box.appendChild(hint);
+  $("pedalSettings").appendChild(box);
  });
- if(!d.collections.length) list.textContent="No HID collections reported by the browser.";
- $("collections").replaceChildren(list);
- log("Device details: name="+(d.productName||"(none)")+"; manufacturer="+(d.manufacturerName||"(not exposed)")+"; serial="+(d.serialNumber||"(not exposed)")+"; opened="+d.opened+"; collections="+d.collections.length+".");
- d.collections.forEach((c,i)=>log("Collection "+(i+1)+": usagePage=0x"+Number(c.usagePage).toString(16).toUpperCase()+", usage=0x"+Number(c.usage).toString(16).toUpperCase()+", inputReports="+(c.inputReports||[]).length+", outputReports="+(c.outputReports||[]).length+", featureReports="+(c.featureReports||[]).length+"."));
- const outs=reportIds(d,"outputReports");
- const features=reportIds(d,"featureReports");
- const ids=outs.length?outs:features;
- reportMethod=outs.length?"output":"feature";
- reportId=ids.includes(0)?0:(ids.length?ids[0]:0);
- canWrite=ids.length>0;
- setStatus(outs.length ? "Connected. Output report ID "+reportId+" is available." : features.length ? "No output reports. Trying feature report ID "+reportId+"." : "Connected, but no output or feature reports are exposed.", canWrite ? "good" : "warn");
- $("read").disabled=!canWrite;
- updateWriteButton();
+ $("threshold").value=String(settings.threshold);
 }
-function onInputReport(event) {
- const bytes=Array.from(new Uint8Array(event.data.buffer,event.data.byteOffset,event.data.byteLength));
- const item={id:event.reportId,bytes};
- log("RX report ID "+event.reportId+": "+hex(bytes));
- // Keep the live input monitor running whenever connected, so reports arriving
- // just before/after the test button is toggled are still decoded and recorded.
- captureInputReport(item);
- if(waiters.length) waiters.shift()(item); else inputQueue.push(item);
+function setConnected(on){$("connect").disabled=on;$("disconnect").disabled=!on;}
+function emitPedal(n,phase){
+ const config=settings.pedals[n-1],key=config.key;
+ if(!key||key==="None")return;
+ const detail={pedal:n,name:names[n-1],action:key,phase:config.mode==="single"?"press":phase,mode:config.mode};
+ document.dispatchEvent(new CustomEvent("infinitypedal",{detail}));
+ const keyName=key==="Space"?" ":key==="ArrowLeft"?"ArrowLeft":key==="ArrowRight"?"ArrowRight":key==="ArrowUp"?"ArrowUp":key==="ArrowDown"?"ArrowDown":key;
+ document.dispatchEvent(new KeyboardEvent(phase==="down"?"keydown":"keyup",{key:keyName,code:key==="Space"?"Space":key, bubbles:true}));
 }
-function captureInputReport(item) {
- const mask=item.bytes[0]||0;
- const pressed=[];
- if(mask & 0x01) pressed.push("Pedal 1 / Left Arrow");
- if(mask & 0x02) pressed.push("Pedal 2 / Space");
- if(mask & 0x04) pressed.push("Pedal 3 / Enter");
- const detected=pressed.length ? "Detected: "+pressed.join(" + ") : "Detected: all pedals released";
- capturedInputCount++;
- $("inputCount").textContent=capturedInputCount+" report"+(capturedInputCount===1?"":"s")+" captured";
- $("inputStatus").textContent="Receiving input reports. Press and release each of the three pedals separately; compare the raw bytes below.";
- const body=$("inputReports");
- if(body.querySelector("td[colspan]")) body.innerHTML="";
- const row=document.createElement("tr");
- const cells=[String(capturedInputCount),String(item.id),hex(item.bytes),detected+"; "+item.bytes.map((b,i)=>"byte "+i+"="+b+" (0x"+b.toString(16).toUpperCase().padStart(2,"0")+")").join("; ")||"(empty report)"];
- cells.forEach(value=>{const td=document.createElement("td");td.textContent=value;row.appendChild(td);});
- body.prepend(row);
- while(body.rows.length>40) body.deleteRow(body.rows.length-1);
-}
-function nextReport(timeout=1000) {
- if(inputQueue.length) return Promise.resolve(inputQueue.shift());
- return new Promise(resolve=>{
-   let done=false;
-   const finish=value=>{if(done)return;done=true;clearTimeout(timer);const i=waiters.indexOf(finish);if(i>=0)waiters.splice(i,1);resolve(value);};
-   const timer=setTimeout(()=>finish(null),timeout);
-   waiters.push(finish);
- });
-}
-async function sendCommand(bytes, delay=30) {
- if(!device || !device.opened) throw new Error("Connect to the pedal first.");
- if(!canWrite) throw new Error("The browser exposes no output or feature reports. No command was sent.");
- await new Promise(resolve=>setTimeout(resolve,delay));
- log("TX "+reportMethod+" report id="+reportId+" "+hex(bytes));
- if(reportMethod==="feature") await device.sendFeatureReport(reportId,new Uint8Array(bytes));
- else await device.sendReport(reportId,new Uint8Array(bytes));
-}
-function clearInputQueue(){inputQueue.length=0;}
-async function readModel() {
- clearInputQueue();
- await sendCommand([1,131,8,0,0,0,0,0]);
- let name="";
- for(let i=0;i<12;i++) {
-   const report=await nextReport(800);
-   if(!report) { if(!name) break; else continue; }
-   const text=report.bytes.filter(v=>v!==0).map(v=>String.fromCharCode(v)).join("");
-   if(text && [...report.bytes].every(v=>v===0 || (v>=32 && v<=126))) name+=text;
-   else log("Model request received non-text reply: "+hex(report.bytes));
-   if(name.includes(".") && !Number.isNaN(Number(name.slice(-3)))) break;
+function onReport(e){
+ const bytes=Array.from(new Uint8Array(e.data.buffer,e.data.byteOffset,e.data.byteLength));
+ const mask=bytes[0]||0;eventCount++;
+ log("Input report #"+eventCount+" ID "+e.reportId+" bytes "+bytes.map(x=>x.toString(16).padStart(2,"0")).join(" ").toUpperCase()+" mask=0x"+mask.toString(16).padStart(2,"0"));
+ for(let i=0;i<3;i++){
+  const bit=1<<i,down=!!(mask&bit),wasDown=!!(previousMask&bit),n=i+1;
+  if(down&&!wasDown){
+   pressStarted[i]=Date.now();
+   $("pedalLive"+n).classList.add("active");$("live"+n).textContent="PRESSED";$("detail"+n).textContent="Press detected.";
+   if(settings.pedals[i].mode==="hold")emitPedal(n,"down");
+   else emitPedal(n,"down");
+  }else if(!down&&wasDown){
+   const duration=Date.now()-pressStarted[i];
+   $("pedalLive"+n).classList.remove("active");$("live"+n).textContent="Released";$("detail"+n).textContent="Held for "+(duration/1000).toFixed(2)+" seconds.";
+   if(settings.pedals[i].mode==="hold")emitPedal(n,"up");
+   log(names[i]+" pedal released after "+duration+" ms.");
+  }
  }
- modelName=name.trim();
- $("model").textContent=modelName || "No model reply";
- log(modelName ? "Model reply: "+modelName : "No model reply received.");
- return modelName;
+ previousMask=mask;
 }
-async function readKey(number) {
- clearInputQueue();
- await sendCommand([1,130,8,number,0,0,0,0]);
- let report=null;
- for(let i=0;i<4;i++) {
-   report=await nextReport(1000);
-   if(!report) break;
-   const b=report.bytes;
-   if(b.length>=2 && !(b[0]===129 && b[1]===85)) break;
- }
- if(!report) return {text:"No reply",raw:""};
- const b=report.bytes, mode=b[1], len=b[0];
- let text="Unknown assignment (mode "+mode+")";
- if([1,129,6,134,18].includes(mode)) {
-   const modifier=b[mode===18?6:2]||0, names=[];
-   const modNames=["Ctrl","Shift","Alt","Meta","Right Ctrl","Right Shift","Right Alt","Right Meta"];
-   for(let i=0;i<8;i++) if(modifier & (1<<i)) names.push(modNames[i]);
-   let usages=[];
-   if(mode===1 || mode===129) usages=[b[3]||0];
-   else {
-     const start=mode===18?7:3, end=Math.min(len,8)-1;
-     for(let i=start;i<=end;i++) if(b[i]) usages.push(b[i]);
-     if(len>8) {
-       const extra=await nextReport(800);
-       if(extra) for(let i=0;i<len-8;i++) if(extra.bytes[i]) usages.push(extra.bytes[i]);
-     }
-   }
-   const labels=new Map(HID_KEYS.map(([label,usage])=>[usage,label]));
-   text=[...names,...usages.map(u=>labels.get(u)||("HID "+u))].join(" + ") || "(no key assigned)";
- } else if(mode===7) text="Media code "+b[2];
- return {text,raw:hex(b)};
+async function connect(){
+ if(!navigator.hid){$("status").textContent="WebHID is unavailable. Use Chrome or Edge over HTTPS.";return;}
+ try{
+  const devices=await navigator.hid.requestDevice({filters:[{vendorId:0x05F3,productId:0x00FF}]});
+  if(!devices.length)return;
+  device=devices[0];if(!device.opened)await device.open();
+  device.addEventListener("inputreport",onReport);
+  $("deviceName").textContent="Device: "+(device.productName||"VEC Infinity");
+  $("deviceId").textContent="VID/PID: 0x"+device.vendorId.toString(16).toUpperCase()+" / 0x"+device.productId.toString(16).toUpperCase();
+  $("status").textContent="Connected to "+(device.productName||"VEC Infinity")+". Press each pedal to test it.";
+  $("status").className="status good";setConnected(true);previousMask=0;
+  log("Connected "+device.productName+"; VID 0x"+device.vendorId.toString(16)+" PID 0x"+device.productId.toString(16)+".");
+  device.collections.forEach((c,i)=>log("Collection "+(i+1)+" usagePage=0x"+c.usagePage.toString(16)+" usage=0x"+c.usage.toString(16)+" input="+(c.inputReports||[]).length+" output="+(c.outputReports||[]).length+" feature="+(c.featureReports||[]).length));
+  $("testStatus").textContent="Connected. Press and release the left, center, and right pedals one at a time.";
+ }catch(e){$("status").textContent=e.name+": "+e.message;$("status").className="status bad";log("Connect error "+e.name+": "+e.message);}
 }
-function renderAssignment(number,result) {
- let row=document.querySelector('tr[data-pedal="'+number+'"]');
- if(!row) {
-   if($("assignments").querySelector("td[colspan]")) $("assignments").innerHTML="";
-   row=document.createElement("tr");row.dataset.pedal=String(number);
-   for(let i=0;i<3;i++) row.appendChild(document.createElement("td"));
-   row.children[0].textContent="Pedal "+number;
-   $("assignments").appendChild(row);
- }
- row.children[1].textContent=result.text;
- row.children[2].textContent=result.raw || "—";
-}
-async function guarded(action) {
- if(busy) return;
- busy=true; updateWriteButton(); $("read").disabled=true;
- try { await action(); }
- catch(error) {
-   log("ERROR "+(error.name||"Error")+": "+error.message);
-   setStatus((error.name||"Error")+": "+error.message,"bad");
- }
- finally { busy=false; $("read").disabled=!device || !canWrite; updateWriteButton(); }
-}
-async function connect() {
- if(!("hid" in navigator)) {
-   setStatus("WebHID is unavailable in this browser. Use current Chrome or Edge over HTTPS.", "bad");
-   return;
- }
- await guarded(async()=>{
-   const picked=await navigator.hid.requestDevice({filters:[{usagePage:0x01},{usagePage:0x0C}]});
-   if(!picked.length) { setStatus("No device selected."); return; }
-   device=picked[0];
-   if(!device.opened) await device.open();
-   device.addEventListener("inputreport",onInputReport);
-   $("name").textContent=device.productName || "(unnamed HID device)";
-   $("vid").textContent="0x"+device.vendorId.toString(16).toUpperCase().padStart(4,"0");
-   $("pid").textContent="0x"+device.productId.toString(16).toUpperCase().padStart(4,"0");
-   log("Opened "+device.productName+" VID 0x"+device.vendorId.toString(16).toUpperCase()+" PID 0x"+device.productId.toString(16).toUpperCase()+".");
-   renderCollections(device);
-   setConnectedControls(true);
-   if(canWrite) {
-     try { await readModel(); }
-     catch(error) { log("Model read failed: "+error.name+": "+error.message); setStatus("Connected. Model request failed: "+error.name+": "+error.message,"warn"); }
-   }
- });
-}
-async function refreshDetails() {
- if(!device) { setStatus("Connect a device first.","warn"); return; }
- log("---- Refreshing HID device details ----");
- $("name").textContent=device.productName || "(unnamed HID device)";
- $("vid").textContent="0x"+device.vendorId.toString(16).toUpperCase().padStart(4,"0");
- $("pid").textContent="0x"+device.productId.toString(16).toUpperCase().padStart(4,"0");
- renderCollections(device);
- log("Report IDs: input ["+reportIds(device,"inputReports").join(", ")+"], output ["+reportIds(device,"outputReports").join(", ")+"], feature ["+reportIds(device,"featureReports").join(", ")+ "].");
- if(canWrite) await guarded(async()=>{await readModel();});
- else { $("model").textContent="Not available (no output/feature reports)"; log("No output or feature reports are exposed by WebHID; no device command can be sent through this page."); setStatus("Connected; HID details refreshed. No output or feature reports are exposed.","warn"); }
-}
-async function readAssignments() {
- if(!device || !canWrite) return;
- await guarded(async()=>{
-   $("assignments").innerHTML="";
-   for(const n of [1,2]) {
-     const result=await readKey(n);
-     renderAssignment(n,result);
-   }
-   setStatus("Read attempt finished. Check the assignment table and diagnostic log.", "good");
- });
-}
-async function writeAssignment() {
- if(!device || !canWrite) return;
- const number=Number($("pedal").value), usage=Number($("key").value), mode=Number($("mode").value);
- const label=HID_KEYS.find(k=>k[1]===usage)?.[0] || ("HID "+usage);
- if(!confirm("Change Pedal "+number+" to "+label+"?")) return;
- await guarded(async()=>{
-   $("writeStatus").textContent="Writing and checking the stored assignment…";
-   const header=[1,129,8,number,0,0,0,0];
-   const payload=[8,mode===2?1:129,0,usage,0,0,0,0];
-   await sendCommand(header);
-   await sendCommand(payload);
-   await new Promise(resolve=>setTimeout(resolve,180));
-   const result=await readKey(number);
-   renderAssignment(number,result);
-   const expectedMode=mode===2?1:129;
-   const b=result.raw.split(" ").map(x=>parseInt(x,16));
-   const verified=b.length>=4 && b[1]===expectedMode && (b[3]||0)===usage;
-   $("writeStatus").textContent=verified ? "Verified: the pedal reports "+result.text+"." : "A write was sent, but read-back did not confirm the requested key. Reported assignment: "+result.text+". Check the log; do not assume the change succeeded.";
-   $("writeStatus").className="status "+(verified?"good":"warn");
-   log("Verification "+(verified?"passed":"not confirmed")+" for pedal "+number+"; requested "+label+".");
- });
+async function disconnect(){
+ if(!device)return;
+ try{device.removeEventListener("inputreport",onReport);if(device.opened)await device.close();}catch(e){log("Disconnect issue: "+e.message);}
+ device=null;previousMask=0;setConnected(false);$("status").textContent="Disconnected.";log("Disconnected.");
 }
 $("connect").addEventListener("click",connect);
-$("disconnect").addEventListener("click",async()=>{
- if(!device) return;
- try {device.removeEventListener("inputreport",onInputReport);if(device.opened)await device.close();}catch(error){log("Disconnect warning: "+error.message);}
- device=null;canWrite=false;modelName="";inputTestActive=false;$("inputTest").textContent="Start pedal input test";setConnectedControls(false);$("model").textContent="Not read";setStatus("Not connected.");$("collections").textContent="Connect to inspect the device's input, output, and feature reports.";log("Disconnected.");
-});
-$("refresh").addEventListener("click",refreshDetails);
-$("inputTest").addEventListener("click",()=>{
- if(!device) return;
- inputTestActive=!inputTestActive;
- $("inputTest").textContent=inputTestActive?"Stop pedal input test":"Start pedal input test";
- $("inputStatus").textContent=inputTestActive?"Input test active. Reports are monitored continuously while connected; press and release each pedal separately.":"Test marker stopped; live input monitoring continues while connected.";
- log(inputTestActive?"Input test marked active; live input monitoring is already running.":"Input test marker stopped; live input monitoring continues.");
-});
-$("clearInput").addEventListener("click",()=>{
- capturedInputCount=0;$("inputCount").textContent="0 reports captured";$("inputReports").innerHTML='<tr><td colspan="4" class="muted">No input reports captured yet.</td></tr>';$("inputStatus").textContent="Captured reports cleared. Start the test and press each pedal.";
-});
-$("read").addEventListener("click",readAssignments);
-$("write").addEventListener("click",writeAssignment);
- $("copy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("log").textContent);setStatus("Log copied.");}catch(e){setStatus("Copy was blocked by the browser. Select and copy the log manually.","warn");}});
-$("clear").addEventListener("click",()=>$("log").textContent="Log cleared.");
-navigator.hid?.addEventListener("disconnect",event=>{if(device && event.device===device){device=null;canWrite=false;inputTestActive=false;$("inputTest").textContent="Start pedal input test";setConnectedControls(false);setStatus("The device disconnected.","warn");$("inputStatus").textContent="Device disconnected.";log("Device disconnected.");}});
+$("disconnect").addEventListener("click",disconnect);
+$("save").addEventListener("click",saveSettings);
+$("reset").addEventListener("click",()=>{settings={pedals:DEFAULTS.map(x=>({...x})),threshold:600};renderSettings();saveSettings();});
+$("copyCode").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("integration").textContent);$("testStatus").textContent="Integration listener copied.";}catch(e){$("testStatus").textContent="Clipboard blocked; select and copy the code manually.";}});
+$("copyLog").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("log").textContent);}catch(e){log("Clipboard copy blocked.");}});
+$("clearLog").addEventListener("click",()=>$("log").textContent="Log cleared.");
+navigator.hid?.addEventListener("disconnect",e=>{if(device&&e.device===device){device=null;setConnected(false);$("status").textContent="Pedal disconnected.";log("Device disconnected.");}});
+renderSettings();
 })();
 </script></body></html>
