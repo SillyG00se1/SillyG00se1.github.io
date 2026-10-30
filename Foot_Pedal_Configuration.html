@@ -42,7 +42,7 @@
 <pre id="integration">document.addEventListener('infinitypedal', function(event) {
   const pedal = event.detail.pedal; // 1 = left, 2 = center, 3 = right
   const action = event.detail.action; // key name, e.g. "Space"
-  const phase = event.detail.phase; // "down" or "up"
+  const phase = event.detail.phase; // "press", "longpress", or "up"
   // Connect these values to the activity's switch action.
 });</pre>
 </section>
@@ -59,7 +59,7 @@ const DEFAULTS=[
  {key:"Space",mode:"hold"},
  {key:"Enter",mode:"hold"}
 ];
-let settings=loadSettings(),device=null,previousMask=0,pressStarted=[0,0,0],eventCount=0;
+let settings=loadSettings(),device=null,previousMask=0,pressStarted=[0,0,0],longTimers=[null,null,null],longFired=[false,false,false],eventCount=0;
 const names=["Left","Center","Right"];
 function loadSettings(){
  try{const x=JSON.parse(localStorage.getItem(STORE));if(Array.isArray(x.pedals)&&x.pedals.length===3)return {pedals:x.pedals,threshold:Number(x.threshold)||600};}catch(e){}
@@ -84,9 +84,9 @@ function renderSettings(){
   ks.value=settings.pedals[i].key;kl.appendChild(ks);box.appendChild(kl);
   const ml=document.createElement("label");ml.textContent="Press behavior";
   const ms=document.createElement("select");ms.id="mode"+n;
-  ms.add(new Option("Single press","single"));ms.add(new Option("Hold while pressed","hold"));
+  ms.add(new Option("Single press","single"));ms.add(new Option("Long press","long"));
   ms.value=settings.pedals[i].mode;ml.appendChild(ms);box.appendChild(ml);
-  const hint=document.createElement("p");hint.className="small muted";hint.textContent="Single press sends one action when you press the pedal. Hold sends a key-down on press and key-up on release.";box.appendChild(hint);
+  const hint=document.createElement("p");hint.className="small muted";hint.textContent="Single press triggers immediately. Long press triggers only after the selected hold duration.";box.appendChild(hint);
   $("pedalSettings").appendChild(box);
  });
  $("threshold").value=String(settings.threshold);
