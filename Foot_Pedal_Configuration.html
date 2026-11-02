@@ -65,6 +65,10 @@ const HID_KEYS = [
 ];
 for (const [label, usage] of HID_KEYS) $("key").add(new Option(label, String(usage)));
 let device = null, reportId = 0, reportMethod = "output", canWrite = false, modelName = "", inputQueue = [], waiters = [], busy = false, inputTestActive = false, capturedInputCount = 0;
+const IKKEGOL={vendorId:0x1A86,productId:0xE026}, INFINITY={vendorId:0x05F3,productId:0x00FF};
+function deviceType(d=device){if(!d)return "none";if(d.vendorId===IKKEGOL.vendorId&&d.productId===IKKEGOL.productId)return "ikkegol";if(d.vendorId===INFINITY.vendorId&&d.productId===INFINITY.productId)return "infinity";return "other";}
+function pedalCount(d=device){return deviceType(d)==="ikkegol"?2:3;}
+function updatePedalChoices(){const select=$("pedal"),count=pedalCount();const previous=Number(select.value)||1;select.replaceChildren();const labels=deviceType()==="ikkegol"?["Pedal 1 / Left","Pedal 2 / Right"]:["Pedal 1 / Left","Pedal 2 / Center","Pedal 3 / Right"];for(let n=1;n<=count;n++)select.add(new Option(labels[n-1],String(n)));select.value=String(Math.min(previous,count));}
 function log(message) {
  const line = "[" + new Date().toLocaleTimeString() + "] " + message;
  $("log").textContent += "\n" + line;
@@ -105,8 +109,11 @@ function renderCollections(d) {
  const ids=outs.length?outs:features;
  reportMethod=outs.length?"output":"feature";
  reportId=ids.includes(0)?0:(ids.length?ids[0]:0);
- canWrite=ids.length>0;
- setStatus(outs.length ? "Connected. Output report ID "+reportId+" is available." : features.length ? "No output reports. Trying feature report ID "+reportId+"." : "Connected, but no output or feature reports are exposed.", canWrite ? "good" : "warn");
+ // IKKEGOL has a known command protocol. Some WebHID descriptors omit its output collection;
+ // allow an explicit attempt and surface any browser/device rejection instead of silently disabling it.
+ canWrite=ids.length>0 || deviceType(d)==="ikkegol";
+ updatePedalChoices();
+ setStatus(outs.length ? "Connected. Output report ID "+reportId+" is available." : features.length ? "No output reports. Trying feature report ID "+reportId+"." : deviceType(d)==="ikkegol" ? "IKKEGOL detected. WebHID lists no output report; assignment commands will be attempted only when requested." : "Connected, but no output or feature reports are exposed.", canWrite ? "good" : "warn");
  $("read").disabled=!canWrite;
  updateWriteButton();
 }
@@ -128,7 +135,7 @@ function captureInputReport(item) {
  const detected=pressed.length ? "Detected: "+pressed.join(" + ") : "Detected: all pedals released";
  capturedInputCount++;
  $("inputCount").textContent=capturedInputCount+" report"+(capturedInputCount===1?"":"s")+" captured";
- $("inputStatus").textContent="Receiving input reports. Press and release each of the three pedals separately; compare the raw bytes below.";
+ $("inputStatus").textContent="Receiving input reports. Press and release each pedal separately; compare the raw bytes below.";
  const body=$("inputReports");
  if(body.querySelector("td[colspan]")) body.innerHTML="";
  const row=document.createElement("tr");
@@ -148,7 +155,7 @@ function nextReport(timeout=1000) {
 }
 async function sendCommand(bytes, delay=30) {
  if(!device || !device.opened) throw new Error("Connect to the pedal first.");
- if(!canWrite) throw new Error("The browser exposes no output or feature reports. No command was sent.");
+ if(!canWrite) throw new Error("This device has no supported assignment-write interface.");
  await new Promise(resolve=>setTimeout(resolve,delay));
  log("TX "+reportMethod+" report id="+reportId+" "+hex(bytes));
  if(reportMethod==="feature") await device.sendFeatureReport(reportId,new Uint8Array(bytes));
@@ -237,6 +244,7 @@ async function connect() {
    device=picked[0];
    if(!device.opened) await device.open();
    device.addEventListener("inputreport",onInputReport);
+    updatePedalChoices();
    $("name").textContent=device.productName || "(unnamed HID device)";
    $("vid").textContent="0x"+device.vendorId.toString(16).toUpperCase().padStart(4,"0");
    $("pid").textContent="0x"+device.productId.toString(16).toUpperCase().padStart(4,"0");
@@ -264,7 +272,7 @@ async function readAssignments() {
  if(!device || !canWrite) return;
  await guarded(async()=>{
    $("assignments").innerHTML="";
-   for(const n of [1,2]) {
+   for(let n=1;n<=pedalCount();n++) {
      const result=await readKey(n);
      renderAssignment(n,result);
    }
@@ -274,6 +282,7 @@ async function readAssignments() {
 async function writeAssignment() {
  if(!device || !canWrite) return;
  const number=Number($("pedal").value), usage=Number($("key").value), mode=Number($("mode").value);
+  if(number<1||number>pedalCount()) throw new Error("The selected pedal is not available on this device.");
  const label=HID_KEYS.find(k=>k[1]===usage)?.[0] || ("HID "+usage);
  if(!confirm("Change Pedal "+number+" to "+label+"?")) return;
  await guarded(async()=>{
@@ -297,7 +306,7 @@ $("connect").addEventListener("click",connect);
 $("disconnect").addEventListener("click",async()=>{
  if(!device) return;
  try {device.removeEventListener("inputreport",onInputReport);if(device.opened)await device.close();}catch(error){log("Disconnect warning: "+error.message);}
- device=null;canWrite=false;modelName="";inputTestActive=false;$("inputTest").textContent="Start pedal input test";setConnectedControls(false);$("model").textContent="Not read";setStatus("Not connected.");$("collections").textContent="Connect to inspect the device's input, output, and feature reports.";log("Disconnected.");
+ device=null;canWrite=false;modelName="";updatePedalChoices();inputTestActive=false;$("inputTest").textContent="Start pedal input test";setConnectedControls(false);$("model").textContent="Not read";setStatus("Not connected.");$("collections").textContent="Connect to inspect the device's input, output, and feature reports.";log("Disconnected.");
 });
 $("refresh").addEventListener("click",refreshDetails);
 $("inputTest").addEventListener("click",()=>{
@@ -314,6 +323,6 @@ $("read").addEventListener("click",readAssignments);
 $("write").addEventListener("click",writeAssignment);
  $("copy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("log").textContent);setStatus("Log copied.");}catch(e){setStatus("Copy was blocked by the browser. Select and copy the log manually.","warn");}});
 $("clear").addEventListener("click",()=>$("log").textContent="Log cleared.");
-navigator.hid?.addEventListener("disconnect",event=>{if(device && event.device===device){device=null;canWrite=false;inputTestActive=false;$("inputTest").textContent="Start pedal input test";setConnectedControls(false);setStatus("The device disconnected.","warn");$("inputStatus").textContent="Device disconnected.";log("Device disconnected.");}});
+navigator.hid?.addEventListener("disconnect",event=>{if(device && event.device===device){device=null;canWrite=false;updatePedalChoices();inputTestActive=false;$("inputTest").textContent="Start pedal input test";setConnectedControls(false);setStatus("The device disconnected.","warn");$("inputStatus").textContent="Device disconnected.";log("Device disconnected.");}});
 })();
 </script></body></html>
