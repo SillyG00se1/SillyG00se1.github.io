@@ -258,11 +258,13 @@ function itemVisual(it, className){
 }
 function orderLabel(i,total){
   if(i===0)return 'First';
+  if(i===total-1)return total===2?'Then':'Last';
+  if(i===1)return 'Next';
   return 'Then';
 }
 function makeInstruction(seq){
  if(seq.length===1)return 'Touch the '+item(seq[0]).name+'.';
- return seq.map((id,i)=>orderLabel(i,seq.length)+', touch the '+item(id).name+'.').join(' ');
+ return seq.map((id,i)=>orderLabel(i,seq.length)+', '+item(id).name+'.').join(' ');
 }
 function clearMemoryTimer(){if(memoryTimer!==null){clearTimeout(memoryTimer);memoryTimer=null;}}
 function newMission(){
