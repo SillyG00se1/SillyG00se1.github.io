@@ -32,7 +32,10 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:4px solid 
 .target img{width:100%;height:clamp(95px,18vw,190px);object-fit:contain;border-radius:10px}
 .target .placeholder{height:clamp(95px,18vw,190px);display:grid;place-items:center;width:100%;font-size:3rem;background:#20283a;border-radius:10px}
 .target .targetLabel{font-size:.9rem;color:var(--muted);overflow-wrap:anywhere}
-.target.scanning{border-color:var(--accent);background:#40391b;box-shadow:0 0 0 3px #ffe36e55;transform:scale(1.015)}
+.target.scanning{border-color:#ff3434;background:#481b24;box-shadow:0 0 0 3px #ff343455;transform:scale(1.015)}
+.target.flashIncorrect{border-color:#fff;background:#fff;box-shadow:0 0 0 5px #ffffff88;transform:scale(1.035)}
+.target.flashCorrect{border-color:#ffe36e;background:#ffe36e;box-shadow:0 0 0 5px #ffe36e99;transform:scale(1.035)}
+#message{display:none!important}
 .target.selected{border-color:var(--good);background:#14392d}
 .target:focus-visible{outline:4px solid var(--focus)}
 #message{min-height:2.2em;font-weight:800;text-align:center;font-size:1.2rem}
@@ -212,7 +215,7 @@ async function buildRound(){
 function renderTargets(){
  const el=$('targets');
  if(!targets.length){el.innerHTML='<p>No targets yet. Add a student and upload images.</p>';return;}
- el.innerHTML=targets.map((t,i)=>'<div class="target" data-index="'+i+'" role="img" aria-label="Target '+(i+1)+'"><div class="placeholder '+(t.image?'hidden':'')+'">🖼️</div>'+(t.image?'<img alt="Target '+(i+1)+'" src="'+t.image+'">':'')+'<div class="targetLabel">Target '+(i+1)+'</div></div>').join('');
+ el.innerHTML=targets.map((t,i)=>'<div class="target" data-index="'+i+'" role="img" aria-label="Target '+(i+1)+'"><div class="placeholder '+(t.image?'hidden':'')+'">🖼️</div>'+(t.image?'<img alt="Target '+(i+1)+'" src="'+t.image+'">':'')+'</div>').join('');
  updateHighlight();
 }
 function updateHighlight(){
@@ -227,18 +230,27 @@ function startTimer(){
  if($('scanMode').value==='auto')scanTimer=setInterval(()=>{if(!locked){scanIndex=(scanIndex+1)%targets.length;updateHighlight();}},Number($('speed').value));
 }
 function pause(){stopTimer();$('scanStatus').textContent='Paused. Press Start scanning to continue.';}
+function flashTarget(index,className){
+ const el=document.querySelector('.target[data-index="'+index+'"]');
+ if(!el)return;
+ el.classList.remove('flashIncorrect','flashCorrect');
+ el.classList.add(className);
+ setTimeout(()=>el.classList.remove(className),450);
+}
 function selectTarget(){
  if(locked||!targets.length){return;}
  if(!running){if($('scanMode').value==='manual'){running=true;updateHighlight();}else{$('message').textContent='Press Start scanning first.';return;}}
  const chosen=targets[scanIndex];
  if(chosen&&chosen.correct){
+  flashTarget(scanIndex,'flashCorrect');
   locked=true;correctCount++;$('score').textContent='Correct selections: '+correctCount;
   $('message').className='good';$('message').textContent='Correct! Great selection! 🎉';
   $('scanStatus').textContent='Correct target selected!';
   stopTimer();celebrate();
   setTimeout(()=>{locked=false;buildRound();if($('scanMode').value==='auto')startTimer();},reducedMotion?900:1700);
  }else{
-  wrongCount++;$('message').className='bad';$('message').textContent='Not that one. Keep scanning and try again.';
+  flashTarget(scanIndex,'flashIncorrect');
+  wrongCount++;
   if($('scanMode').value==='manual'){scanIndex=(scanIndex+1)%targets.length;updateHighlight();}
  }
 }
