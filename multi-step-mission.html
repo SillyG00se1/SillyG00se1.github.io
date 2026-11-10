@@ -174,12 +174,18 @@ let level=0,sequence=[],boardItems=[],step=0,missionsCompleted=0,stars=0,attempt
 function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 const PROFILE_KEY='multiStepMissionProfilesV1';
 const PRIZES=[
- {id:'unicorn-badge',name:'Unicorn Badge',icon:'🦄',cost:3,desc:'A magical badge'},
- {id:'dragon-pet',name:'Tiny Dragon',icon:'🐉',cost:5,desc:'A pocket-sized dragon'},
- {id:'cupcake-crown',name:'Cupcake Crown',icon:'🧁',cost:4,desc:'Royal frosting'},
- {id:'rainbow-star',name:'Rainbow Star',icon:'🌈',cost:6,desc:'Extra colorful'},
- {id:'silly-glasses',name:'Silly Glasses',icon:'🤓',cost:3,desc:'Maximum silliness'},
- {id:'rocket-ride',name:'Rocket Ride',icon:'🚀',cost:8,desc:'Zoom to the moon'}
+ {id:'unicorn-badge',name:'Unicorn Badge',icon:'🦄',cost:3,desc:'A magical badge',unlockAfter:0},
+ {id:'dragon-pet',name:'Tiny Dragon',icon:'🐉',cost:5,desc:'A pocket-sized dragon',unlockAfter:0},
+ {id:'cupcake-crown',name:'Cupcake Crown',icon:'🧁',cost:4,desc:'Royal frosting',unlockAfter:0},
+ {id:'rainbow-star',name:'Rainbow Star',icon:'🌈',cost:6,desc:'Extra colorful',unlockAfter:0},
+ {id:'silly-glasses',name:'Silly Glasses',icon:'🤓',cost:3,desc:'Maximum silliness',unlockAfter:0},
+ {id:'rocket-ride',name:'Rocket Ride',icon:'🚀',cost:8,desc:'Zoom to the moon',unlockAfter:0},
+ {id:'magic-wand',name:'Magic Wand',icon:'🪄',cost:10,desc:'Make something silly happen',unlockAfter:1},
+ {id:'space-ship',name:'Super Spaceship',icon:'🛸',cost:12,desc:'A trip across the galaxy',unlockAfter:1},
+ {id:'t-rex',name:'Pet T-Rex',icon:'🦖',cost:15,desc:'A tiny prehistoric friend',unlockAfter:2},
+ {id:'castle',name:'Rainbow Castle',icon:'🏰',cost:18,desc:'A castle fit for a champion',unlockAfter:2},
+ {id:'unicorn-ride',name:'Unicorn Ride',icon:'🌟',cost:20,desc:'The fanciest ride around',unlockAfter:3},
+ {id:'treasure-chest',name:'Giant Treasure Chest',icon:'💎',cost:25,desc:'The ultimate silly prize',unlockAfter:4}
 ];
 let ownedPrizes=[];
 function getProfiles(){try{return JSON.parse(localStorage.getItem(PROFILE_KEY)||'{}');}catch(e){return {};}}
@@ -219,10 +225,10 @@ function saveActiveProfileSilently(){
 }
 function renderStore(){
  $('storeBalance').innerHTML='<span class="badge">⭐ Available stars: '+stars+'</span>';
- $('storeItems').innerHTML=PRIZES.map(p=>{
-  const owned=ownedPrizes.includes(p.id);
-  return '<div class="storeItem"><div class="prizeIcon" aria-hidden="true">'+p.icon+'</div><strong>'+p.name+'</strong><span>'+p.desc+'</span><span class="cost">'+p.cost+' ⭐</span><button type="button" data-prize="'+p.id+'" '+(owned||stars<p.cost?'disabled':'')+'>'+(owned?'Purchased ✓':'Buy prize')+'</button></div>';
- }).join('');
+ const available=PRIZES.filter(p=>!ownedPrizes.includes(p.id)&&ownedPrizes.length>=(p.unlockAfter||0));
+ $('storeItems').innerHTML=available.length?available.map(p=>{
+  return '<div class="storeItem"><div class="prizeIcon" aria-hidden="true">'+p.icon+'</div><strong>'+p.name+'</strong><span>'+p.desc+'</span><span class="cost">'+p.cost+' ⭐</span><button type="button" data-prize="'+p.id+'" '+(stars<p.cost?'disabled':'')+'>Buy prize</button></div>';
+ }).join(''):'<p>You've collected every prize!</p>';
  $('storeItems').querySelectorAll('[data-prize]').forEach(b=>b.addEventListener('click',()=>buyPrize(b.dataset.prize)));
  $('collection').innerHTML=ownedPrizes.length?ownedPrizes.map(id=>{const p=PRIZES.find(x=>x.id===id);return p?'<span class="badge">'+p.icon+' '+p.name+'</span>':'';}).join(''):'<span class="badge">No prizes purchased yet.</span>';
 }
