@@ -10,7 +10,7 @@
 body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.45 system-ui,-apple-system,Segoe UI,Arial,sans-serif}
 main{max-width:1200px;margin:auto;padding:18px}
 h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.1;margin:8px 0 12px;text-align:center}
-h2{font-size:1.35rem;margin:0 0 12px}
+h2{font-size:1.35rem;margin:0 0 30px}
 p{margin:8px 0;color:var(--muted)}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;margin:16px 0}
 .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
@@ -26,9 +26,9 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:4px solid 
 .success{background:#174d3b;border-color:#4dd6a0}
 .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
 .small{font-size:.93rem}
-#scanStatus{font-weight:800;text-align:center;font-size:1.15rem;color:var(--accent);min-height:1.7em}
-#targets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.target{min-width:0;min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:#151b29;border:4px solid #3b465e;border-radius:18px;padding:12px;transition:border-color .08s,background .08s,transform .08s}
+#scanStatus,#message{display:none!important}
+#targets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:30px;padding:30px 14px 14px}
+.target{min-width:0;min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:transparent;border:4px solid transparent;border-radius:18px;padding:18px;transition:border-color .08s,background .08s,transform .08s}
 .target img{width:100%;height:clamp(95px,18vw,190px);object-fit:contain;border-radius:10px}
 .target .placeholder{height:clamp(95px,18vw,190px);display:grid;place-items:center;width:100%;font-size:3rem;background:#20283a;border-radius:10px}
 .target.scanning{border-color:#ff3434;background:#481b24;box-shadow:0 0 0 3px #ff343455;transform:scale(1.015)}
@@ -48,7 +48,7 @@ th,td{padding:10px;border-bottom:1px solid var(--line);white-space:nowrap}th{col
 #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:10}
 .hidden{display:none!important}
 footer{text-align:center;color:var(--muted);font-size:.9rem;padding:12px}
-@media(max-width:650px){main{padding:10px}#targets{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.target{min-height:145px;padding:8px}.panel{padding:13px}.target img,.target .placeholder{height:120px}}
+@media(max-width:650px){main{padding:10px}#targets{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;padding:24px 8px 8px}.target{min-height:145px;padding:8px}.panel{padding:13px}.target img,.target .placeholder{height:120px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -99,7 +99,7 @@ footer{text-align:center;color:var(--muted);font-size:.9rem;padding:12px}
 <div id="scanStatus" role="status" aria-live="polite"></div>
 <div id="targets" aria-label="Scanning targets"></div>
 <div id="message" role="status" aria-live="polite"></div>
-<div class="actions"><button id="resetScore" type="button">Reset score</button><span class="pill" id="score">Correct selections: 0</span><span class="pill" id="round">Round: 0</span></div>
+
 </section>
 </div>
 <section id="dataPage" class="panel hidden" aria-labelledby="dataHeading"><div class="actions" style="justify-content:space-between;align-items:center"><h2 id="dataHeading">Data</h2><span class="pill" id="attemptTotal">0 total attempts</span></div><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;text-align:left"><thead><tr><th>Question</th><th>Total attempts</th><th>Student</th><th>Date</th><th>Time</th><th>Result</th></tr></thead><tbody id="attemptRows"><tr><td colspan="6">No attempts recorded yet.</td></tr></tbody></table></div></section>
@@ -212,7 +212,7 @@ async function buildRound(){
  targets=[{key:'student',correct:true,image:images.student||null},...chosen.map(key=>({key,correct:false,image:images[key]}))];
  targets.sort(()=>Math.random()-.5);
  scanIndex=0;roundNumber++;currentRoundId=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);currentRoundAttempts=0;locked=false;
- $('round').textContent='Round: '+roundNumber;
+ 
  renderTargets();
  const hasCorrect=!!images.student;
  $('scanStatus').textContent=hasCorrect?'Ready to scan '+targets.length+' target(s).':'Upload an image named student for the correct target.';
@@ -227,7 +227,7 @@ function renderTargets(){
 }
 function updateHighlight(){
  document.querySelectorAll('.target').forEach((el,i)=>{el.classList.toggle('scanning',running&&i===scanIndex);el.setAttribute('aria-label','Target '+(i+1)+(running&&i===scanIndex?', highlighted':''));});
- $('scanStatus').textContent=running?'Scanning':'Paused';
+ 
 }
 function stopTimer(){if(scanTimer!==null){clearInterval(scanTimer);scanTimer=null;}running=false;updateHighlight();}
 function startTimer(){
@@ -236,7 +236,7 @@ function startTimer(){
  running=true;updateHighlight();
  if($('scanMode').value==='auto')scanTimer=setInterval(()=>{if(!locked){scanIndex=(scanIndex+1)%targets.length;updateHighlight();}},Number($('speed').value));
 }
-function pause(){stopTimer();$('scanStatus').textContent='Paused. Press Start scanning to continue.';}
+function pause(){stopTimer();}
 function flashTarget(index,className){
  const el=document.querySelector('.target[data-index="'+index+'"]');
  if(!el)return;
@@ -246,15 +246,15 @@ function flashTarget(index,className){
 }
 function selectTarget(){
  if(locked||!targets.length){return;}
- if(!running){if($('scanMode').value==='manual'){running=true;updateHighlight();}else{$('message').textContent='Press Start scanning first.';return;}}
+ if(!running){if($('scanMode').value==='manual'){running=true;updateHighlight();}else{return;}}
  const chosen=targets[scanIndex];
  if(!chosen)return;
  logAttempt(chosen);
  if(chosen&&chosen.correct){
   flashTarget(scanIndex,'flashCorrect');
-  locked=true;correctCount++;$('score').textContent='Correct selections: '+correctCount;
+  locked=true;correctCount++;
   $('message').className='good';$('message').textContent='Correct! Great selection! 🎉';
-  $('scanStatus').textContent='Correct target selected!';
+  
   stopTimer();celebrate();
   setTimeout(()=>{locked=false;buildRound();if($('scanMode').value==='auto')startTimer();},reducedMotion?900:1700);
  }else{
@@ -274,16 +274,16 @@ function onSwitch(){
 }
 function celebrate(){
  const canvas=$('confetti'),ctx=canvas.getContext('2d');
- if(!ctx||reducedMotion)return;
+ if(!ctx)return;
  const dpr=Math.max(1,window.devicePixelRatio||1);
  canvas.width=innerWidth*dpr;canvas.height=innerHeight*dpr;canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';
  ctx.setTransform(dpr,0,0,dpr,0,0);
- const pieces=Array.from({length:140},()=>({x:Math.random()*innerWidth,y:-20-Math.random()*innerHeight*.5,w:5+Math.random()*8,h:7+Math.random()*10,vx:(Math.random()-.5)*5,vy:2+Math.random()*5,rot:Math.random()*6,vr:(Math.random()-.5)*.2,color:['#ffe36e','#5cf0ad','#79d8ff','#ff8dc7','#c6a4ff'][Math.floor(Math.random()*5)]}));
+ const pieces=Array.from({length:180},()=>({x:Math.random()*innerWidth,y:-20-Math.random()*innerHeight*.5,w:5+Math.random()*8,h:7+Math.random()*10,vx:(Math.random()-.5)*5,vy:2+Math.random()*5,rot:Math.random()*6,vr:(Math.random()-.5)*.2,color:['#ffe36e','#5cf0ad','#79d8ff','#ff8dc7','#c6a4ff'][Math.floor(Math.random()*5)]}));
  let frames=0;
  function frame(){
   ctx.clearRect(0,0,innerWidth,innerHeight);
   pieces.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;p.vy+=.035;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();});
-  frames++;if(frames<130)requestAnimationFrame(frame);else ctx.clearRect(0,0,innerWidth,innerHeight);
+  frames++;if(frames<160)requestAnimationFrame(frame);else ctx.clearRect(0,0,innerWidth,innerHeight);
  }
  requestAnimationFrame(frame);
 }
@@ -312,7 +312,7 @@ $('startScan').addEventListener('click',()=>startTimer());
 $('pauseScan').addEventListener('click',pause);
 $('switchPress').addEventListener('click',()=>{if($('scanMode').value==='manual'){if(!running){advanceManual();return;}selectTarget();}else selectTarget();});
 $('newRound').addEventListener('click',()=>buildRound());
-$('resetScore').addEventListener('click',()=>{correctCount=0;wrongCount=0;$('score').textContent='Correct selections: 0';$('message').textContent='Score reset.';$('message').className='';});
+
 document.addEventListener('keydown',e=>{
  if(e.repeat||e.ctrlKey||e.altKey||e.metaKey)return;
  const tag=(document.activeElement&&document.activeElement.tagName||'').toLowerCase();
