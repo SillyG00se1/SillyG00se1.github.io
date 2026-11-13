@@ -219,7 +219,7 @@ $("taskHome").onclick=showHome;$("taskHint").onclick=showHint;focusHeading();
 function feedback(message,kind){const f=$("taskFeedback");f.className="feedback "+kind;f.textContent=message;f.classList.remove("hidden")}
 function correct(){
 if(answered)return;answered=true;sessionCorrect++;data.points+=10;data.totalCorrect++;data.correctByGrade[data.grade]=(data.correctByGrade[data.grade]||0)+1;
-let unlocked=false;const threshold=thresholds[data.grade];if(threshold&&data.correctByGrade[data.grade]>=threshold){data.grade++;unlocked=true}
+let unlocked=false;const threshold=thresholds[data.grade];if(threshold&&data.correctByGrade[data.grade]>=threshold){data.grade++;taskIndex=-1;unlocked=true}
 save();
 const msg=unlocked?"Correct. You earned 10 points. You unlocked grade "+data.grade+".": "Correct. You earned 10 points.";
 feedback(msg+" "+(currentTask.why||""),"good");
