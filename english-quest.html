@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#172b4d">
+<title>Word Quest</title>
+<style>
+:root{color-scheme:light;--ink:#172b4d;--paper:#fff;--soft:#eef3f8;--line:#c8d2df;--accent:#174f86;--good:#17633b;--bad:#8a2e27}
+*{box-sizing:border-box}
+body{margin:0;background:#f4f6f9;color:var(--ink);font:18px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:#172b4d;color:#fff;padding:18px max(18px,env(safe-area-inset-left));}
+header h1{font-size:1.7rem;margin:0 0 8px}
+header p{margin:0}
+main{max-width:850px;margin:0 auto;padding:20px 16px 48px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px;margin:0 0 18px}
+h2{font-size:1.35rem;line-height:1.3;margin:0 0 14px}
+h3{font-size:1.1rem;margin:0 0 8px}
+p{margin:0 0 12px}
+button,input,textarea{font:inherit}
+button{display:block;width:100%;text-align:left;padding:14px 16px;border:2px solid var(--accent);border-radius:10px;background:#fff;color:var(--ink);margin:10px 0;min-height:54px}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:4px solid #f0b429;outline-offset:3px}
+button.primary{background:var(--accent);color:#fff}
+button:disabled{opacity:.55}
+button.secondary{border-color:#66788d}
+input,textarea{width:100%;border:2px solid #66788d;border-radius:10px;padding:13px;background:#fff;color:#172b4d;min-height:54px}
+textarea{min-height:112px;resize:vertical}
+label{display:block;font-weight:700;margin:14px 0 6px}
+.small{font-size:.92rem;color:#40536b}
+.stats{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 13px}
+.stat strong{display:block;font-size:1.1rem}
+.progress{height:12px;background:#dce4ed;border-radius:20px;overflow:hidden;margin:8px 0 14px}
+.progress span{display:block;height:100%;background:#17633b;width:0}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+.actions button{flex:1 1 180px}
+.feedback{padding:12px;border-left:5px solid var(--accent);background:var(--soft);margin:14px 0;border-radius:4px}
+.feedback.good{border-color:var(--good)}
+.feedback.bad{border-color:var(--bad)}
+.hidden{display:none!important}
+ul{padding-left:24px}
+li{margin:6px 0}
+hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+@media(min-width:650px){main{padding-top:28px}.panel{padding:26px}}
+</style>
+</head>
+<body>
+<header>
+<h1>Word Quest</h1>
+<p>Read, play, earn points, and unlock new things.</p>
+</header>
+<main id="main">
+<section class="panel" aria-labelledby="welcomeTitle">
+<h2 id="welcomeTitle">Welcome to Word Quest</h2>
+<p>Build your English skills one mission at a time. You can take as long as you need.</p>
+<button class="primary" id="startButton">Start a mission</button>
+<button id="storeButton">Visit the store</button>
+<button class="secondary" id="progressButton">My progress</button>
+</section>
+<section class="panel" id="statusPanel" aria-label="Your progress">
+<div class="stats">
+<div class="stat">Grade level<strong id="gradeStat">2</strong></div>
+<div class="stat">Points<strong id="pointsStat">0</strong></div>
+<div class="stat">Items owned<strong id="ownedStat">0</strong></div>
+</div>
+<p id="gradeDescription">Your learning starts here.</p>
+<div class="progress" role="progressbar" aria-label="Progress toward the next grade level" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0" id="gradeProgress"><span id="gradeProgressBar"></span></div>
+<p class="small" id="progressDescription">Earn points by completing activities.</p>
+</section>
+<div id="view" aria-live="off"></div>
+<div id="announcer" class="hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+</main>
+<script>
+(function(){
+"use strict";
+const KEY="wordQuestProgressV1";
+const gradeNames={2:"Growing words",3:"Stronger sentences",4:"Reading detective",5:"Language explorer",6:"Word master"};
+const thresholds={2:8,3:10,4:12,5:14};
+const tasks={
+2:{
+vocab:[
+{q:"What does enormous mean?",opts:["very big","very quiet","very fast"],a:0,why:"Enormous means very big."},
+{q:"Which word means the same as begin?",opts:["finish","start","forget"],a:1,why:"Begin and start mean the same thing."},
+{q:"What is a habitat?",opts:["an animal's home","a kind of weather","a school subject"],a:0,why:"A habitat is the place where a plant or animal lives."}],
+spelling:[
+{q:"Spell the word that means the opposite of hot.",a:"cold",hint:"It starts with c."},
+{q:"Spell the word for a place where books are kept.",a:"library",hint:"It starts with l."},
+{q:"Complete the word: yest___day.",a:"yesterday",hint:"The full word names the day before today."}],
+sentence:[
+{q:"Choose the sentence that is written correctly.",opts:["the dog ran home.","The dog ran home.","The dog ran home"],a:1,why:"A sentence begins with a capital letter and ends with punctuation."},
+{q:"Which word completes this sentence? The birds ___ in the tree.",opts:["sings","sing","singing"],a:1,why:"Birds is plural, so use sing."}],
+reading:[
+{q:"Mia planted three seeds. She watered them every day. Soon, two green plants appeared. How many seeds did Mia plant?",opts:["two","three","five"],a:1,why:"The passage says Mia planted three seeds."},
+{q:"Where did the dog sleep? Ben's dog was tired after the long walk. It curled up on a soft bed near the window.",opts:["near the door","on a soft bed","outside"],a:1,why:"The dog curled up on a soft bed near the window."}],
+language:[
+{q:"Which word is an adjective?",opts:["quickly","blue","jump"],a:1,why:"Blue describes a person, place, or thing."},
+{q:"Which word rhymes with light?",opts:["late","bright","list"],a:1,why:"Light and bright have the same ending sound."}]
+},
+3:{
+vocab:[
+{q:"What does cautious mean?",opts:["careful","angry","sleepy"],a:0,why:"Cautious means careful to avoid danger or mistakes."},
+{q:"Which word is closest in meaning to assist?",opts:["help","hide","wait"],a:0,why:"Assist means help."},
+{q:"What does predict mean?",opts:["to tell what may happen","to remember the past","to ask a question"],a:0,why:"Predict means to say what you think will happen."}],
+spelling:[
+{q:"Spell the word that means full of wonder.",a:"amazing",hint:"It begins with a."},
+{q:"Spell the word for a person who teaches.",a:"teacher",hint:"It begins with t."},
+{q:"Complete the word: care___.",a:"careful",hint:"The word means paying attention."}],
+sentence:[
+{q:"Choose the sentence with correct punctuation.",opts:["Where are you going?","Where are you going.","where are you going?"],a:0,why:"A question ends with a question mark."},
+{q:"Choose the best word: We ___ the museum yesterday.",opts:["visit","visited","visiting"],a:1,why:"Yesterday tells us the action happened in the past."}],
+reading:[
+{q:"Why did Luis bring an umbrella? Dark clouds covered the sky. Luis checked the weather report, saw rain was coming, and packed an umbrella before leaving.",opts:["He expected rain.","He wanted shade.","He was going swimming."],a:0,why:"The weather report said rain was coming."},
+{q:"What is the main idea? Bees visit flowers to collect nectar. As they move, they carry pollen from flower to flower. This helps plants make seeds.",opts:["Bees help plants grow.","Flowers are always yellow.","Bees live underwater."],a:0,why:"The passage explains how bees help plants."}],
+language:[
+{q:"Which word is a synonym for tiny?",opts:["huge","small","rough"],a:1,why:"Tiny and small have similar meanings."},
+{q:"Which word is a noun?",opts:["happily","mountain","climb"],a:1,why:"A mountain is a person, place, or thing."}]
+},
+4:{
+vocab:[
+{q:"What does reluctant mean?",opts:["not sure you want to do something","very excited","easy to understand"],a:0,why:"Reluctant means unwilling or hesitant."},
+{q:"Which word means to examine closely?",opts:["inspect","ignore","invent"],a:0,why:"Inspect means to look at something carefully."},
+{q:"What does scarce mean?",opts:["hard to find or limited","very colorful","extremely loud"],a:0,why:"Scarce means there is not much of something."}],
+spelling:[
+{q:"Spell the word that means to look into something carefully.",a:"investigate",hint:"It begins with i."},
+{q:"Spell the word that means a choice you make.",a:"decision",hint:"It begins with d."}],
+sentence:[
+{q:"Choose the sentence with correct subject-verb agreement.",opts:["The group are ready.","The group is ready.","The group be ready."],a:1,why:"Group is treated as one unit here, so use is."},
+{q:"Choose the best transition: I studied hard. ___, I felt ready for the test.",opts:["However","As a result","Meanwhile"],a:1,why:"As a result shows that one thing happened because of another."}],
+reading:[
+{q:"What can you infer about Nia? Nia checked the trail map twice, filled her water bottle, and packed a jacket before the hike.",opts:["She likes to be prepared.","She dislikes walking.","She forgot where she was going."],a:0,why:"Her actions show that she planned ahead."},
+{q:"What is the author's purpose? Recycling paper saves trees and reduces waste. Communities can help by placing paper in recycling bins.",opts:["to entertain with a story","to persuade or inform readers about recycling","to describe a character"],a:1,why:"The passage gives information and encourages recycling."}],
+language:[
+{q:"Which word is an antonym of expand?",opts:["increase","stretch","shrink"],a:2,why:"Shrink means to become smaller, the opposite of expand."},
+{q:"Which sentence uses a metaphor?",opts:["The classroom was a zoo.","The classroom was noisy.","The classroom had twenty desks."],a:0,why:"The sentence compares the classroom to a zoo without using like or as."}]
+},
+5:{
+vocab:[
+{q:"What does significant mean?",opts:["important","ordinary","invisible"],a:0,why:"Significant means important or meaningful."},
+{q:"What does the prefix mis- usually mean?",opts:["again","wrongly or badly","before"],a:1,why:"Mis- can mean wrongly or badly, as in misunderstand."},
+{q:"What does conclude mean?",opts:["to reach an ending or decision","to begin a journey","to make a copy"],a:0,why:"Conclude means to bring something to an end or decide after thinking."}],
+spelling:[
+{q:"Spell the word meaning able to be depended on.",a:"reliable",hint:"It begins with r."},
+{q:"Spell the word meaning to communicate without speaking.",a:"gesture",hint:"It begins with g."}],
+sentence:[
+{q:"Choose the clearest combined sentence.",opts:["The storm ended. We went outside.","After the storm ended, we went outside.","The storm ended, and outside."],a:1,why:"The first clause gives the time for the second action."},
+{q:"Choose the correct word: Each of the players ___ a uniform.",opts:["have","has","having"],a:1,why:"Each is singular, so use has."}],
+reading:[
+{q:"What is the best summary? A town replaced some streetlights with energy-saving bulbs. The new bulbs use less electricity and last longer. The town expects to save money over time.",opts:["The town changed its lights to save energy and money.","The town removed every streetlight.","The new bulbs are more expensive to make."],a:0,why:"The summary includes the main change and its purpose."},
+{q:"Which detail best supports the idea that the character is determined? Amira's first science experiment failed. She read more about the topic, changed her method, and tried again the next afternoon.",opts:["It was a science experiment.","She tried again after changing her method.","It happened in the afternoon."],a:1,why:"Trying again after changing her method shows determination."}],
+language:[
+{q:"Which word contains a suffix meaning 'full of'?",opts:["hopeful","replay","preview"],a:0,why:"The suffix -ful means full of."},
+{q:"What is the tone of this sentence? 'At last, the team had solved the mystery!'",opts:["excited","uncertain","bored"],a:0,why:"The exclamation and phrase at last show excitement."}]
+},
+6:{
+vocab:[
+{q:"What does ambiguous mean?",opts:["having more than one possible meaning","very easy to prove","completely harmless"],a:0,why:"Ambiguous means unclear because it can be understood in more than one way."},
+{q:"What does the root struct mean in construct?",opts:["build","write","see"],a:0,why:"Struct relates to building, as in construct and structure."},
+{q:"Which word best replaces brief?",opts:["concise","distant","complex"],a:0,why:"Concise means short but clear."}],
+spelling:[
+{q:"Spell the word meaning to make something easier to understand.",a:"clarify",hint:"It begins with c."},
+{q:"Spell the word meaning a reasonable explanation supported by evidence.",a:"argument",hint:"It begins with a."}],
+sentence:[
+{q:"Choose the sentence with the clearest use of a semicolon.",opts:["The rain stopped; the sun came out.","The rain; stopped the sun came out.","The rain stopped,; the sun came out."],a:0,why:"A semicolon can join two closely related complete sentences."},
+{q:"Choose the best revision: 'The book was good. It was interesting.'",opts:["The book was good and interesting.","The book was good. Interesting it was.","Good, the book was interesting."],a:0,why:"The revision combines the repeated idea smoothly."}],
+reading:[
+{q:"Which claim is best supported? A school garden gives students a place to study plant life. Students measure growth, record observations, and compare how plants respond to sunlight.",opts:["A garden can support hands-on science learning.","Every student wants to become a farmer.","Plants grow at the same rate in every place."],a:0,why:"The examples show students using the garden to investigate plant growth."},
+{q:"What is the effect of the final sentence? The library extended its hours during exam week. More students used the quiet study rooms. Several students said the extra time helped them prepare.",opts:["It gives evidence of the change's benefit.","It introduces an unrelated problem.","It explains how to build a library."],a:0,why:"The final sentence gives a student's view of the benefit."}],
+language:[
+{q:"Which sentence uses personification?",opts:["The wind whispered through the trees.","The wind was strong.","The trees moved in the wind."],a:0,why:"Whispered gives the wind a human action."},
+{q:"What does the phrase 'weigh the evidence' mean?",opts:["measure its physical weight","consider how strong and useful it is","put it on a scale"],a:1,why:"The phrase means to examine evidence carefully before deciding."}]
+}
+};
+const activities=[
+{id:"vocab",name:"Vocabulary Quest",desc:"Explore word meanings and choose the best word."},
+{id:"spelling",name:"Word Builder",desc:"Use your braille display to type words."},
+{id:"sentence",name:"Sentence Lab",desc:"Practice grammar, punctuation, and clear sentences."},
+{id:"reading",name:"Reading Missions",desc:"Read a short passage and answer questions."},
+{id:"language",name:"Word Challenges",desc:"Explore synonyms, antonyms, word parts, and language."}
+];
+const products=[
+{id:"notebook",name:"Explorer notebook",price:25,desc:"A notebook for collecting new words."},
+{id:"headphones",name:"Studio headphones",price:40,desc:"A new look for your study space."},
+{id:"robot",name:"Helper robot",price:65,desc:"A little helper for your Word Quest base."},
+{id:"treehouse",name:"Treehouse hideout",price:90,desc:"Unlock a quiet reading hideout."},
+{id:"spaceship",name:"Starship",price:140,desc:"Your own ship for the next adventure."},
+{id:"trophy",name:"Golden word trophy",price:180,desc:"A trophy for your collection."},
+{id:"library",name:"Secret library",price:250,desc:"Unlock your own special library."}
+];
+let data=load();
+let currentTask=null, currentActivity=null, taskIndex=0, sessionCorrect=0, answered=false;
+const $=id=>document.getElementById(id);
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&typeof d==="object")return Object.assign({grade:2,points:0,owned:[],correctByGrade:{},totalCorrect:0,totalSessions:0},d)}catch(e){}return{grade:2,points:0,owned:[],correctByGrade:{},totalCorrect:0,totalSessions:0}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){announce("Progress could not be saved on this device.")}updateStats()}
+function announce(s){$("announcer").textContent="";window.setTimeout(()=>{$("announcer").textContent=s},30)}
+function focusHeading(){const h=$("view").querySelector("h2");if(h){h.setAttribute("tabindex","-1");h.focus()}}
+function updateStats(){
+$("gradeStat").textContent=data.grade;$("pointsStat").textContent=data.points;$("ownedStat").textContent=data.owned.length;
+const needed=thresholds[data.grade]||0, got=data.correctByGrade[data.grade]||0;
+$("gradeDescription").textContent=gradeNames[data.grade]+". Keep practicing to unlock the next grade.";
+$("gradeProgress").setAttribute("aria-valuemax",needed||1);$("gradeProgress").setAttribute("aria-valuenow",Math.min(got,needed));
+$("gradeProgressBar").style.width=(needed?Math.min(100,got/needed*100):100)+"%";
+$("progressDescription").textContent=needed?(got+" of "+needed+" correct answers toward grade "+(data.grade+1)+"."):"You have reached grade 6. Keep earning points and exploring.";
+}
+function showHome(){currentTask=null;currentActivity=null;$("view").innerHTML='<section class="panel"><h2>Choose your next adventure</h2><p>Pick a learning game. You can switch activities whenever you like.</p><div id="activityList"></div><hr><button id="homeStore">Visit the store</button><button class="secondary" id="homeProgress">My progress</button></section>' ;activities.forEach(a=>{const b=document.createElement("button");b.textContent=a.name+". "+a.desc;b.addEventListener("click",()=>startActivity(a.id));$("activityList").appendChild(b)});$("homeStore").onclick=showStore;$("homeProgress").onclick=showProgress;focusHeading()}
+function startActivity(id){currentActivity=id;taskIndex=0;sessionCorrect=0;data.totalSessions++;const bank=tasks[data.grade][id];if(!bank||!bank.length){announce("No activity found.");return}showTask()}
+function showTask(){
+const bank=tasks[data.grade][currentActivity];currentTask=bank[taskIndex%bank.length];answered=false;
+const activity=activities.find(a=>a.id===currentActivity);
+let html='<section class="panel"><p class="small">'+activity.name+' · Grade '+data.grade+'</p><h2 id="taskTitle">'+activity.name+'</h2>';
+if(currentActivity==="reading"){html+='<p>'+currentTask.q+'</p>'}else{html+='<p>'+currentTask.q+'</p>'}
+if(currentTask.opts){html+='<div id="choices" role="group" aria-label="Answer choices">';currentTask.opts.forEach((o,i)=>{html+='<button type="button" data-choice="'+i+'">'+String.fromCharCode(65+i)+'. '+o+'</button>'});html+='</div>'}
+else{html+='<form id="answerForm"><label for="answerInput">Type your answer</label><textarea id="answerInput" name="answer" rows="2" autocapitalize="none" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done"></textarea><p class="small">Enter your answer with the Chameleon braille display. Use the normal VoiceOver text-entry controls.</p><button class="primary" type="submit">Check answer</button></form>'}
+html+='<div id="taskFeedback" class="feedback hidden" role="status" aria-live="polite" aria-atomic="true"></div><div class="actions"><button class="secondary" id="taskHome">Choose another activity</button><button class="secondary" id="taskHint">Give me a hint</button></div></section>';
+$("view").innerHTML=html;
+if(currentTask.opts){$("choices").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>checkChoice(Number(b.dataset.choice))))}
+else{$("answerForm").addEventListener("submit",e=>{e.preventDefault();checkEntry($("answerInput").value)})}
+$("taskHome").onclick=showHome;$("taskHint").onclick=showHint;focusHeading();
+}
+function feedback(message,kind){const f=$("taskFeedback");f.className="feedback "+kind;f.textContent=message;f.classList.remove("hidden")}
+function correct(){
+if(answered)return;answered=true;sessionCorrect++;data.points+=10;data.totalCorrect++;data.correctByGrade[data.grade]=(data.correctByGrade[data.grade]||0)+1;
+let unlocked=false;const threshold=thresholds[data.grade];if(threshold&&data.correctByGrade[data.grade]>=threshold){data.grade++;unlocked=true}
+save();
+const msg=unlocked?"Correct. You earned 10 points. You unlocked grade "+data.grade+".": "Correct. You earned 10 points.";
+feedback(msg+" "+(currentTask.why||""),"good");
+const buttons=$("view").querySelectorAll("#choices button, #answerForm button");buttons.forEach(b=>b.disabled=true);
+const next=document.createElement("button");next.className="primary";next.textContent="Next question";next.addEventListener("click",()=>{taskIndex++;showTask()});
+$("taskFeedback").after(next);next.focus();announce(msg);
+}
+function incorrect(){feedback("Not quite. Try again. You can ask for a hint.","bad");const input=$("answerInput");if(input)input.focus()}
+function checkChoice(n){if(n===currentTask.a)correct();else incorrect()}
+function normalize(s){return s.toLowerCase().trim().replace(/[.,!?;:'"]/g,"").replace(/\s+/g," ")}
+function checkEntry(v){if(normalize(v)===normalize(currentTask.a))correct();else incorrect()}
+function showHint(){if(!currentTask)return;let hint=currentTask.hint||currentTask.why||"Read the question again and look for an important clue.";feedback("Hint: "+hint,"");announce("Hint: "+hint)}
+function showStore(){
+currentActivity=null;let html='<section class="panel"><h2>Word Quest Store</h2><p>You have '+data.points+' points.</p><p>Choose an item to buy. Purchased items stay in your collection.</p><div id="storeItems"></div><hr><h3>Your collection</h3><ul>';
+if(data.owned.length){data.owned.forEach(id=>{const p=products.find(x=>x.id===id);if(p)html+='<li>'+p.name+'</li>'})}else html+='<li>You have not bought anything yet.</li>';
+html+='</ul><button class="secondary" id="storeBack">Back to activities</button></section>';$("view").innerHTML=html;
+products.filter(p=>!data.owned.includes(p.id)).forEach(p=>{const b=document.createElement("button");b.textContent=p.name+". "+p.desc+" Cost: "+p.price+" points.";b.disabled=data.points<p.price;b.addEventListener("click",()=>buy(p));$("storeItems").appendChild(b)});
+$("storeBack").onclick=showHome;focusHeading();
+}
+function buy(p){if(data.owned.includes(p.id)||data.points<p.price)return;data.points-=p.price;data.owned.push(p.id);save();announce("You bought "+p.name+".");showStore()}
+function showProgress(){
+currentActivity=null;const grade=data.grade;const correct=data.totalCorrect;
+$("view").innerHTML='<section class="panel"><h2>My progress</h2><p>Current grade level: '+grade+'</p><p>Total correct answers: '+correct+'</p><p>Points available: '+data.points+'</p><p>Items in your collection: '+data.owned.length+'</p><h3>Skills you can practice</h3><ul>'+activities.map(a=>'<li>'+a.name+'</li>').join("")+'</ul><button id="progressStore">Visit the store</button><button class="secondary" id="progressBack">Back to activities</button></section>';
+$("progressStore").onclick=showStore;$("progressBack").onclick=showHome;focusHeading();
+}
+$("startButton").onclick=showHome;$("storeButton").onclick=showStore;$("progressButton").onclick=showProgress;
+updateStats();
+})();
+</script>
+</body>
+</html>
