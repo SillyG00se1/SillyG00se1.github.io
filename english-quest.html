@@ -170,6 +170,330 @@ language:[
 {q:"What does the phrase 'weigh the evidence' mean?",opts:["measure its physical weight","consider how strong and useful it is","put it on a scale"],a:1,why:"The phrase means to examine evidence carefully before deciding."}]
 }
 };
+
+/* Expanded question bank: each of the five levels has 12 questions in each of
+   the five activities, for 300 questions total. */
+const extra = {
+2:{
+vocab:[
+["What does curious mean?",["eager to learn","ready to sleep","easy to break"],0,"Curious means wanting to know or learn something."],
+["Which word means the same as tiny?",["huge","small","bright"],1,"Tiny and small have similar meanings."],
+["What does cheerful mean?",["happy","hungry","slow"],0,"Cheerful means happy and positive."],
+["Which word means to repair something?",["break","fix","hide"],1,"To fix something is to repair it."],
+["What does enormous mean?",["very small","very large","very old"],1,"Enormous means very large."],
+["Which word means the opposite of empty?",["full","open","quiet"],0,"Full is the opposite of empty."],
+["What is a journey?",["a trip","a snack","a game piece"],0,"A journey is a trip from one place to another."],
+["Which word means to notice something?",["observe","forget","borrow"],0,"Observe means to watch or notice carefully."],
+["What does fragile mean?",["easily broken","very heavy","full of energy"],0,"Fragile things can break easily."],
+],
+spelling:[
+["Spell the word that means not difficult.","easy","It begins with e."],
+["Spell the word for frozen water.","ice","It begins with i."],
+["Spell the word that means to move quickly on foot.","run","It has three letters."],
+["Spell the word for the meal eaten in the morning.","breakfast","It begins with b."],
+["Spell the word that means the opposite of dark.","light","It begins with l."],
+["Spell the word for a place where children learn.","school","It begins with s."],
+["Spell the word that means to look at words and understand them.","read","It rhymes with seed."],
+["Spell the word for a young dog.","puppy","It begins with p."],
+["Spell the word that means to make something clean with water.","wash","It begins with w."],
+],
+sentence:[
+["Choose the sentence with the correct capital letter.",["my friend likes music.","My friend likes music.","My Friend likes music."],1,"A sentence begins with a capital letter."],
+["Choose the correct ending mark: Please close the door",[".","?","!"],0,"A polite request usually ends with a period."],
+["Which word completes the sentence? The cat ___ on the rug.",["sleep","sleeps","sleeping"],1,"A singular subject takes the verb sleeps."],
+["Choose the correct plural of fox.",["foxs","foxes","foxies"],1,"Fox becomes foxes in the plural."],
+["Which sentence is a question?",["We went home.","Did you call me?","The sky is blue."],1,"A question asks something and ends with a question mark."],
+["Choose the correct word: I ___ my lunch yesterday.",["eat","ate","eating"],1,"A past action uses ate."],
+["Which word is a describing word? The soft blanket felt warm.",["blanket","felt","soft"],2,"Soft describes the blanket."],
+["Choose the sentence with correct punctuation.",["Look out!","Look out","look out."],0,"An exclamation mark can show a sudden warning."],
+["Which word completes the sentence? Two ___ flew by.",["bird","birds","bird's"],1,"Two tells us to use the plural noun birds."],
+["Choose the correct pronoun: Sam and ___ played chess.",["me","I","mine"],1,"I is the subject pronoun in this sentence."],
+],
+reading:[
+["What did the children do first? The class put soil in small pots. Then each child planted a seed and added water.",["They added water.","They planted a seed.","They put soil in pots."],2,"The first action was putting soil in the pots."],
+["Why did the room become brighter? Lena opened the curtains, and sunlight spread across the floor.",["She turned on a lamp.","She opened the curtains.","The lights went out."],1,"Opening the curtains let sunlight into the room."],
+["What is the passage mostly about? Omar feeds his fish each morning. He cleans the tank every week and checks that the water is clear.",["How Omar cares for his fish.","How to catch fish in a lake.","What fish eat in the wild."],0,"The details describe Omar caring for his fish."],
+["Where did the family go? On Saturday, the family packed sandwiches and drove to the beach. They built a sandcastle near the water.",["to the library","to the beach","to a farm"],1,"The passage says they drove to the beach."],
+["What happened after the rain? The clouds moved away, and a rainbow appeared over the houses.",["A rainbow appeared.","The rain became snow.","The sun disappeared."],0,"The rainbow appeared after the rain."],
+["Why did Ben wear boots? The path was muddy after the storm, so Ben put on his tall boots before walking outside.",["The path was muddy.","It was very hot.","He was going swimming."],0,"Boots helped protect his feet from the mud."],
+["Which detail tells when the event happened? Every evening, Priya reads for twenty minutes before bed.",["for twenty minutes","before bed","Every evening"],2,"Every evening tells when she reads."],
+["What can you tell about the garden? Green shoots pushed through the soil, and tiny leaves opened in the warm sun.",["Plants are beginning to grow.","The garden is covered in snow.","The plants have been removed."],0,"Shoots and leaves show new plant growth."],
+["What is the best title? A train carries people between towns. It follows tracks and stops at stations along the way.",["A Trip by Train","A Day at the Pool","How to Bake Bread"],0,"The passage explains how a train carries people."],
+["Why did Maya bring a map? She had never visited the park before and wanted to find the lake.",["She wanted to find the lake.","She planned to draw a picture.","She wanted to stay indoors."],0,"The map could help her find the lake."],
+],
+language:[
+["Which word is an action word?",["dance","gentle","pencil"],0,"Dance names an action."],
+["Which word rhymes with cake?",["cook","lake","kick"],1,"Cake and lake rhyme."],
+["Which word is a noun?",["garden","slowly","bright"],0,"A garden is a place."],
+["Which word means the opposite of loud?",["noisy","quiet","strong"],1,"Quiet is the opposite of loud."],
+["Which word describes how someone might walk?",["carefully","table","green"],0,"Carefully tells how an action is done."],
+["Which pair of words are opposites?",["hot and cold","small and tiny","glad and happy"],0,"Hot and cold have opposite meanings."],
+["Which word has the same beginning sound as moon?",["map","sun","boat"],0,"Moon and map begin with the m sound."],
+["Which word is a compound word?",["sunshine","yellow","running"],0,"Sunshine combines sun and shine."],
+["Which word names a person?",["doctor","quickly","soft"],0,"A doctor is a person."],
+["Which word means the same as happy?",["glad","angry","tired"],0,"Glad and happy have similar meanings."]
+]
+},
+3:{
+vocab:[
+["What does eager mean?",["excited to do something","afraid of everything","too tired to move"],0,"Eager means excited or ready to do something."],
+["Which word means to gather things together?",["collect","scatter","remove"],0,"Collect means to bring things together."],
+["What does enormous mean?",["very large","very quiet","very thin"],0,"Enormous means extremely large."],
+["Which word is closest in meaning to reply?",["answer","question","forget"],0,"A reply is an answer."],
+["What does protect mean?",["keep safe","make louder","move away"],0,"Protect means to keep someone or something safe."],
+["Which word means to continue?",["stop","keep going","turn around"],1,"Continue means to keep going."],
+["What does exhausted mean?",["very tired","very hungry","very surprised"],0,"Exhausted means extremely tired."],
+["Which word means to choose?",["select","repair","describe"],0,"Select means to choose."],
+["What does ordinary mean?",["usual or common","rare and unusual","dangerous"],0,"Ordinary means usual or common."]
+],
+spelling:[
+["Spell the word that means to answer.","reply","It begins with r."],
+["Spell the word for a place where planes arrive and leave.","airport","It begins with a."],
+["Spell the word that means to keep safe.","protect","It begins with p."],
+["Spell the word for a person who visits a place.","visitor","It begins with v."],
+["Spell the word meaning very tired.","exhausted","It begins with e."],
+["Spell the word that means to pick one thing.","choose","It begins with ch."],
+["Spell the word for a written message sent to someone.","letter","It begins with l."],
+["Spell the word that means to make something better.","improve","It begins with i."],
+["Spell the word for a place where books are borrowed.","library","It begins with l."],
+["Spell the word meaning to work together.","cooperate","It begins with c."]
+],
+sentence:[
+["Choose the sentence with the correct verb.",["The children was laughing.","The children were laughing.","The children is laughing."],1,"Children is plural, so use were."],
+["Choose the correct possessive form.",["the dogs bone","the dog's bone","the dogs' bone"],1,"The bone belongs to one dog, so use dog's."],
+["Which sentence uses a comma correctly?",["After lunch, we went outside.","After, lunch we went outside.","After lunch we, went outside."],0,"A comma follows the introductory phrase."],
+["Choose the best word: I wanted to play, ___ it began to rain.",["because","but","so"],1,"But shows a contrast."],
+["Which sentence is written in the past tense?",["She walks to school.","She walked to school.","She will walk to school."],1,"Walked is the past-tense form."],
+["Choose the correct word: There are ___ apples in the bowl.",["much","many","anyone"],1,"Many is used with countable plural nouns."],
+["Which sentence has a complete thought?",["Because the bus was late.","The bus arrived after noon.","When the bus arrived."],1,"The second sentence expresses a complete thought."],
+["Choose the correct contraction for they are.",["their","they're","there"],1,"They're combines they and are."],
+["Which word completes the sentence? The puppy wagged ___ tail.",["it's","its","it"],1,"Its shows that the tail belongs to the puppy."],
+["Choose the best transition: First we mixed the flour. ___, we added water.",["Next","Instead","Although"],0,"Next shows the following step."]
+],
+reading:[
+["What is the main idea? A neighborhood group planted trees along the sidewalks. The trees will provide shade and make the streets more pleasant.",["Neighbors worked together to improve their streets.","Trees should never be planted near sidewalks.","The group built a new road."],0,"The details explain why the neighbors planted trees."],
+["What can you infer about Eli? Eli reread the directions, checked each answer, and corrected two mistakes before turning in his work.",["He wanted his work to be accurate.","He did not understand the assignment.","He finished without checking."],0,"Checking and correcting show care about accuracy."],
+["Why did the coach stop practice? Dark clouds gathered, thunder sounded, and the coach asked everyone to go inside.",["A storm was approaching.","The team had won.","The field was too small."],0,"Thunder and dark clouds signal a storm."],
+["Which detail supports the idea that the trip was long? The travelers left before sunrise and did not reach the campsite until late evening.",["They packed sandwiches.","They left before sunrise and arrived late.","The campsite had trees."],1,"The early departure and late arrival show a long trip."],
+["What is the author's purpose? Wear a helmet whenever you ride a bicycle. A helmet can help protect your head if you fall.",["to give safety advice","to tell a funny story","to describe a vacation"],0,"The passage gives advice about bicycle safety."],
+["What happened because the power went out? The lights went dark, so the family used flashlights to find candles.",["They used flashlights.","They watched television.","They opened the refrigerator."],0,"The family used flashlights after the lights went out."],
+["What does the word enormous mean in this passage? The enormous oak tree stretched above the roof and shaded the entire yard.",["very large","very young","very weak"],0,"The tree is described as very large."],
+["Which statement is a fact? The museum opens at nine each morning. Many visitors say it is the best museum in town.",["The museum opens at nine.","It is the best museum.","Everyone enjoys museums."],0,"Opening time can be checked; best is an opinion."],
+["What is the problem in the story? The class planned an outdoor picnic, but heavy rain began just before lunch.",["Rain threatened the picnic.","The class forgot to bring food.","The picnic lasted too long."],0,"The rain creates a problem for the outdoor plan."],
+["What is the best summary? A young bird fell from its nest. A nearby adult bird called loudly, and a wildlife worker safely returned the young bird.",["A young bird was helped back to safety.","A worker built a new nest.","A bird flew across the ocean."],0,"The summary includes the main event and outcome."]
+],
+language:[
+["Which word is a synonym for brave?",["courageous","careless","silent"],0,"Courageous means brave."],
+["Which word is an antonym of ancient?",["modern","old","historic"],0,"Modern is the opposite of ancient."],
+["What does the prefix re- mean in replay?",["again","not","under"],0,"Re- means again."],
+["Which word is an adverb?",["slowly","slow","slowness"],0,"Slowly describes how an action happens."],
+["Which phrase is a simile?",["as quiet as a mouse","the quiet room","quietly speaking"],0,"A simile compares using like or as."],
+["Which word has a suffix that means a person who does something?",["painter","painting","painted"],0,"The suffix -er can name a person who performs an action."],
+["Which word is an antonym of narrow?",["wide","thin","short"],0,"Wide is the opposite of narrow."],
+["What does the expression 'lend a hand' mean?",["help someone","wave hello","borrow money"],0,"Lend a hand means to help."],
+["Which word is a verb?",["discover","discovery","discovered"],0,"Discover is the base verb."],
+["Which word is a synonym for enormous?",["gigantic","tiny","ordinary"],0,"Gigantic and enormous have similar meanings."]
+]
+},
+4:{
+vocab:[
+["What does observe mean?",["to watch carefully","to guess without looking","to forget quickly"],0,"Observe means to watch or notice carefully."],
+["What does fortunate mean?",["lucky","confused","unfair"],0,"Fortunate means lucky."],
+["Which word means to reduce something?",["decrease","increase","decorate"],0,"Decrease means to make or become less."],
+["What does persuade mean?",["to convince someone","to confuse a story","to measure a distance"],0,"Persuade means to convince someone to think or act a certain way."],
+["Which word means to avoid something?",["prevent","approach","include"],0,"Prevent means to stop something from happening."],
+["What does accurate mean?",["correct and exact","loud and clear","quick and easy"],0,"Accurate means correct and exact."],
+["Which word means a careful examination?",["inspection","celebration","prediction"],0,"An inspection is a careful examination."],
+["What does frequent mean?",["happening often","happening once","happening secretly"],0,"Frequent means happening often."],
+["Which word means to explain the meaning of?",["interpret","interrupt","invent"],0,"Interpret means to explain or understand meaning."]
+],
+spelling:[
+["Spell the word meaning correct and exact.","accurate","It begins with a."],
+["Spell the word meaning to convince someone.","persuade","It begins with p."],
+["Spell the word meaning happening often.","frequent","It begins with f."],
+["Spell the word for a careful examination.","inspection","It begins with i."],
+["Spell the word meaning to explain or understand.","interpret","It begins with i."],
+["Spell the word meaning lucky.","fortunate","It begins with f."],
+["Spell the word meaning to make something smaller or less.","decrease","It begins with d."],
+["Spell the word meaning to stop something from happening.","prevent","It begins with p."],
+["Spell the word for a conclusion based on clues.","inference","It begins with i."],
+["Spell the word meaning to look at carefully.","observe","It begins with o."]
+],
+sentence:[
+["Choose the sentence with correct subject-verb agreement.",["Neither of the answers are correct.","Neither of the answers is correct.","Neither answers is correct."],1,"Neither is singular in this sentence, so use is."],
+["Choose the best revision: 'The book was long. The book was exciting.'",["The book was long, but exciting.","The book was long and exciting.","The book was long. And exciting."],1,"Combining the ideas removes repetition."],
+["Which sentence uses a semicolon correctly?",["I packed a lunch; then I left for school.","I packed; a lunch then I left.","I packed a lunch; because I was hungry."],0,"A semicolon can connect closely related complete thoughts."],
+["Choose the correct word: The team practiced ___ than before.",["more carefully","most careful","careful"],0,"More carefully correctly compares how the team practiced."],
+["Which sentence uses quotation marks correctly?",["Mia said, "I am ready."","Mia said, I am "ready.","Mia said "I am ready."],0,"Quotation marks surround the exact words spoken."],
+["Choose the best transition: The road was icy. ___, the driver slowed down.",["Therefore","For example","Meanwhile"],0,"Therefore shows a result."],
+["Which sentence has a misplaced modifier?",["Running quickly, the finish line came into view.","Running quickly, Ava reached the finish line.","Ava ran quickly toward the finish line."],0,"The first sentence incorrectly makes the finish line seem to be running."],
+["Choose the correct verb: By noon, the students ___ the project.",["finished","had finished","finishing"],1,"Had finished shows the action was completed by a past time."],
+["Which sentence uses a colon correctly?",["Bring three items: a pencil, paper, and a ruler.","Bring: three items a pencil, paper, and a ruler.","Bring three: items a pencil, paper, and a ruler."],0,"A colon can introduce a list after a complete thought."],
+["Choose the clearest sentence.",["Due to the fact that it rained, the game was canceled.","Because it rained, the game was canceled.","It rained, the game due to canceled."],1,"Because states the reason directly and clearly."]
+],
+reading:[
+["What is the author's point of view? The writer describes how she learned to ride a bicycle, including her early falls and later success.",["first person","third person","second person"],0,"The writer uses her own experience and refers to herself."],
+["Which evidence best supports the claim that exercise can improve mood? Researchers found that people who took regular walks reported feeling less stressed.",["People who walked regularly reported less stress.","Some people own walking shoes.","Walking paths can be made of gravel."],0,"The reported change in stress directly supports the claim."],
+["What can you infer about the inventor? After each failed test, the inventor adjusted the design and tried again.",["The inventor is persistent.","The inventor dislikes experiments.","The inventor stopped working."],0,"Repeatedly adjusting and trying again shows persistence."],
+["What is the main conflict? Two friends both want to lead the project, and neither agrees to share the role.",["They disagree about leadership.","They cannot find the project.","They have finished early."],0,"Their disagreement creates the central conflict."],
+["What does the word scarce mean? Fresh water was scarce during the drought, so families used it carefully.",["limited or hard to find","plentiful and easy to get","unsafe to drink"],0,"The drought made fresh water limited."],
+["Which statement is an opinion?",["The bridge is two hundred meters long.","The bridge opened in 1998.","The bridge is the most beautiful in the country."],2,"Most beautiful is a judgment, not a measurable fact."],
+["How does the second sentence support the first? The city added more bus routes. As a result, residents in several neighborhoods can reach the hospital more easily.",["It explains a benefit of the new routes.","It introduces an unrelated event.","It disagrees with the first sentence."],0,"The second sentence describes how the routes help residents."],
+["What is the likely meaning of the phrase 'a turning point'? After months of practice, the athlete's first successful race was a turning point.",["an important moment of change","a place to turn around","a minor mistake"],0,"The race marked an important change in progress."],
+["Which detail is most relevant to the main idea that sleep supports learning? Students who slept well remembered more of the material the next day.",["They remembered more after sleeping well.","The classroom had blue walls.","The students carried backpacks."],0,"The detail directly connects sleep and memory."],
+["What is the best summary? A community center offered free computer classes. Adults learned to use email, search for jobs, and complete online forms.",["Free classes helped adults build useful computer skills.","The center bought several new computers.","Adults stopped using email."],0,"The summary captures the program and its purpose."]
+],
+language:[
+["Which word is an antonym of temporary?",["permanent","brief","recent"],0,"Permanent means lasting, the opposite of temporary."],
+["What does the prefix pre- mean in preview?",["before","after","against"],0,"Pre- means before."],
+["Which sentence contains hyperbole?",["I have told you a million times.","I told you twice.","I told you yesterday."],0,"A million times is an exaggeration for effect."],
+["Which word is a synonym for cautious?",["careful","reckless","impatient"],0,"Cautious and careful have similar meanings."],
+["What is the meaning of the root port in transport?",["carry","write","look"],0,"Port relates to carrying or moving."],
+["Which phrase is an example of alliteration?",["wild winds whistle","the wind is strong","a windy afternoon"],0,"The repeated w sound creates alliteration."],
+["Which word has a suffix that means 'without'?",["hopeless","hopeful","hoping"],0,"The suffix -less means without."],
+["What does the idiom 'break the ice' mean?",["help people feel comfortable","damage frozen water","end a friendship"],0,"The idiom means to make a social situation less awkward."],
+["Which sentence uses an adverb to modify a verb?",["She spoke softly.","The soft blanket was warm.","Her voice was soft."],0,"Softly describes how she spoke."],
+["Which word is a synonym for reluctant?",["hesitant","eager","certain"],0,"Hesitant and reluctant have similar meanings."]
+]
+},
+5:{
+vocab:[
+["What does analyze mean?",["examine carefully","copy exactly","avoid completely"],0,"Analyze means to examine something closely."],
+["What does contrast mean?",["show differences","show agreement","repeat an idea"],0,"Contrast means to show how things differ."],
+["Which word means to support with evidence?",["substantiate","decorate","interrupt"],0,"Substantiate means to support a claim with evidence."],
+["What does scarce mean?",["limited in amount","easy to replace","widely available"],0,"Scarce means limited or hard to find."],
+["Which word means to make something stronger?",["reinforce","remove","weaken"],0,"Reinforce means to strengthen or support."],
+["What does relevant mean?",["connected to the topic","difficult to pronounce","completely unrelated"],0,"Relevant information relates directly to the subject."],
+["Which word means to predict based on evidence?",["forecast","recall","translate"],0,"Forecast means to predict what may happen."],
+["What does establish mean?",["set up or prove","hide from view","take apart"],0,"Establish can mean to set up or show something to be true."],
+["Which word means to examine two things for similarities?",["compare","separate","dismiss"],0,"Compare means to look for similarities and differences."]
+],
+spelling:[
+["Spell the word meaning to examine carefully.","analyze","It begins with a."],
+["Spell the word meaning connected to the topic.","relevant","It begins with r."],
+["Spell the word meaning to strengthen or support.","reinforce","It begins with r."],
+["Spell the word meaning to prove with evidence.","substantiate","It begins with s."],
+["Spell the word meaning to show differences.","contrast","It begins with c."],
+["Spell the word meaning to predict what may happen.","forecast","It begins with f."],
+["Spell the word meaning to set up or prove.","establish","It begins with e."],
+["Spell the word meaning limited in amount.","scarce","It begins with s."],
+["Spell the word meaning to look for similarities.","compare","It begins with c."],
+["Spell the word meaning a result or effect.","consequence","It begins with c."]
+],
+sentence:[
+["Choose the sentence with correct parallel structure.",["She enjoys reading, writing, and swimming.","She enjoys reading, to write, and swimming.","She enjoys to read, writing, and swim."],0,"The three activities use matching -ing forms."],
+["Choose the best revision: 'The reason is because the road was closed.'",["The reason is that the road was closed.","The reason because the road was closed.","The road was closed for the reason because."],0,"The revision removes the redundant phrase."],
+["Which sentence uses a transition to show contrast?",["The plan was costly; however, it saved time.","The plan was costly; therefore, it saved time.","The plan was costly; for example, it saved time."],0,"However signals a contrast."],
+["Choose the correct pronoun: The coach spoke to Maya and ___.",["I","me","my"],1,"Me is the object of the preposition to."],
+["Which sentence avoids a run-on?",["The bell rang, and students left the room.","The bell rang students left the room.","The bell rang, students left the room."],0,"The conjunction and correctly joins the two clauses."],
+["Choose the best word: The evidence was ___ to the investigation.",["relevant","relevantly","relevance"],0,"Relevant is the adjective needed to describe evidence."],
+["Which sentence uses a conditional correctly?",["If I had more time, I would revise the essay.","If I have more time, I would revised the essay.","If I had more time, I will revised the essay."],0,"Would revise matches the hypothetical condition."],
+["Choose the sentence with the clearest modifier.",["The student carefully reviewed the instructions.","The student reviewed carefully the instructions.","Carefully the instructions reviewed the student."],0,"The adverb clearly modifies reviewed."],
+["Which sentence correctly punctuates an introductory phrase?",["Before the meeting, we reviewed the agenda.","Before, the meeting we reviewed the agenda.","Before the meeting we, reviewed the agenda."],0,"A comma follows the introductory phrase."],
+["Choose the correct form: The results were ___ than expected.",["better","best","more good"],0,"Better is the comparative form of good."]
+],
+reading:[
+["Which statement best expresses the central idea? The town expanded its bike lanes, added secure racks, and started a safety campaign. More residents began cycling to work.",["Several changes encouraged more people to bicycle.","The town closed every road to cars.","Cycling is always faster than driving."],0,"The details show how the town encouraged cycling."],
+["Which source would be most reliable for current local rainfall totals?",["a regional weather service","an anonymous comment from years ago","a fictional story"],0,"A weather service collects and reports measured conditions."],
+["What is the author's tone? The proposal offers a practical way to reduce waste without placing extra costs on families.",["confident and positive","angry and sarcastic","frightened and uncertain"],0,"The wording presents the proposal favorably and confidently."],
+["Which evidence is strongest for the claim that the new schedule reduced lateness? School records show late arrivals fell by 30 percent after the schedule changed.",["School records show a 30 percent drop.","One student said mornings felt easier.","The new schedule uses different colors."],0,"Measured records provide direct evidence."],
+["What can you infer about the narrator? Although the first draft was rejected, the narrator asked for feedback and rewrote it.",["The narrator is willing to improve.","The narrator no longer cares.","The narrator dislikes advice."],0,"Asking for feedback and revising shows a desire to improve."],
+["What is the function of the final paragraph? The article describes a problem with plastic waste, explains its effects, and ends by listing steps readers can take.",["It offers possible actions.","It introduces a new character.","It repeats the title only."],0,"The final paragraph moves from explaining the problem to suggesting action."],
+["Which sentence best summarizes the passage? Solar panels convert sunlight into electricity. They can reduce the amount of energy a building needs from other sources.",["Solar panels use sunlight to produce electricity and can reduce other energy use.","Solar panels only work at night.","Electricity cannot be stored."],0,"The summary includes the process and its benefit."],
+["What does the phrase 'weigh the options' mean?",["consider choices carefully","measure objects on a scale","choose without thinking"],0,"The phrase means to think carefully about different choices."],
+["Which detail is least relevant to an article about conserving water?",["The color of the writer's notebook","Repairing leaking faucets saves water.","Shorter showers use less water."],0,"The notebook color does not relate to water conservation."],
+["How does the author develop the argument? The writer states a claim, gives survey results, and explains how the results support the claim.",["by presenting evidence and explaining it","by telling an imaginary adventure","by listing unrelated events"],0,"The writer supports the claim with evidence and reasoning."]
+],
+language:[
+["What does the prefix inter- mean in interact?",["between or among","under","after"],0,"Inter- means between or among."],
+["Which word is an antonym of abundant?",["scarce","plentiful","ample"],0,"Scarce is the opposite of abundant."],
+["Which sentence uses irony?",["The fire station burned down during a fire.","The fire station opened at noon.","The fire station has red trucks."],0,"The unexpected event creates irony."],
+["What does the root cred mean in credible?",["believe","carry","shape"],0,"Cred relates to belief or trust."],
+["Which phrase uses imagery?",["The warm, cinnamon-scented bread filled the kitchen.","The bread was food.","Someone made bread."],0,"Sensory details help readers imagine the scene."],
+["What is the meaning of the idiom 'get to the point'?",["focus on the main idea","walk to a location","avoid answering"],0,"The idiom means to state the main idea directly."],
+["Which word contains a prefix meaning 'against'?",["antibiotic","preview","rewrite"],0,"Anti- means against."],
+["Which sentence contains a sound word, or onomatopoeia?",["The door slammed with a bang.","The door was heavy.","The door was open."],0,"Bang imitates a sound."],
+["Which word is closest in meaning to objective?",["unbiased","emotional","uncertain"],0,"Objective means not influenced by personal feelings."],
+["What does the suffix -ology mean in biology?",["study of","fear of","written by"],0,"-Ology means the study of a subject."]
+]
+},
+6:{
+vocab:[
+["What does ambiguous mean?",["open to more than one interpretation","supported by direct proof","impossible to change"],0,"Ambiguous language can have more than one meaning."],
+["What does substantiate mean?",["support with evidence","make less important","change the subject"],0,"Substantiate means to provide evidence for a claim."],
+["Which word means to examine the parts of something?",["dissect","summarize","predict"],0,"Dissect can mean to analyze something part by part."],
+["What does coherent mean?",["logical and connected","unclear and unrelated","brief and incomplete"],0,"Coherent ideas fit together in a logical way."],
+["Which word means to make something less severe?",["mitigate","intensify","complicate"],0,"Mitigate means to reduce the severity of something."],
+["What does infer mean?",["draw a conclusion from clues","repeat a statement exactly","ignore available facts"],0,"Infer means to reach a conclusion using evidence and reasoning."],
+["Which word means to question the truth of a claim?",["challenge","confirm","celebrate"],0,"Challenge can mean to dispute or question a claim."],
+["What does nuanced mean?",["showing subtle differences","completely obvious","lacking any detail"],0,"Nuanced ideas include fine or subtle distinctions."],
+["Which word means to combine ideas into a whole?",["synthesize","separate","contradict"],0,"Synthesize means to combine parts into a whole."]
+],
+spelling:[
+["Spell the word meaning logical and connected.","coherent","It begins with c."],
+["Spell the word meaning to reduce severity.","mitigate","It begins with m."],
+["Spell the word meaning open to more than one interpretation.","ambiguous","It begins with a."],
+["Spell the word meaning to combine ideas into a whole.","synthesize","It begins with s."],
+["Spell the word meaning to support with evidence.","substantiate","It begins with s."],
+["Spell the word meaning to draw a conclusion from clues.","infer","It has five letters."],
+["Spell the word meaning showing subtle distinctions.","nuanced","It begins with n."],
+["Spell the word meaning to examine closely, part by part.","dissect","It begins with d."],
+["Spell the word meaning to question or dispute a claim.","challenge","It begins with ch."],
+["Spell the word meaning a statement that can be argued.","claim","It has five letters."]
+],
+sentence:[
+["Choose the sentence with correct use of a restrictive clause.",["Students who complete the project may present first.","Students, who complete the project, may present first.","Students who complete, the project may present first."],0,"The clause identifies which students may present."],
+["Which revision best removes ambiguity? 'Jordan told Alex that he had won.'",["Jordan told Alex, "You won."","Jordan told Alex he had won.","Jordan said that he won."],0,"The revision makes clear who won."],
+["Choose the sentence with correct parallel structure.",["The report explains the problem, evaluates evidence, and proposes a solution.","The report explains the problem, evaluating evidence, and a solution is proposed.","The report explains, evidence is evaluated, and proposing a solution."],0,"All three verbs use the same grammatical form."],
+["Which sentence correctly uses a semicolon between independent clauses?",["The evidence was limited; the conclusion remained tentative.","The evidence; was limited the conclusion remained tentative.","The evidence was limited; because the conclusion remained tentative."],0,"Both sides of the semicolon are complete sentences."],
+["Choose the most precise revision: 'The results were kind of surprising.'",["The results were unexpected.","The results were sort of surprising.","The results were pretty unusual and surprising."],0,"Unexpected is more concise and precise."],
+["Which sentence correctly uses a subordinate clause?",["Although the data were incomplete, the team identified a pattern.","Although the data were incomplete. The team identified a pattern.","The data were incomplete, although."],0,"Although introduces a dependent clause followed by a complete clause."],
+["Choose the best transition to show a concession.",["Although the method is costly, it is effective.","Because the method is costly, it is effective.","For example, the method is costly, it is effective."],0,"Although acknowledges a limitation while introducing a contrasting point."],
+["Which sentence maintains consistent verb tense?",["The researcher collected samples and recorded the results.","The researcher collects samples and recorded the results.","The researcher collecting samples and records the results."],0,"Both verbs use past tense."],
+["Choose the correct punctuation for the appositive.",["My brother, a skilled mechanic, repaired the engine.","My brother a skilled mechanic repaired, the engine.","My brother, a skilled mechanic repaired the engine."],0,"Commas set off the extra identifying information."],
+["Which revision is most concise without changing the meaning?",["Due to the fact that the roads were icy, school closed.","Because the roads were icy, school closed.","School closed for the reason that the roads were icy."],1,"Because expresses the reason in fewer words."]
+],
+reading:[
+["Which claim is best supported by the passage? A study compared two groups of students. The group that practiced retrieval remembered more information a week later than the group that only reread notes.",["Retrieval practice may improve long-term memory.","Rereading notes always prevents learning.","All students learn in exactly the same way."],0,"The comparison supports a possible memory benefit from retrieval practice."],
+["What is the author's central assumption? The article recommends expanding public transit because reliable buses allow more residents to reach jobs and services.",["Access to transportation matters to community participation.","Every resident owns a car.","Public transit is free in every city."],0,"The recommendation assumes transportation access is important."],
+["Which evidence would most strongly challenge the claim that a policy reduced traffic?",["Traffic counts stayed the same after the policy began.","A few residents liked the policy.","The policy was announced on a Monday."],0,"Unchanged traffic counts would directly challenge the claim."],
+["How does the author distinguish correlation from causation? The writer notes that two trends occurred together but explains that other factors may have influenced both.",["The writer warns that a relationship does not prove cause.","The writer assumes one trend caused the other.","The writer ignores other possible explanations."],0,"The passage recognizes other factors may explain the relationship."],
+["What is the effect of the counterargument? The author presents an opposing view, then responds with evidence from several recent studies.",["It acknowledges another position and strengthens the response.","It replaces the main claim with an unrelated idea.","It ends the discussion without evidence."],0,"Addressing an opposing view makes the argument more complete."],
+["Which source is most appropriate for verifying a scientific claim?",["a peer-reviewed research article","an advertisement for a product","an anonymous social media post"],0,"Peer-reviewed research is evaluated by experts before publication."],
+["What can be inferred about the narrator's reliability? The narrator admits forgetting part of the event and distinguishes remembered details from what others later reported.",["The narrator is careful about the limits of memory.","The narrator claims to know every detail.","The narrator refuses to consider other accounts."],0,"The narrator openly identifies limits and separates sources."],
+["Which statement best synthesizes the two ideas? One passage explains that trees cool neighborhoods with shade. Another reports that tree cover can reduce energy use in nearby buildings.",["Urban trees can provide environmental and energy benefits.","Trees only help in rural areas.","Shade makes buildings use more electricity."],0,"The combined ideas show two related benefits of trees."],
+["What is the most reasonable conclusion? The sample included only volunteers from one small town, so the results may not represent the wider population.",["The findings should be generalized cautiously.","The findings apply to every person.","The study proves the opposite claim."],0,"A narrow volunteer sample limits generalization."],
+["How does the structure support the author's purpose? The passage introduces a problem, compares three possible solutions, and evaluates each solution's costs.",["It helps readers compare options before deciding.","It tells events in reverse chronological order.","It focuses on the biography of one person."],0,"The structure organizes information for a decision."]
+],
+language:[
+["What does the root bene mean in beneficial?",["good","write","water"],0,"Bene means good or well."],
+["Which sentence uses a deliberate understatement?",["The enormous storm caused a little trouble.","The storm destroyed several buildings.","The storm was very powerful."],0,"Calling major damage a little trouble understates the event."],
+["What is the function of an allusion?",["to refer to a familiar person, event, or text","to repeat a vowel sound","to list facts in order"],0,"An allusion points to something readers may already know."],
+["Which word is closest in meaning to mitigate?",["lessen","intensify","ignore"],0,"Lessen and mitigate both mean to reduce."],
+["What does the prefix circum- mean in circumference?",["around","under","across"],0,"Circum- means around."],
+["Which sentence contains an oxymoron?",["The room was filled with a deafening silence.","The room was very quiet.","The room was empty."],0,"Deafening silence combines contrasting terms."],
+["What is the effect of a rhetorical question?",["to prompt thought without requiring an answer","to request a specific measurement","to introduce a list of facts"],0,"A rhetorical question encourages readers to consider an idea."],
+["Which word has a connotation that is more positive than cheap?",["inexpensive","stingy","flimsy"],0,"Inexpensive suggests low cost without the negative judgment of cheap."],
+["What does the root ject mean in reject?",["throw","speak","see"],0,"Ject means throw; reject is to throw back or refuse."],
+["Which phrase is an example of an extended metaphor?",["The debate was a chess match, with each side planning its next move.","The debate was loud.","The debate lasted an hour."],0,"The comparison continues through several connected chess images."]
+]
+}
+};
+Object.keys(extra).forEach(level=>{
+  Object.keys(extra[level]).forEach(category=>{
+    const rows=extra[level][category];
+    rows.forEach(row=>{
+      if(category==="spelling"){
+        const [q,a,hint]=row;
+        tasks[level][category].push({q,a,hint});
+      }else{
+        const [q,opts,a,why]=row;
+        tasks[level][category].push({q,opts,a,why});
+      }
+    });
+  });
+});
+
 const activities=[
 {id:"vocab",name:"Vocabulary Quest",desc:"Explore word meanings and choose the best word."},
 {id:"spelling",name:"Word Builder",desc:"Use your braille display to type words."},
