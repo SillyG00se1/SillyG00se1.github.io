@@ -59,12 +59,12 @@ hr{border:0;border-top:1px solid var(--line);margin:18px 0}
 </section>
 <section class="panel" id="statusPanel" aria-label="Your progress">
 <div class="stats">
-<div class="stat">Grade level<strong id="gradeStat">2</strong></div>
+<div class="stat">Level<strong id="gradeStat">2</strong></div>
 <div class="stat">Points<strong id="pointsStat">0</strong></div>
 <div class="stat">Items owned<strong id="ownedStat">0</strong></div>
 </div>
 <p id="gradeDescription">Your learning starts here.</p>
-<div class="progress" role="progressbar" aria-label="Progress toward the next grade level" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0" id="gradeProgress"><span id="gradeProgressBar"></span></div>
+<div class="progress" role="progressbar" aria-label="Progress toward the next level" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0" id="gradeProgress"><span id="gradeProgressBar"></span></div>
 <p class="small" id="progressDescription">Earn points by completing activities.</p>
 </section>
 <div id="view" aria-live="off"></div>
@@ -196,17 +196,17 @@ function focusHeading(){const h=$("view").querySelector("h2");if(h){h.setAttribu
 function updateStats(){
 $("gradeStat").textContent=data.grade;$("pointsStat").textContent=data.points;$("ownedStat").textContent=data.owned.length;
 const needed=thresholds[data.grade]||0, got=data.correctByGrade[data.grade]||0;
-$("gradeDescription").textContent=gradeNames[data.grade]+". Keep practicing to unlock the next grade.";
+$("gradeDescription").textContent=gradeNames[data.grade]+". Keep practicing to unlock the next level.";
 $("gradeProgress").setAttribute("aria-valuemax",needed||1);$("gradeProgress").setAttribute("aria-valuenow",Math.min(got,needed));
 $("gradeProgressBar").style.width=(needed?Math.min(100,got/needed*100):100)+"%";
-$("progressDescription").textContent=needed?(got+" of "+needed+" correct answers toward grade "+(data.grade+1)+"."):"You have reached grade 6. Keep earning points and exploring.";
+$("progressDescription").textContent=needed?(got+" of "+needed+" correct answers toward level "+(data.grade+1)+"."):"You have reached level 6. Keep earning points and exploring.";
 }
 function showHome(){currentTask=null;currentActivity=null;$("view").innerHTML='<section class="panel"><h2>Choose your next adventure</h2><p>Pick a learning game. You can switch activities whenever you like.</p><div id="activityList"></div><hr><button id="homeStore">Visit the store</button><button class="secondary" id="homeProgress">My progress</button></section>' ;activities.forEach(a=>{const b=document.createElement("button");b.textContent=a.name+". "+a.desc;b.addEventListener("click",()=>startActivity(a.id));$("activityList").appendChild(b)});$("homeStore").onclick=showStore;$("homeProgress").onclick=showProgress;focusHeading()}
 function startActivity(id){currentActivity=id;taskIndex=0;sessionCorrect=0;data.totalSessions++;const bank=tasks[data.grade][id];if(!bank||!bank.length){announce("No activity found.");return}showTask()}
 function showTask(){
 const bank=tasks[data.grade][currentActivity];currentTask=bank[taskIndex%bank.length];answered=false;
 const activity=activities.find(a=>a.id===currentActivity);
-let html='<section class="panel"><p class="small">'+activity.name+' · Grade '+data.grade+'</p><h2 id="taskTitle">'+activity.name+'</h2>';
+let html='<section class="panel"><p class="small">'+activity.name+' · Level '+data.grade+'</p><h2 id="taskTitle">'+activity.name+'</h2>';
 if(currentActivity==="reading"){html+='<p>'+currentTask.q+'</p>'}else{html+='<p>'+currentTask.q+'</p>'}
 if(currentTask.opts){html+='<div id="choices" role="group" aria-label="Answer choices">';currentTask.opts.forEach((o,i)=>{html+='<button type="button" data-choice="'+i+'">'+String.fromCharCode(65+i)+'. '+o+'</button>'});html+='</div>'}
 else{html+='<form id="answerForm"><label for="answerInput">Type your answer</label><textarea id="answerInput" name="answer" rows="2" autocapitalize="none" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done"></textarea><p class="small">Enter your answer with the Chameleon braille display. Use the normal VoiceOver text-entry controls.</p><button class="primary" type="submit">Check answer</button></form>'}
@@ -221,7 +221,7 @@ function correct(){
 if(answered)return;answered=true;sessionCorrect++;data.points+=10;data.totalCorrect++;data.correctByGrade[data.grade]=(data.correctByGrade[data.grade]||0)+1;
 let unlocked=false;const threshold=thresholds[data.grade];if(threshold&&data.correctByGrade[data.grade]>=threshold){data.grade++;taskIndex=-1;unlocked=true}
 save();
-const msg=unlocked?"Correct. You earned 10 points. You unlocked grade "+data.grade+".": "Correct. You earned 10 points.";
+const msg=unlocked?"Correct. You earned 10 points. You unlocked level "+data.grade+".": "Correct. You earned 10 points.";
 feedback(msg+" "+(currentTask.why||""),"good");
 const buttons=$("view").querySelectorAll("#choices button, #answerForm button");buttons.forEach(b=>b.disabled=true);
 const next=document.createElement("button");next.className="primary";next.textContent="Next question";next.addEventListener("click",()=>{taskIndex++;showTask()});
@@ -242,7 +242,7 @@ $("storeBack").onclick=showHome;focusHeading();
 function buy(p){if(data.owned.includes(p.id)||data.points<p.price)return;data.points-=p.price;data.owned.push(p.id);save();announce("You bought "+p.name+".");showStore()}
 function showProgress(){
 currentActivity=null;const grade=data.grade;const correct=data.totalCorrect;
-$("view").innerHTML='<section class="panel"><h2>My progress</h2><p>Current grade level: '+grade+'</p><p>Total correct answers: '+correct+'</p><p>Points available: '+data.points+'</p><p>Items in your collection: '+data.owned.length+'</p><h3>Skills you can practice</h3><ul>'+activities.map(a=>'<li>'+a.name+'</li>').join("")+'</ul><button id="progressStore">Visit the store</button><button class="secondary" id="progressBack">Back to activities</button></section>';
+$("view").innerHTML='<section class="panel"><h2>My progress</h2><p>Current level: '+grade+'</p><p>Total correct answers: '+correct+'</p><p>Points available: '+data.points+'</p><p>Items in your collection: '+data.owned.length+'</p><h3>Skills you can practice</h3><ul>'+activities.map(a=>'<li>'+a.name+'</li>').join("")+'</ul><button id="progressStore">Visit the store</button><button class="secondary" id="progressBack">Back to activities</button></section>';
 $("progressStore").onclick=showStore;$("progressBack").onclick=showHome;focusHeading();
 }
 $("startButton").onclick=showHome;$("storeButton").onclick=showStore;$("progressButton").onclick=showProgress;
