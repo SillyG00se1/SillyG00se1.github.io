@@ -510,67 +510,47 @@ const products=[
 {id:"trophy",name:"Golden word trophy",price:180,desc:"A trophy for your collection."},
 {id:"library",name:"Secret library",price:250,desc:"Unlock your own special library."}
 ];
+
+const STUDENTS=["Matthew","Miss G."];
+const SUPABASE_URL="https://bszanoiwepiqhvzbcvnz.supabase.co";
+const SUPABASE_KEY="sb_publishable_B6A3Pp4Tsa3oDKUn3Q7zBA_lM1who2g";
+const params=new URLSearchParams(location.search);
+const view=params.get("view");
+const studentName=params.get("student")||localStorage.getItem("wordQuestStudent")||"Matthew";
+const KEY="wordQuestProgressV2:"+studentName;
 let data=load();
-let currentTask=null, currentActivity=null, taskIndex=0, sessionCorrect=0, answered=false;
+let currentTask=null,currentActivity=null,taskIndex=0,sessionCorrect=0,answered=false;
 const $=id=>document.getElementById(id);
-function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&typeof d==="object")return Object.assign({grade:2,points:0,owned:[],correctByGrade:{},totalCorrect:0,totalSessions:0},d)}catch(e){}return{grade:2,points:0,owned:[],correctByGrade:{},totalCorrect:0,totalSessions:0}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){announce("Progress could not be saved on this device.")}updateStats()}
-function announce(s){$("announcer").textContent="";window.setTimeout(()=>{$("announcer").textContent=s},30)}
-function focusHeading(){const h=$("view").querySelector("h2");if(h){h.setAttribute("tabindex","-1");h.focus()}}
-function updateStats(){
-$("gradeStat").textContent=data.grade;$("pointsStat").textContent=data.points;$("ownedStat").textContent=data.owned.length;
-const needed=thresholds[data.grade]||0, got=data.correctByGrade[data.grade]||0;
-$("gradeDescription").textContent=gradeNames[data.grade]+". Keep practicing to unlock the next level.";
-$("gradeProgress").setAttribute("aria-valuemax",needed||1);$("gradeProgress").setAttribute("aria-valuenow",Math.min(got,needed));
-$("gradeProgressBar").style.width=(needed?Math.min(100,got/needed*100):100)+"%";
-$("progressDescription").textContent=needed?(got+" of "+needed+" correct answers toward level "+(data.grade+1)+"."):"You have reached level 6. Keep earning points and exploring.";
-}
-function showHome(){currentTask=null;currentActivity=null;$("view").innerHTML='<section class="panel"><h2>Choose your next adventure</h2><p>Pick a learning game. You can switch activities whenever you like.</p><div id="activityList"></div><hr><button id="homeStore">Visit the store</button><button class="secondary" id="homeProgress">My progress</button></section>' ;activities.forEach(a=>{const b=document.createElement("button");b.textContent=a.name+". "+a.desc;b.addEventListener("click",()=>startActivity(a.id));$("activityList").appendChild(b)});$("homeStore").onclick=showStore;$("homeProgress").onclick=showProgress;focusHeading()}
-function startActivity(id){currentActivity=id;taskIndex=0;sessionCorrect=0;data.totalSessions++;const bank=tasks[data.grade][id];if(!bank||!bank.length){announce("No activity found.");return}showTask()}
-function showTask(){
-const bank=tasks[data.grade][currentActivity];currentTask=bank[taskIndex%bank.length];answered=false;
-const activity=activities.find(a=>a.id===currentActivity);
-let html='<section class="panel"><p class="small">'+activity.name+' · Level '+data.grade+'</p><h2 id="taskTitle">'+activity.name+'</h2>';
-if(currentActivity==="reading"){html+='<p>'+currentTask.q+'</p>'}else{html+='<p>'+currentTask.q+'</p>'}
-if(currentTask.opts){html+='<div id="choices" role="group" aria-label="Answer choices">';currentTask.opts.forEach((o,i)=>{html+='<button type="button" data-choice="'+i+'">'+String.fromCharCode(65+i)+'. '+o+'</button>'});html+='</div>'}
-else{html+='<form id="answerForm"><label for="answerInput">Type your answer</label><textarea id="answerInput" name="answer" rows="2" autocapitalize="none" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done"></textarea><p class="small">Enter your answer with the Chameleon braille display. Use the normal VoiceOver text-entry controls.</p><button class="primary" type="submit">Check answer</button></form>'}
-html+='<div id="taskFeedback" class="feedback hidden" role="status" aria-live="polite" aria-atomic="true"></div><div class="actions"><button class="secondary" id="taskHome">Choose another activity</button><button class="secondary" id="taskHint">Give me a hint</button></div></section>';
-$("view").innerHTML=html;
-if(currentTask.opts){$("choices").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>checkChoice(Number(b.dataset.choice))))}
-else{$("answerForm").addEventListener("submit",e=>{e.preventDefault();checkEntry($("answerInput").value)})}
-$("taskHome").onclick=showHome;$("taskHint").onclick=showHint;focusHeading();
-}
+function blank(){return {grade:2,skillLevels:{vocab:2,spelling:2,sentence:2,reading:2,language:2},points:0,owned:[],totalCorrect:0,totalSessions:0,sessions:{}}}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&typeof d==="object"){const b=blank();return Object.assign(b,d,{skillLevels:Object.assign(b.skillLevels,d.skillLevels||{})})}}catch(e){}return blank()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}if($("pointsStat"))$("pointsStat").textContent=data.points}
+function announce(s){const a=$("announcer");if(a){a.textContent="";setTimeout(()=>a.textContent=s,20)}}
+function focusHeading(){const h=$("view")?.querySelector("h2");if(h){h.tabIndex=-1;h.focus()}}
+function levelFor(skill){return data.skillLevels[skill]||2}
+function updateStats(){if(!$("gradeStat"))return;const levels=Object.values(data.skillLevels);$("gradeStat").textContent=Math.min(...levels);$("pointsStat").textContent=data.points;$("ownedStat").textContent=data.owned.length;$("gradeDescription").textContent="Your current levels are tracked separately for each skill.";$("gradeProgress").hidden=true;$("progressDescription").textContent="Complete missions to earn points and build your skills."}
+function setStudent(name){if(!STUDENTS.includes(name))return;localStorage.setItem("wordQuestStudent",name);location.href=location.pathname}
+function homeShell(){document.querySelector("header p").textContent="";$("welcomeTitle").textContent="Welcome, "+studentName;$("statusPanel").hidden=false;$("view").innerHTML='<section class="panel"><h2>Choose your next adventure</h2><div id="activityList"></div><hr><button id="homeStore">Visit the store</button><button class="secondary" id="homeProgress">My progress</button></section>';activities.forEach(a=>{const b=document.createElement("button");b.textContent=a.name;b.addEventListener("click",()=>startActivity(a.id));$("activityList").appendChild(b)});$("homeStore").onclick=showStore;$("homeProgress").onclick=showProgress;focusHeading()}
+function showHome(){location.href=location.pathname}
+function startActivity(id){const level=levelFor(id);const bank=tasks[level]?.[id];if(!bank||bank.length<12){alert("This mission is not ready yet.");return}const sid=Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8);data.sessions[sid]={skill:id,level,correct:0,answered:[],finished:false};save();goQuestion(id,level,0,sid)}
+function goQuestion(skill,level,q,sid){location.href=location.pathname+"?view=question&student="+encodeURIComponent(studentName)+"&skill="+skill+"&level="+level+"&q="+q+"&sid="+sid}
+function questionPage(){document.querySelector("header p").textContent="";$("welcomeTitle").parentElement.hidden=true;$("statusPanel").hidden=true;const skill=params.get("skill"),level=Number(params.get("level")),q=Number(params.get("q")),sid=params.get("sid");const session=data.sessions[sid];const bank=tasks[level]?.[skill];if(!session||session.skill!==skill||!bank||q<0||q>=12){location.href=location.pathname;return}currentActivity=skill;taskIndex=q;currentTask=bank[q];answered=session.answered.includes(q);const activity=activities.find(a=>a.id===skill);let html='<section class="panel"><p class="small">'+activity.name+' · Level '+level+' · Question '+(q+1)+' of 12</p><h2 id="taskTitle">'+activity.name+'</h2><p>'+currentTask.q+'</p>';if(currentTask.opts){html+='<div id="choices" role="group" aria-label="Answer choices">';currentTask.opts.forEach((o,i)=>html+='<button type="button" data-choice="'+i+'" '+(answered?'disabled':'')+'>'+String.fromCharCode(65+i)+'. '+o+'</button>');html+='</div>'}else{html+='<form id="answerForm"><label for="answerInput">Type your answer</label><textarea id="answerInput" rows="2" autocapitalize="none" autocomplete="off" autocorrect="off" spellcheck="false"></textarea><button class="primary" type="submit">Check answer</button></form>'}html+='<div id="taskFeedback" class="feedback '+(answered?'good hidden':'hidden')+'" role="status" aria-live="polite"></div><button class="secondary" id="taskHint" '+(answered?'disabled':'')+'>Give me a hint</button></section>'; $("view").innerHTML=html;if(currentTask.opts)$("choices").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>checkChoice(Number(b.dataset.choice))));else $("answerForm").addEventListener("submit",e=>{e.preventDefault();checkEntry($("answerInput").value)});$("taskHint").onclick=showHint;if(answered){const f=$("taskFeedback");f.textContent="You already answered this question.";f.classList.remove("hidden");addNext(sid,skill,level,q)}focusHeading()}
 function feedback(message,kind){const f=$("taskFeedback");f.className="feedback "+kind;f.textContent=message;f.classList.remove("hidden")}
-function correct(){
-if(answered)return;answered=true;sessionCorrect++;data.points+=10;data.totalCorrect++;data.correctByGrade[data.grade]=(data.correctByGrade[data.grade]||0)+1;
-let unlocked=false;const threshold=thresholds[data.grade];if(threshold&&data.correctByGrade[data.grade]>=threshold){data.grade++;taskIndex=-1;unlocked=true}
-save();
-const msg=unlocked?"Correct. You earned 10 points. You unlocked level "+data.grade+".": "Correct. You earned 10 points.";
-feedback(msg+" "+(currentTask.why||""),"good");
-const buttons=$("view").querySelectorAll("#choices button, #answerForm button");buttons.forEach(b=>b.disabled=true);
-const next=document.createElement("button");next.className="primary";next.textContent="Next question";next.addEventListener("click",()=>{taskIndex++;showTask()});
-$("taskFeedback").after(next);next.focus();announce(msg);
-}
-function incorrect(){feedback("Not quite. Try again. You can ask for a hint.","bad");const input=$("answerInput");if(input)input.focus()}
+function addNext(sid,skill,level,q){if($("nextQuestion"))return;const b=document.createElement("button");b.id="nextQuestion";b.className="primary";b.textContent=q===11?"Finish mission":"Next question";b.onclick=()=>{if(q===11)finishMission(sid,skill,level);else goQuestion(skill,level,q+1,sid)};$("taskFeedback").after(b);b.focus()}
+function correct(){const sid=params.get("sid"),skill=params.get("skill"),level=Number(params.get("level")),q=Number(params.get("q")),session=data.sessions[sid];if(session.answered.includes(q))return;session.answered.push(q);session.correct++;data.points+=10;data.totalCorrect++;save();feedback("Correct. You earned 10 points. "+(currentTask.why||""),"good");$("view").querySelectorAll("#choices button,#answerForm button,#taskHint").forEach(b=>b.disabled=true);addNext(sid,skill,level,q);announce("Correct. You earned 10 points.")}
+function incorrect(){feedback("Not quite. Try again. You can ask for a hint.","bad");$("answerInput")?.focus()}
 function checkChoice(n){if(n===currentTask.a)correct();else incorrect()}
 function normalize(s){return s.toLowerCase().trim().replace(/[.,!?;:'"]/g,"").replace(/\s+/g," ")}
 function checkEntry(v){if(normalize(v)===normalize(currentTask.a))correct();else incorrect()}
-function showHint(){if(!currentTask)return;let hint=currentTask.hint||currentTask.why||"Read the question again and look for an important clue.";feedback("Hint: "+hint,"");announce("Hint: "+hint)}
-function showStore(){
-currentActivity=null;let html='<section class="panel"><h2>Word Quest Store</h2><p>You have '+data.points+' points.</p><p>Choose an item to buy. Purchased items stay in your collection.</p><div id="storeItems"></div><hr><h3>Your collection</h3><ul>';
-if(data.owned.length){data.owned.forEach(id=>{const p=products.find(x=>x.id===id);if(p)html+='<li>'+p.name+'</li>'})}else html+='<li>You have not bought anything yet.</li>';
-html+='</ul><button class="secondary" id="storeBack">Back to activities</button></section>';$("view").innerHTML=html;
-products.filter(p=>!data.owned.includes(p.id)).forEach(p=>{const b=document.createElement("button");b.textContent=p.name+". "+p.desc+" Cost: "+p.price+" points.";b.disabled=data.points<p.price;b.addEventListener("click",()=>buy(p));$("storeItems").appendChild(b)});
-$("storeBack").onclick=showHome;focusHeading();
-}
-function buy(p){if(data.owned.includes(p.id)||data.points<p.price)return;data.points-=p.price;data.owned.push(p.id);save();announce("You bought "+p.name+".");showStore()}
-function showProgress(){
-currentActivity=null;const grade=data.grade;const correct=data.totalCorrect;
-$("view").innerHTML='<section class="panel"><h2>My progress</h2><p>Current level: '+grade+'</p><p>Total correct answers: '+correct+'</p><p>Points available: '+data.points+'</p><p>Items in your collection: '+data.owned.length+'</p><h3>Skills you can practice</h3><ul>'+activities.map(a=>'<li>'+a.name+'</li>').join("")+'</ul><button id="progressStore">Visit the store</button><button class="secondary" id="progressBack">Back to activities</button></section>';
-$("progressStore").onclick=showStore;$("progressBack").onclick=showHome;focusHeading();
-}
-$("startButton").onclick=showHome;$("storeButton").onclick=showStore;$("progressButton").onclick=showProgress;
-updateStats();
+function showHint(){if(!currentTask)return;feedback("Hint: "+(currentTask.hint||currentTask.why||"Read the question again and look for an important clue."),"")}
+async function saveRemote(session,student,skill,level){try{const res=await fetch(SUPABASE_URL+"/rest/v1/word_quest_scores",{method:"POST",headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify({student_name:student,skill,level,correct_count:session.correct,total_questions:12,points_earned:session.correct*10})});if(!res.ok)throw new Error("HTTP "+res.status);return true}catch(e){console.error("Score save failed",e);return false}}
+async function finishMission(sid,skill,level){const session=data.sessions[sid];if(session.finished){showCompletion(session,skill,level);return}session.finished=true;const count=session.correct;let message="You got "+count+" out of 12 correct.";if(count<=2){const next=Math.max(2,level-1);data.skillLevels[skill]=next;message+=" You will return to Level "+next+" questions for this skill."}else if(count>=(thresholds[level]||12)){const next=Math.min(6,level+1);data.skillLevels[skill]=next;if(next>level)message+=" You unlocked Level "+next+" for this skill."}data.totalSessions++;save();const ok=await saveRemote(session,studentName,skill,level);session.remoteSaved=ok;save();showCompletion(session,skill,level,message,ok)}
+function showCompletion(session,skill,level,message,ok){$("view").innerHTML='<section class="panel"><h2>Mission complete</h2><p>'+(message||("You got "+session.correct+" out of 12 correct."))+'</p><p>'+(ok?"Your score was saved.":"Your score is saved on this device. The online save did not complete.")+'</p><button class="primary" id="again">Choose another mission</button></section>';$("again").onclick=showHome;focusHeading()}
+function showStore(){let html='<section class="panel"><h2>Word Quest Store</h2><p>You have '+data.points+' points.</p><div id="storeItems"></div><h3>Your collection</h3><ul>';if(data.owned.length)data.owned.forEach(id=>{const p=products.find(x=>x.id===id);if(p)html+='<li>'+p.name+'</li>'});else html+='<li>You have not bought anything yet.</li>';html+='<li></li></ul><button class="secondary" id="storeBack">Back to activities</button></section>';$("view").innerHTML=html;products.filter(p=>!data.owned.includes(p.id)).forEach(p=>{const b=document.createElement("button");b.textContent=p.name+". "+p.desc+" Cost: "+p.price+" points.";b.disabled=data.points<p.price;b.onclick=()=>{data.points-=p.price;data.owned.push(p.id);save();showStore()};$("storeItems").appendChild(b)});$("storeBack").onclick=showHome;focusHeading()}
+async function showProgress(){ $("view").innerHTML='<section class="panel"><h2>My progress</h2><p>Scores for '+studentName+'</p><div id="remoteScores">Loading saved scores...</div><button class="secondary" id="progressBack">Back to activities</button></section>';$("progressBack").onclick=showHome;focusHeading();try{const r=await fetch(SUPABASE_URL+"/rest/v1/word_quest_scores?select=skill,level,correct_count,total_questions,points_earned,completed_at&student_name=eq."+encodeURIComponent(studentName)+"&order=completed_at.desc&limit=100",{headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY}});if(!r.ok)throw new Error("HTTP "+r.status);const rows=await r.json();$("remoteScores").innerHTML=rows.length?rows.map(x=>"<p>"+activities.find(a=>a.id===x.skill).name+" · Level "+x.level+": "+x.correct_count+"/12 · "+new Date(x.completed_at).toLocaleDateString()+"</p>").join(""):"<p>No completed missions yet.</p>"}catch(e){$("remoteScores").textContent="Saved scores could not be loaded right now."}}
+function showProgressLocal(){showProgress()}
+function startHome(){const select=document.createElement("section");select.className="panel";select.innerHTML='<label for="studentSelect">Choose your name</label><select id="studentSelect"></select>';const welcome=$("welcomeTitle").parentElement;welcome.insertBefore(select,welcome.querySelector("#startButton"));STUDENTS.forEach(n=>{const o=document.createElement("option");o.value=n;o.textContent=n;o.selected=n===studentName;$("studentSelect").appendChild(o)});$("studentSelect").onchange=e=>setStudent(e.target.value);$("startButton").onclick=homeShell;$("storeButton").onclick=showStore;$("progressButton").onclick=showProgress;updateStats()}
+if(view==="question"){questionPage()}else{startHome()}
+
 })();
 </script>
 </body>
