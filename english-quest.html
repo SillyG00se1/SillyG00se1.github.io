@@ -499,7 +499,7 @@ Object.keys(extra).forEach(level=>{
   });
 });
 
-Object.values(tasks).forEach(level=>{(level.sentence||[]).forEach(row=>{const opts=Array.isArray(row.opts)?row.opts:(Array.isArray(row[1])?row[1]:null);if(!opts)return;opts.forEach((value,i)=>{if(typeof value!=="string")return;let v=value.trim();if(v.split(/\s+/).length>=4||/^[A-Z]/.test(v)){v=v.charAt(0).toUpperCase()+v.slice(1);if(!/[.!?]$/.test(v))v+=".";opts[i]=v}})})});
+Object.values(tasks).forEach(level=>{(level.sentence||[]).forEach(row=>{const opts=Array.isArray(row.opts)?row.opts:(Array.isArray(row[1])?row[1]:null);if(!opts)return;opts.forEach((value,i)=>{if(typeof value!=="string")return;let v=value.trim();if(v.split(/\s+/).length>=4||(v.split(/\s+/).length>=2&&/^[A-Z]/.test(v))){v=v.charAt(0).toUpperCase()+v.slice(1);if(!/[.!?]$/.test(v))v+=".";opts[i]=v}})})});
 
 const activities=[
 {id:"vocab",name:"Vocabulary Quest",desc:"Explore word meanings and choose the best word."},
