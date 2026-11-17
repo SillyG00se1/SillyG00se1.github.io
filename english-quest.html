@@ -333,7 +333,7 @@ sentence:[
 ["Choose the best transition: The road was icy. ___, the driver slowed down.",["Therefore","For example","Meanwhile"],0,"Therefore shows a result."],
 ["Which sentence has a misplaced modifier?",["Running quickly, the finish line came into view.","Running quickly, Ava reached the finish line.","Ava ran quickly toward the finish line."],0,"The first sentence incorrectly makes the finish line seem to be running."],
 ["Choose the correct verb: By noon, the students ___ the project.",["finished","had finished","finishing"],1,"Had finished shows the action was completed by a past time."],
-["Which sentence uses a colon correctly?",["Bring three items: a pencil, paper, and a ruler.","Bring: three items a pencil, paper, and a ruler.","Bring three: items a pencil, paper, and a ruler."],0,"A colon can introduce a list after a complete thought."],
+["Choose the correct verb: We ___ three items to class.",["brings","brought","bringing"],1,"Brought is the past-tense form of bring."],
 ["Choose the clearest sentence.",["Due to the fact that it rained, the game was canceled.","Because it rained, the game was canceled.","It rained, the game due to canceled."],1,"Because states the reason directly and clearly."]
 ],
 reading:[
@@ -390,7 +390,7 @@ sentence:[
 ["Choose the best revision: 'The reason is because the road was closed.'",["The reason is that the road was closed.","The reason because the road was closed.","The road was closed for the reason because."],0,"The revision removes the redundant phrase."],
 ["Which sentence uses a transition to show contrast?",["The plan was costly; however, it saved time.","The plan was costly; therefore, it saved time.","The plan was costly; for example, it saved time."],0,"However signals a contrast."],
 ["Choose the correct pronoun: The coach spoke to Maya and ___.",["I","me","my"],1,"Me is the object of the preposition to."],
-["Which sentence avoids a run-on?",["The bell rang, and students left the room.","The bell rang students left the room.","The bell rang, students left the room."],0,"The conjunction and correctly joins the two clauses."],
+["Choose the sentence with correct subject and verb agreement.",["The bell and the students was ready.","The bell and the students were ready.","The bell and the students be ready."],1,"The compound subject takes the plural verb were."],
 ["Choose the best word: The evidence was ___ to the investigation.",["relevant","relevantly","relevance"],0,"Relevant is the adjective needed to describe evidence."],
 ["Which sentence uses a conditional correctly?",["If I had more time, I would revise the essay.","If I have more time, I would revised the essay.","If I had more time, I will revised the essay."],0,"Would revise matches the hypothetical condition."],
 ["Choose the sentence with the clearest modifier.",["The student carefully reviewed the instructions.","The student reviewed carefully the instructions.","Carefully the instructions reviewed the student."],0,"The adverb clearly modifies reviewed."],
@@ -484,6 +484,8 @@ language:[
 ]
 }
 };
+Object.values(tasks).forEach(level=>{(level.sentence||[]).forEach(row=>{const opts=Array.isArray(row.opts)?row.opts:(Array.isArray(row[1])?row[1]:null);if(!opts)return;opts.forEach((value,i)=>{if(typeof value!=="string")return;let v=value.trim();if(v.split(/\\s+/).length>=4||/^[A-Z]/.test(v)){v=v.charAt(0).toUpperCase()+v.slice(1);if(!/[.!?]$/.test(v))v+=".";opts[i]=v}})})});
+
 Object.keys(extra).forEach(level=>{
   Object.keys(extra[level]).forEach(category=>{
     const rows=extra[level][category];
