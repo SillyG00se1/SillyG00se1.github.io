@@ -25,20 +25,18 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .question{font-size:1.45rem;font-weight:700;margin:20px 0}
 .counter{color:#405568;font-size:1rem}
 .abacus-wrap{overflow-x:auto;padding:10px 0 20px}
-.abacus{display:flex;justify-content:center;gap:22px;min-width:300px;margin:0 auto;width:max-content;padding:18px 30px 22px;background:#ead6b6;border:8px solid #80552f;border-radius:14px;box-shadow:inset 0 0 0 2px #f7e9d2}
-.rod{position:relative;width:112px;height:310px;border-left:7px solid #80552f;border-right:7px solid #80552f;display:flex;flex-direction:column;align-items:center;padding:8px 0}
+.abacus{display:flex;justify-content:center;gap:26px;min-width:300px;margin:0 auto;width:max-content;padding:22px 34px 24px;background:linear-gradient(135deg,#f3e3c7,#dfbd8d);border:12px solid #754522;border-radius:8px;box-shadow:inset 0 0 0 3px #f8edd9,0 5px 12px #0002}
+.rod{position:relative;width:116px;height:322px;border-left:5px solid #9a6938;border-right:5px solid #9a6938;display:flex;flex-direction:column;align-items:center;padding:8px 0;background:linear-gradient(90deg,#ffffff25,#00000008,#ffffff25)}
 .rod-label{font-size:1rem;font-weight:700;margin-bottom:4px}
-.upper-zone{height:105px;width:100%;display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px}
-.bar{height:12px;width:100%;background:#80552f;border:2px solid #5d3d25;flex:none}
-.lower-zone{height:170px;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:8px;gap:7px}
-.bead{width:48px;height:30px;border-radius:50% / 42%;border:2px solid #965c20;background:linear-gradient(#f0b45e,#c77925);box-shadow:inset 0 3px 3px #ffffff80,0 2px 2px #55371955;padding:0;min-height:30px}
-.bead.active{background:linear-gradient(#73b8da,#2677a8);border-color:#15577e;box-shadow:inset 0 3px 3px #ffffff70,0 2px 2px #55371955}
-.upper-zone .bead{transform:translateY(0)}
-.upper-zone .bead.active{transform:translateY(76px)}
-.lower-zone .bead{transform:translateY(0)}
-.lower-zone .bead.active{transform:translateY(0)}
-.lower-zone .bead.first-inactive{margin-top:auto}
-.lower-zone .bead.inactive-after{visibility:hidden}
+.upper-zone{height:112px;width:100%;position:relative;flex:none}
+.bar{height:14px;width:calc(100% + 10px);margin-left:-5px;background:linear-gradient(#a97842,#69401f);border:2px solid #5d3d25;flex:none;box-shadow:0 2px 3px #0004}
+.lower-zone{height:166px;width:100%;position:relative;flex:none}
+.bead{position:absolute;left:50%;width:54px;height:31px;transform:translateX(-50%);border-radius:50% / 42%;border:2px solid #965c20;background:linear-gradient(180deg,#f8d18e 0%,#d88b36 48%,#a95e20 100%);box-shadow:inset 0 3px 4px #ffffffa6,inset 0 -3px 4px #6e3d1d55,0 2px 3px #55371966;padding:0;min-height:31px;transition:transform .28s cubic-bezier(.2,.8,.2,1),filter .2s}
+.bead.active{background:linear-gradient(180deg,#9bd2ec 0%,#4d9fc8 48%,#21658e 100%);border-color:#15577e;box-shadow:inset 0 3px 4px #ffffffa6,inset 0 -3px 4px #17476655,0 2px 3px #55371966}
+.upper-zone .bead{top:4px;transform:translate(-50%,0)}
+.upper-zone .bead.active{transform:translate(-50%,66px)}
+.lower-zone .bead{top:0;transform:translate(-50%,var(--rest))}
+.lower-zone .bead.active{transform:translate(-50%,var(--move))}
 .rod-value{font-size:.9rem;font-weight:700;margin-top:4px}
 .controls{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
 .feedback{min-height:2em;font-weight:700;margin:16px 0}
@@ -47,7 +45,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .answer-row input{width:120px;padding:10px;border:2px solid var(--line);border-radius:8px;background:white}
 .problem{font-size:2.2rem;font-weight:750;letter-spacing:.04em;margin:30px 0}
 .hidden{display:none!important}
-@media(max-width:480px){main{padding:18px 12px}.abacus{gap:12px;padding:14px 16px}.rod{width:96px}.bead{width:42px}}
+@media(max-width:480px){main{padding:18px 12px}.abacus{gap:12px;padding:14px 16px}.rod{width:100px}.bead{width:48px}}
 </style>
 </head>
 <body>
@@ -62,7 +60,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 </section>
 <section id="counting" class="hidden" aria-labelledby="countTitle">
 <div class="topline"><h1 id="countTitle" tabindex="-1">Counting</h1><button id="countHome">Main Menu</button></div>
-<div class="counter" id="countProgress">Question 1 of 11</div>
+<div class="counter" id="countProgress">Question 1 of 10</div>
 <p class="question" id="countPrompt">Show 0 on the abacus.</p>
 <p>Move beads toward the center bar. The upper bead is worth 5. Each lower bead is worth 1.</p>
 <div class="abacus-wrap">
@@ -90,23 +88,29 @@ document.getElementById('countMenu').addEventListener('click',()=>{startCounting
 document.getElementById('addMenu').addEventListener('click',()=>{startAddition();show('addition');document.getElementById('addTitle').focus?.();});
 document.getElementById('countHome').addEventListener('click',()=>show('home'));
 document.getElementById('addHome').addEventListener('click',()=>show('home'));
-let countIndex=0,countQuestions=[0,1,2,3,4,5,6,7,8,9,10],beadState={tens:{upper:false,lower:0},ones:{upper:false,lower:0}},countChecked=false;
+let countIndex=0,countQuestions=[1,4,3,2,0,5,8,6,7,9],beadState={tens:{upper:false,lower:0},ones:{upper:false,lower:0}},countChecked=false;
 function makeBead(label,active,onClick){const b=document.createElement('button');b.type='button';b.className='bead'+(active?' active':'');b.setAttribute('aria-label',label);b.setAttribute('aria-pressed',String(active));b.addEventListener('click',onClick);return b;}
 function drawRod(which){
  const state=beadState[which],upper=document.getElementById(which+'Upper'),lower=document.getElementById(which+'Lower');
- upper.replaceChildren(makeBead(which+' rod upper bead, worth 5'+(state.upper?', counted':', not counted'),state.upper,()=>{state.upper=!state.upper;drawRod(which);}));
- lower.replaceChildren();
- // Beads are ordered from nearest the reckoning bar outward; choosing one moves that bead and all nearer beads to the bar.
- for(let i=1;i<=4;i++){const active=i<=state.lower;const bead=makeBead(which+' rod lower bead '+i+' of 4, worth 1'+(active?', counted':', not counted'),active,()=>{state.lower=(i<=state.lower)?i-1:i;drawRod(which);});if(i===state.lower+1)bead.classList.add('first-inactive');lower.append(bead);}
+ if(!upper.firstChild){
+  const top=makeBead('',false,()=>{state.upper=!state.upper;updateRod(which);});upper.append(top);
+  for(let i=1;i<=4;i++){const bead=makeBead('',false,()=>{state.lower=(i<=state.lower)?i-1:i;updateRod(which);});bead.dataset.bead=String(i);bead.style.setProperty('--rest',(127-37*(i-1))+'px');bead.style.setProperty('--move',(8+37*(i-1))+'px');lower.append(bead);}
+ }
+ updateRod(which);
+}
+function updateRod(which){
+ const state=beadState[which],upper=document.getElementById(which+'Upper').firstChild;
+ upper.classList.toggle('active',state.upper);upper.setAttribute('aria-label',which+' rod upper bead, worth 5'+(state.upper?', counted':', not counted'));upper.setAttribute('aria-pressed',String(state.upper));
+ [...document.getElementById(which+'Lower').children].forEach((bead,index)=>{const active=index+1<=state.lower;bead.classList.toggle('active',active);bead.setAttribute('aria-label',which+' rod lower bead '+(index+1)+' of 4, worth 1'+(active?', counted':', not counted'));bead.setAttribute('aria-pressed',String(active));});
  document.getElementById(which+'Value').textContent=String((state.upper?5:0)+state.lower);
 }
 function drawAbacus(){drawRod('tens');drawRod('ones');}
 function abacusValue(){return ((beadState.tens.upper?5:0)+beadState.tens.lower)*10+(beadState.ones.upper?5:0)+beadState.ones.lower;}
 function resetAbacus(){beadState={tens:{upper:false,lower:0},ones:{upper:false,lower:0}};drawAbacus();}
 function startCounting(){countIndex=0;countChecked=false;resetAbacus();renderCount();}
-function renderCount(){document.getElementById('countProgress').textContent='Question '+(countIndex+1)+' of 11';document.getElementById('countPrompt').textContent='Show '+countQuestions[countIndex]+' on the abacus.';document.getElementById('countFeedback').textContent='';document.getElementById('countFeedback').className='feedback';document.getElementById('checkCount').disabled=false;document.getElementById('nextCount').disabled=true;}
+function renderCount(){countChecked=false;document.getElementById('countProgress').textContent='Question '+(countIndex+1)+' of 11';document.getElementById('countPrompt').textContent='Show '+countQuestions[countIndex]+' on the abacus.';document.getElementById('countFeedback').textContent='';document.getElementById('countFeedback').className='feedback';document.getElementById('checkCount').disabled=false;document.getElementById('nextCount').disabled=true;}
 document.getElementById('checkCount').addEventListener('click',()=>{if(countChecked)return;countChecked=true;const correct=abacusValue()===countQuestions[countIndex];const f=document.getElementById('countFeedback');f.textContent=correct?'Correct!':'Not quite. Try again on the abacus.';f.className='feedback '+(correct?'good':'bad');if(correct){document.getElementById('nextCount').disabled=false;document.getElementById('checkCount').disabled=true;}else{countChecked=false;}});
-document.getElementById('nextCount').addEventListener('click',()=>{if(countIndex>=10){document.getElementById('countFeedback').textContent='You finished all 11 counting questions!';document.getElementById('nextCount').disabled=true;return;}countIndex++;resetAbacus();renderCount();});
+document.getElementById('nextCount').addEventListener('click',()=>{if(countIndex>=countQuestions.length-1){document.getElementById('countFeedback').textContent='You finished all 10 counting questions!';document.getElementById('nextCount').disabled=true;return;}countIndex++;resetAbacus();renderCount();});
 let additionQuestions=[],addIndex=0,addChecked=false;
 function makeAdditionQuestions(){const list=[];while(list.length<20){const a=Math.floor(Math.random()*10),b=Math.floor(Math.random()*10),key=a+','+b;if(!list.some(q=>q.key===key))list.push({a,b,answer:a+b,key});}return list;}
 function startAddition(){additionQuestions=makeAdditionQuestions();addIndex=0;renderAddition();}
