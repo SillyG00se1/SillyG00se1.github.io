@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Abacus Practice</title>
+<style>
+:root{color-scheme:light;--ink:#172638;--blue:#245b83;--paper:#f5f7fa;--line:#b8c5d1;--bead:#d38a37;--active:#2677a8;--green:#176b43;--red:#a12d2d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:18px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+main{width:min(900px,100%);margin:0 auto;padding:24px 18px 48px}
+h1{font-size:clamp(1.8rem,5vw,2.5rem);margin:0 0 8px}
+h2{font-size:1.5rem;margin:0 0 18px}
+p{margin:8px 0 18px}
+button,input{font:inherit}
+button{border:2px solid var(--blue);border-radius:10px;background:white;color:var(--ink);padding:12px 18px;min-height:48px;cursor:pointer}
+button:hover{background:#eaf2f8}
+button:focus-visible,input:focus-visible{outline:4px solid #f0b84b;outline-offset:3px}
+button.primary{background:var(--blue);color:white}
+button:disabled{opacity:.45;cursor:not-allowed}
+.menu{display:flex;flex-wrap:wrap;gap:14px;margin-top:24px}
+.menu button{min-width:180px;font-size:1.2rem}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.topline button{padding:8px 14px;min-height:42px}
+.question{font-size:1.45rem;font-weight:700;margin:20px 0}
+.counter{color:#405568;font-size:1rem}
+.abacus-wrap{overflow-x:auto;padding:10px 0 20px}
+.abacus{display:flex;justify-content:center;gap:22px;min-width:300px;margin:0 auto;width:max-content;padding:18px 30px 22px;background:#ead6b6;border:8px solid #80552f;border-radius:14px;box-shadow:inset 0 0 0 2px #f7e9d2}
+.rod{position:relative;width:112px;height:310px;border-left:7px solid #80552f;border-right:7px solid #80552f;display:flex;flex-direction:column;align-items:center;padding:8px 0}
+.rod-label{font-size:1rem;font-weight:700;margin-bottom:4px}
+.upper-zone{height:105px;width:100%;display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px}
+.bar{height:12px;width:100%;background:#80552f;border:2px solid #5d3d25;flex:none}
+.lower-zone{height:170px;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:8px;gap:7px}
+.bead{width:48px;height:30px;border-radius:50% / 42%;border:2px solid #965c20;background:linear-gradient(#f0b45e,#c77925);box-shadow:inset 0 3px 3px #ffffff80,0 2px 2px #55371955;padding:0;min-height:30px}
+.bead.active{background:linear-gradient(#73b8da,#2677a8);border-color:#15577e;box-shadow:inset 0 3px 3px #ffffff70,0 2px 2px #55371955}
+.upper-zone .bead{transform:translateY(0)}
+.upper-zone .bead.active{transform:translateY(76px)}
+.lower-zone .bead{transform:translateY(0)}
+.lower-zone .bead.active{transform:translateY(-2px)}
+.lower-zone .bead.inactive-after{visibility:hidden}
+.rod-value{font-size:.9rem;font-weight:700;margin-top:4px}
+.controls{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.feedback{min-height:2em;font-weight:700;margin:16px 0}
+.feedback.good{color:var(--green)}.feedback.bad{color:var(--red)}
+.answer-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:22px 0}
+.answer-row input{width:120px;padding:10px;border:2px solid var(--line);border-radius:8px;background:white}
+.problem{font-size:2.2rem;font-weight:750;letter-spacing:.04em;margin:30px 0}
+.hidden{display:none!important}
+@media(max-width:480px){main{padding:18px 12px}.abacus{gap:12px;padding:14px 16px}.rod{width:96px}.bead{width:42px}}
+</style>
+</head>
+<body>
+<main>
+<section id="home">
+<h1>Abacus Practice</h1>
+<p>Choose a practice activity.</p>
+<div class="menu">
+<button class="primary" id="countMenu">Counting</button>
+<button class="primary" id="addMenu">Addition</button>
+</div>
+</section>
+<section id="counting" class="hidden" aria-labelledby="countTitle">
+<div class="topline"><h1 id="countTitle">Counting</h1><button id="countHome">Main Menu</button></div>
+<div class="counter" id="countProgress">Question 1 of 11</div>
+<p class="question" id="countPrompt">Show 0 on the abacus.</p>
+<p>Move beads toward the center bar. The upper bead is worth 5. Each lower bead is worth 1.</p>
+<div class="abacus-wrap">
+<div class="abacus" role="group" aria-label="Cranmer abacus with tens rod on the left and ones rod on the right">
+<div class="rod" id="tensRod"><div class="rod-label">Tens</div><div class="upper-zone" id="tensUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="tensLower"></div><div class="rod-value" id="tensValue">0</div></div>
+<div class="rod" id="onesRod"><div class="rod-label">Ones</div><div class="upper-zone" id="onesUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="onesLower"></div><div class="rod-value" id="onesValue">0</div></div>
+</div>
+</div>
+<div class="controls"><button class="primary" id="checkCount">Check Answer</button><button id="nextCount" disabled>Next Question</button></div>
+<div class="feedback" id="countFeedback" role="status" aria-live="polite"></div>
+</section>
+<section id="addition" class="hidden" aria-labelledby="addTitle">
+<div class="topline"><h1 id="addTitle">Addition</h1><button id="addHome">Main Menu</button></div>
+<div class="counter" id="addProgress">Question 1 of 20</div>
+<div class="problem" id="sumPrompt">4 + 7 = ?</div>
+<div class="answer-row"><label for="sumAnswer">Your answer</label><input id="sumAnswer" type="number" inputmode="numeric" step="1" autocomplete="off"></div>
+<div class="controls"><button class="primary" id="checkAdd">Check Answer</button><button id="nextAdd" disabled>Next Question</button></div>
+<div class="feedback" id="addFeedback" role="status" aria-live="polite"></div>
+</section>
+</main>
+<script>
+const sections={home:document.getElementById('home'),counting:document.getElementById('counting'),addition:document.getElementById('addition')};
+function show(which){Object.entries(sections).forEach(([k,v])=>v.classList.toggle('hidden',k!==which));}
+document.getElementById('countMenu').addEventListener('click',()=>{startCounting();show('counting');document.getElementById('countTitle').focus?.();});
+document.getElementById('addMenu').addEventListener('click',()=>{startAddition();show('addition');document.getElementById('addTitle').focus?.();});
+document.getElementById('countHome').addEventListener('click',()=>show('home'));
+document.getElementById('addHome').addEventListener('click',()=>show('home'));
+let countIndex=0,countQuestions=[0,1,2,3,4,5,6,7,8,9,10],beadState={tens:{upper:false,lower:0},ones:{upper:false,lower:0}},countChecked=false;
+function makeBead(label,active,onClick){const b=document.createElement('button');b.type='button';b.className='bead'+(active?' active':'');b.setAttribute('aria-label',label);b.setAttribute('aria-pressed',String(active));b.addEventListener('click',onClick);return b;}
+function drawRod(which){
+ const state=beadState[which],upper=document.getElementById(which+'Upper'),lower=document.getElementById(which+'Lower');
+ upper.replaceChildren(makeBead(which+' rod upper bead, worth 5'+(state.upper?', counted':', not counted'),state.upper,()=>{state.upper=!state.upper;drawRod(which);}));
+ lower.replaceChildren();
+ // Beads are ordered from nearest the reckoning bar outward; choosing one moves that bead and all nearer beads to the bar.
+ for(let i=1;i<=4;i++){const active=i<=state.lower;const bead=makeBead(which+' rod lower bead '+i+' of 4, worth 1'+(active?', counted':', not counted'),active,()=>{state.lower=(i<=state.lower)?i-1:i;drawRod(which);});lower.append(bead);}
+ document.getElementById(which+'Value').textContent=String((state.upper?5:0)+state.lower);
+}
+function drawAbacus(){drawRod('tens');drawRod('ones');}
+function abacusValue(){return ((beadState.tens.upper?5:0)+beadState.tens.lower)*10+(beadState.ones.upper?5:0)+beadState.ones.lower;}
+function resetAbacus(){beadState={tens:{upper:false,lower:0},ones:{upper:false,lower:0}};drawAbacus();}
+function startCounting(){countIndex=0;countChecked=false;resetAbacus();renderCount();}
+function renderCount(){document.getElementById('countProgress').textContent='Question '+(countIndex+1)+' of 11';document.getElementById('countPrompt').textContent='Show '+countQuestions[countIndex]+' on the abacus.';document.getElementById('countFeedback').textContent='';document.getElementById('countFeedback').className='feedback';document.getElementById('checkCount').disabled=false;document.getElementById('nextCount').disabled=true;}
+document.getElementById('checkCount').addEventListener('click',()=>{if(countChecked)return;countChecked=true;const correct=abacusValue()===countQuestions[countIndex];const f=document.getElementById('countFeedback');f.textContent=correct?'Correct!':'Not quite. Try again on the abacus.';f.className='feedback '+(correct?'good':'bad');if(correct){document.getElementById('nextCount').disabled=false;document.getElementById('checkCount').disabled=true;}else{countChecked=false;}});
+document.getElementById('nextCount').addEventListener('click',()=>{if(countIndex>=10){document.getElementById('countFeedback').textContent='You finished all 11 counting questions!';document.getElementById('nextCount').disabled=true;return;}countIndex++;resetAbacus();renderCount();});
+let additionQuestions=[],addIndex=0,addChecked=false;
+function makeAdditionQuestions(){const list=[];while(list.length<20){const a=Math.floor(Math.random()*10),b=Math.floor(Math.random()*10),key=a+','+b;if(!list.some(q=>q.key===key))list.push({a,b,answer:a+b,key});}return list;}
+function startAddition(){additionQuestions=makeAdditionQuestions();addIndex=0;renderAddition();}
+function renderAddition(){addChecked=false;const q=additionQuestions[addIndex];document.getElementById('addProgress').textContent='Question '+(addIndex+1)+' of 20';document.getElementById('sumPrompt').textContent=q.a+' + '+q.b+' = ?';document.getElementById('sumAnswer').value='';document.getElementById('addFeedback').textContent='';document.getElementById('addFeedback').className='feedback';document.getElementById('checkAdd').disabled=false;document.getElementById('nextAdd').disabled=true;}
+document.getElementById('checkAdd').addEventListener('click',()=>{if(addChecked)return;const field=document.getElementById('sumAnswer');if(field.value.trim()===''){document.getElementById('addFeedback').textContent='Enter an answer first.';field.focus();return;}const correct=Number(field.value)===additionQuestions[addIndex].answer;const f=document.getElementById('addFeedback');f.textContent=correct?'Correct!':'Not quite. Try again.';f.className='feedback '+(correct?'good':'bad');if(correct){addChecked=true;document.getElementById('checkAdd').disabled=true;document.getElementById('nextAdd').disabled=false;}});
+document.getElementById('nextAdd').addEventListener('click',()=>{if(addIndex>=19){document.getElementById('addFeedback').textContent='You finished all 20 addition questions!';document.getElementById('nextAdd').disabled=true;return;}addIndex++;renderAddition();document.getElementById('sumAnswer').focus();});
+document.getElementById('sumAnswer').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('checkAdd').click();});
+drawAbacus();
+</script>
+</body>
+</html>
