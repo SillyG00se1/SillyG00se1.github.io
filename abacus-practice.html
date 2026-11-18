@@ -36,7 +36,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .upper-zone .bead{transform:translateY(0)}
 .upper-zone .bead.active{transform:translateY(76px)}
 .lower-zone .bead{transform:translateY(0)}
-.lower-zone .bead.active{transform:translateY(-2px)}
+.lower-zone .bead.active{transform:translateY(0)}
+.lower-zone .bead.first-inactive{margin-top:auto}
 .lower-zone .bead.inactive-after{visibility:hidden}
 .rod-value{font-size:.9rem;font-weight:700;margin-top:4px}
 .controls{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
@@ -60,7 +61,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 </div>
 </section>
 <section id="counting" class="hidden" aria-labelledby="countTitle">
-<div class="topline"><h1 id="countTitle">Counting</h1><button id="countHome">Main Menu</button></div>
+<div class="topline"><h1 id="countTitle" tabindex="-1">Counting</h1><button id="countHome">Main Menu</button></div>
 <div class="counter" id="countProgress">Question 1 of 11</div>
 <p class="question" id="countPrompt">Show 0 on the abacus.</p>
 <p>Move beads toward the center bar. The upper bead is worth 5. Each lower bead is worth 1.</p>
@@ -74,7 +75,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 <div class="feedback" id="countFeedback" role="status" aria-live="polite"></div>
 </section>
 <section id="addition" class="hidden" aria-labelledby="addTitle">
-<div class="topline"><h1 id="addTitle">Addition</h1><button id="addHome">Main Menu</button></div>
+<div class="topline"><h1 id="addTitle" tabindex="-1">Addition</h1><button id="addHome">Main Menu</button></div>
 <div class="counter" id="addProgress">Question 1 of 20</div>
 <div class="problem" id="sumPrompt">4 + 7 = ?</div>
 <div class="answer-row"><label for="sumAnswer">Your answer</label><input id="sumAnswer" type="number" inputmode="numeric" step="1" autocomplete="off"></div>
@@ -96,7 +97,7 @@ function drawRod(which){
  upper.replaceChildren(makeBead(which+' rod upper bead, worth 5'+(state.upper?', counted':', not counted'),state.upper,()=>{state.upper=!state.upper;drawRod(which);}));
  lower.replaceChildren();
  // Beads are ordered from nearest the reckoning bar outward; choosing one moves that bead and all nearer beads to the bar.
- for(let i=1;i<=4;i++){const active=i<=state.lower;const bead=makeBead(which+' rod lower bead '+i+' of 4, worth 1'+(active?', counted':', not counted'),active,()=>{state.lower=(i<=state.lower)?i-1:i;drawRod(which);});lower.append(bead);}
+ for(let i=1;i<=4;i++){const active=i<=state.lower;const bead=makeBead(which+' rod lower bead '+i+' of 4, worth 1'+(active?', counted':', not counted'),active,()=>{state.lower=(i<=state.lower)?i-1:i;drawRod(which);});if(i===state.lower+1)bead.classList.add('first-inactive');lower.append(bead);}
  document.getElementById(which+'Value').textContent=String((state.upper?5:0)+state.lower);
 }
 function drawAbacus(){drawRod('tens');drawRod('ones');}
