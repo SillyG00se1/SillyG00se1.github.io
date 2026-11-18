@@ -39,12 +39,17 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .lower-zone .bead.active{transform:translate(-50%,var(--move))}
 .rod-value{font-size:.9rem;font-weight:700;margin-top:4px}
 .controls{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
-.feedback{min-height:2em;font-weight:700;margin:16px 0}
+.feedback{min-height:2em;font-size:1.65rem;line-height:1.3;font-weight:800;margin:20px 0}
 .feedback.good{color:var(--green)}.feedback.bad{color:var(--red)}
 .answer-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:22px 0}
 .answer-row input{width:120px;padding:10px;border:2px solid var(--line);border-radius:8px;background:white}
 .problem{font-size:2.2rem;font-weight:750;letter-spacing:.04em;margin:30px 0}
 .hidden{display:none!important}
+.practice-values{display:flex;justify-content:center;gap:26px;width:max-content;margin:0 auto;padding:0 34px;color:#172638;font-size:15pt;font-weight:700;text-align:center}
+.practice-values span{width:116px}
+.confetti-piece{position:fixed;top:-16px;width:10px;height:16px;z-index:9999;pointer-events:none;animation:confetti-fall 1.8s ease-in forwards}
+@keyframes confetti-fall{to{transform:translate3d(var(--drift),105vh,0) rotate(760deg);opacity:.9}}
+@media(prefers-reduced-motion:reduce){.confetti-piece{animation-duration:.8s}}
 @media(max-width:480px){main{padding:18px 12px}.abacus{gap:12px;padding:14px 16px}.rod{width:100px}.bead{width:48px}}
 </style>
 </head>
@@ -56,8 +61,19 @@ button:disabled{opacity:.45;cursor:not-allowed}
 <div class="menu">
 <button class="primary" id="countMenu">Counting</button>
 <button class="primary" id="addMenu">Addition</button>
+<button class="primary" id="practiceMenu">Practice</button>
 </div>
 </section>
+<section id="practice" class="hidden" aria-labelledby="practiceTitle">
+<div class="topline"><h1 id="practiceTitle" tabindex="-1">Practice</h1><button id="practiceHome">Return to Menu</button></div>
+<p>Move the beads and watch each column’s number change.</p>
+<div class="abacus-wrap"><div class="abacus" role="group" aria-label="Practice Cranmer abacus with hundreds, tens, and ones rods">
+<div class="rod"><div class="rod-label">Hundreds</div><div class="upper-zone" id="practiceHundredsUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="practiceHundredsLower"></div></div>
+<div class="rod"><div class="rod-label">Tens</div><div class="upper-zone" id="practiceTensUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="practiceTensLower"></div></div>
+<div class="rod"><div class="rod-label">Ones</div><div class="upper-zone" id="practiceOnesUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="practiceOnesLower"></div></div>
+</div>
+<div class="practice-values" aria-label="Digit values"><span id="practiceHundredsValue">0</span><span id="practiceTensValue">0</span><span id="practiceOnesValue">0</span></div></div>
+<div class="controls"><button id="resetPractice">Reset Abacus</button></div></section>
 <section id="counting" class="hidden" aria-labelledby="countTitle">
 <div class="topline"><h1 id="countTitle" tabindex="-1">Counting</h1><button id="countHome">Return to Menu</button></div>
 <div class="counter" id="countProgress">Question 1 of 10</div>
@@ -65,9 +81,9 @@ button:disabled{opacity:.45;cursor:not-allowed}
 <p>Move beads toward the center bar. The upper bead is worth 5. Each lower bead is worth 1.</p>
 <div class="abacus-wrap">
 <div class="abacus" role="group" aria-label="Cranmer abacus with hundreds, tens, and ones rods">
-<div class="rod" id="hundredsRod"><div class="rod-label">Hundreds</div><div class="upper-zone" id="hundredsUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="hundredsLower"></div><div class="rod-value" id="hundredsValue">0</div></div>
-<div class="rod" id="tensRod"><div class="rod-label">Tens</div><div class="upper-zone" id="tensUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="tensLower"></div><div class="rod-value" id="tensValue">0</div></div>
-<div class="rod" id="onesRod"><div class="rod-label">Ones</div><div class="upper-zone" id="onesUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="onesLower"></div><div class="rod-value" id="onesValue">0</div></div>
+<div class="rod" id="hundredsRod"><div class="rod-label">Hundreds</div><div class="upper-zone" id="hundredsUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="hundredsLower"></div></div>
+<div class="rod" id="tensRod"><div class="rod-label">Tens</div><div class="upper-zone" id="tensUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="tensLower"></div></div>
+<div class="rod" id="onesRod"><div class="rod-label">Ones</div><div class="upper-zone" id="onesUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="onesLower"></div></div>
 </div>
 </div>
 <div class="controls"><button class="primary" id="checkCount">Check Answer</button><button id="nextCount" disabled>Next Question</button></div>
@@ -80,9 +96,9 @@ button:disabled{opacity:.45;cursor:not-allowed}
 <p>Show the answer on the abacus. The upper bead is worth 5. Each lower bead is worth 1.</p>
 <div class="abacus-wrap">
 <div class="abacus" role="group" aria-label="Addition answer Cranmer abacus with hundreds, tens, and ones rods">
-<div class="rod" id="addHundredsRod"><div class="rod-label">Hundreds</div><div class="upper-zone" id="addHundredsUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="addHundredsLower"></div><div class="rod-value" id="addHundredsValue">0</div></div>
-<div class="rod" id="addTensRod"><div class="rod-label">Tens</div><div class="upper-zone" id="addTensUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="addTensLower"></div><div class="rod-value" id="addTensValue">0</div></div>
-<div class="rod" id="addOnesRod"><div class="rod-label">Ones</div><div class="upper-zone" id="addOnesUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="addOnesLower"></div><div class="rod-value" id="addOnesValue">0</div></div>
+<div class="rod" id="addHundredsRod"><div class="rod-label">Hundreds</div><div class="upper-zone" id="addHundredsUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="addHundredsLower"></div></div>
+<div class="rod" id="addTensRod"><div class="rod-label">Tens</div><div class="upper-zone" id="addTensUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="addTensLower"></div></div>
+<div class="rod" id="addOnesRod"><div class="rod-label">Ones</div><div class="upper-zone" id="addOnesUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="addOnesLower"></div></div>
 </div>
 </div>
 
@@ -91,10 +107,13 @@ button:disabled{opacity:.45;cursor:not-allowed}
 </section>
 </main>
 <script>
-const sections={home:document.getElementById('home'),counting:document.getElementById('counting'),addition:document.getElementById('addition')};
+const sections={home:document.getElementById('home'),practice:document.getElementById('practice'),counting:document.getElementById('counting'),addition:document.getElementById('addition')};
 function show(which){Object.entries(sections).forEach(([k,v])=>v.classList.toggle('hidden',k!==which));}
 document.getElementById('countMenu').addEventListener('click',()=>{startCounting();show('counting');document.getElementById('countTitle').focus?.();});
 document.getElementById('addMenu').addEventListener('click',()=>{startAddition();show('addition');document.getElementById('addTitle').focus?.();});
+document.getElementById('practiceMenu').addEventListener('click',()=>{resetPractice();show('practice');document.getElementById('practiceTitle').focus?.();});
+document.getElementById('practiceHome').addEventListener('click',()=>show('home'));
+document.getElementById('resetPractice').addEventListener('click',resetPractice);
 document.getElementById('countHome').addEventListener('click',()=>show('home'));
 document.getElementById('addHome').addEventListener('click',()=>show('home'));
 let countIndex=0,countQuestions=[1,4,3,2,0,5,8,6,7,9],beadState={hundreds:{upper:false,lower:0},tens:{upper:false,lower:0},ones:{upper:false,lower:0}},countChecked=false;
@@ -111,14 +130,15 @@ function updateRod(which){
  const state=beadState[which],upper=document.getElementById(which+'Upper').firstChild;
  upper.classList.toggle('active',state.upper);upper.setAttribute('aria-label',which+' rod upper bead, worth 5'+(state.upper?', counted':', not counted'));upper.setAttribute('aria-pressed',String(state.upper));
  [...document.getElementById(which+'Lower').children].forEach((bead,index)=>{const i=index+1,active=i<=state.lower;bead.style.setProperty('--rest',(30+35*(i-1))+'px');bead.style.setProperty('--move',(35*(i-1))+'px');bead.classList.toggle('active',active);bead.setAttribute('aria-label',which+' rod lower bead '+i+' of 4, worth 1'+(active?', counted':', not counted'));bead.setAttribute('aria-pressed',String(active));});
- document.getElementById(which+'Value').textContent=String((state.upper?5:0)+state.lower);
+ const value=document.getElementById(which+'Value');if(value)value.textContent=String((state.upper?5:0)+state.lower);
 }
 function drawAbacus(){drawRod('hundreds');drawRod('tens');drawRod('ones');}
 function abacusValue(){return ((beadState.hundreds.upper?5:0)+beadState.hundreds.lower)*100+((beadState.tens.upper?5:0)+beadState.tens.lower)*10+(beadState.ones.upper?5:0)+beadState.ones.lower;}
 function resetAbacus(){beadState={hundreds:{upper:false,lower:0},tens:{upper:false,lower:0},ones:{upper:false,lower:0}};drawAbacus();}
 function startCounting(){countIndex=0;countChecked=false;resetAbacus();renderCount();}
+function celebrate(){const colors=['#e74c3c','#f1c40f','#2ecc71','#3498db','#9b59b6','#ff8c42'];for(let i=0;i<85;i++){const p=document.createElement('i');p.className='confetti-piece';p.style.left=(Math.random()*100)+'vw';p.style.backgroundColor=colors[i%colors.length];p.style.setProperty('--drift',((Math.random()-.5)*260)+'px');p.style.animationDelay=(Math.random()*.35)+'s';p.style.borderRadius=Math.random()>.5?'50%':'2px';document.body.append(p);setTimeout(()=>p.remove(),2400);}}
 function renderCount(){countChecked=false;document.getElementById('countProgress').textContent='Question '+(countIndex+1)+' of 10';document.getElementById('countPrompt').textContent='Show '+countQuestions[countIndex]+' on the abacus.';document.getElementById('countFeedback').textContent='';document.getElementById('countFeedback').className='feedback';document.getElementById('checkCount').disabled=false;document.getElementById('nextCount').disabled=true;}
-document.getElementById('checkCount').addEventListener('click',()=>{if(countChecked)return;countChecked=true;const correct=abacusValue()===countQuestions[countIndex];const f=document.getElementById('countFeedback');f.textContent=correct?'Correct!':'Not quite. Try again on the abacus.';f.className='feedback '+(correct?'good':'bad');if(correct){document.getElementById('nextCount').disabled=false;document.getElementById('checkCount').disabled=true;}else{countChecked=false;}});
+document.getElementById('checkCount').addEventListener('click',()=>{if(countChecked)return;countChecked=true;const correct=abacusValue()===countQuestions[countIndex];const f=document.getElementById('countFeedback');f.textContent=correct?'Correct!':'Not quite. Try again on the abacus.';f.className='feedback '+(correct?'good':'bad');if(correct){celebrate();document.getElementById('nextCount').disabled=false;document.getElementById('checkCount').disabled=true;}else{countChecked=false;}});
 document.getElementById('nextCount').addEventListener('click',()=>{if(countIndex>=countQuestions.length-1){document.getElementById('countFeedback').textContent='You finished all 10 counting questions!';document.getElementById('nextCount').disabled=true;document.getElementById('countHome').focus();return;}countIndex++;resetAbacus();renderCount();});
 let additionQuestions=[],addIndex=0,addChecked=false,addBeadState={hundreds:{upper:false,lower:0},tens:{upper:false,lower:0},ones:{upper:false,lower:0}};
 
@@ -134,7 +154,7 @@ function updateAdditionRod(which){
  const state=addBeadState[which],prefix='add'+which[0].toUpperCase()+which.slice(1),upper=document.getElementById(prefix+'Upper').firstChild;
  upper.classList.toggle('active',state.upper);upper.setAttribute('aria-label',which+' rod upper bead, worth 5'+(state.upper?', counted':', not counted'));upper.setAttribute('aria-pressed',String(state.upper));
  [...document.getElementById(prefix+'Lower').children].forEach((bead,index)=>{const i=index+1,active=i<=state.lower;bead.style.setProperty('--rest',(30+35*(i-1))+'px');bead.style.setProperty('--move',(35*(i-1))+'px');bead.classList.toggle('active',active);bead.setAttribute('aria-label',which+' rod lower bead '+i+' of 4, worth 1'+(active?', counted':', not counted'));bead.setAttribute('aria-pressed',String(active));});
- document.getElementById(prefix+'Value').textContent=String((state.upper?5:0)+state.lower);
+ const value=document.getElementById(prefix+'Value');if(value)value.textContent=String((state.upper?5:0)+state.lower);
 }
 function drawAdditionAbacus(){drawAdditionRod('hundreds');drawAdditionRod('tens');drawAdditionRod('ones');}
 function additionAbacusValue(){return ((addBeadState.hundreds.upper?5:0)+addBeadState.hundreds.lower)*100+((addBeadState.tens.upper?5:0)+addBeadState.tens.lower)*10+(addBeadState.ones.upper?5:0)+addBeadState.ones.lower;}
@@ -143,10 +163,14 @@ function resetAdditionAbacus(){addBeadState={hundreds:{upper:false,lower:0},tens
 function makeAdditionQuestions(){const list=[];while(list.length<20){const a=Math.floor(Math.random()*10),b=Math.floor(Math.random()*10),key=a+','+b;if(!list.some(q=>q.key===key))list.push({a,b,answer:a+b,key});}return list;}
 function startAddition(){additionQuestions=makeAdditionQuestions();addIndex=0;addBeadState={hundreds:{upper:false,lower:0},tens:{upper:false,lower:0},ones:{upper:false,lower:0}};drawAdditionAbacus();renderAddition();}
 function renderAddition(){addChecked=false;resetAdditionAbacus();const q=additionQuestions[addIndex];document.getElementById('addProgress').textContent='Question '+(addIndex+1)+' of 20';document.getElementById('sumPrompt').textContent=q.a+' + '+q.b+' = ?';document.getElementById('addFeedback').textContent='';document.getElementById('addFeedback').className='feedback';document.getElementById('checkAdd').disabled=false;document.getElementById('nextAdd').disabled=true;}
-document.getElementById('checkAdd').addEventListener('click',()=>{if(addChecked)return;const correct=additionAbacusValue()===additionQuestions[addIndex].answer;const f=document.getElementById('addFeedback');f.textContent=correct?'Correct!':'Not quite. Adjust the beads and try again.';f.className='feedback '+(correct?'good':'bad');if(correct){addChecked=true;document.getElementById('checkAdd').disabled=true;document.getElementById('nextAdd').disabled=false;}});
+document.getElementById('checkAdd').addEventListener('click',()=>{if(addChecked)return;const correct=additionAbacusValue()===additionQuestions[addIndex].answer;const f=document.getElementById('addFeedback');f.textContent=correct?'Correct!':'Not quite. Adjust the beads and try again.';f.className='feedback '+(correct?'good':'bad');if(correct){celebrate();addChecked=true;document.getElementById('checkAdd').disabled=true;document.getElementById('nextAdd').disabled=false;}});
 document.getElementById('nextAdd').addEventListener('click',()=>{if(addIndex>=19){document.getElementById('addFeedback').textContent='You finished all 20 addition questions!';document.getElementById('nextAdd').disabled=true;document.getElementById('addHome').focus();return;}addIndex++;renderAddition();document.getElementById('sumPrompt').focus?.();});
 
-drawAbacus();
+let practiceState={hundreds:{upper:false,lower:0},tens:{upper:false,lower:0},ones:{upper:false,lower:0}};
+function updatePracticeRod(which){const state=practiceState[which],prefix='practice'+which[0].toUpperCase()+which.slice(1),upper=document.getElementById(prefix+'Upper').firstChild;upper.classList.toggle('active',state.upper);upper.setAttribute('aria-label',which+' upper bead, worth 5'+(state.upper?', counted':', not counted'));upper.setAttribute('aria-pressed',String(state.upper));[...document.getElementById(prefix+'Lower').children].forEach((bead,index)=>{const i=index+1,active=i<=state.lower;bead.style.setProperty('--rest',(30+35*(i-1))+'px');bead.style.setProperty('--move',(35*(i-1))+'px');bead.classList.toggle('active',active);bead.setAttribute('aria-label',which+' lower bead '+i+' of 4, worth 1'+(active?', counted':', not counted'));bead.setAttribute('aria-pressed',String(active));});document.getElementById(prefix+'Value').textContent=String((state.upper?5:0)+state.lower);}
+function drawPracticeRod(which){const prefix='practice'+which[0].toUpperCase()+which.slice(1),upper=document.getElementById(prefix+'Upper'),lower=document.getElementById(prefix+'Lower');if(!upper.firstChild){upper.append(makeBead('',false,()=>{practiceState[which].upper=!practiceState[which].upper;updatePracticeRod(which);}));for(let i=1;i<=4;i++)lower.append(makeBead('',false,()=>{const current=practiceState[which].lower;practiceState[which].lower=i<=current?i-1:i;updatePracticeRod(which);}));}updatePracticeRod(which);}
+function resetPractice(){practiceState={hundreds:{upper:false,lower:0},tens:{upper:false,lower:0},ones:{upper:false,lower:0}};['hundreds','tens','ones'].forEach(drawPracticeRod);}
+drawAbacus();resetPractice();
 </script>
 </body>
 </html>
