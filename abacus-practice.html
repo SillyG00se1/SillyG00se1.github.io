@@ -64,7 +64,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
 <p class="question" id="countPrompt">Show 0 on the abacus.</p>
 <p>Move beads toward the center bar. The upper bead is worth 5. Each lower bead is worth 1.</p>
 <div class="abacus-wrap">
-<div class="abacus" role="group" aria-label="Cranmer abacus with tens rod on the left and ones rod on the right">
+<div class="abacus" role="group" aria-label="Cranmer abacus with hundreds, tens, and ones rods">
+<div class="rod" id="hundredsRod"><div class="rod-label">Hundreds</div><div class="upper-zone" id="hundredsUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="hundredsLower"></div><div class="rod-value" id="hundredsValue">0</div></div>
 <div class="rod" id="tensRod"><div class="rod-label">Tens</div><div class="upper-zone" id="tensUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="tensLower"></div><div class="rod-value" id="tensValue">0</div></div>
 <div class="rod" id="onesRod"><div class="rod-label">Ones</div><div class="upper-zone" id="onesUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="onesLower"></div><div class="rod-value" id="onesValue">0</div></div>
 </div>
@@ -78,7 +79,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
 <div class="problem" id="sumPrompt">4 + 7 = ?</div>
 <p>Show the answer on the abacus. The upper bead is worth 5. Each lower bead is worth 1.</p>
 <div class="abacus-wrap">
-<div class="abacus" role="group" aria-label="Addition answer abacus with tens rod on the left and ones rod on the right">
+<div class="abacus" role="group" aria-label="Addition answer Cranmer abacus with hundreds, tens, and ones rods">
+<div class="rod" id="addHundredsRod"><div class="rod-label">Hundreds</div><div class="upper-zone" id="addHundredsUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="addHundredsLower"></div><div class="rod-value" id="addHundredsValue">0</div></div>
 <div class="rod" id="addTensRod"><div class="rod-label">Tens</div><div class="upper-zone" id="addTensUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="addTensLower"></div><div class="rod-value" id="addTensValue">0</div></div>
 <div class="rod" id="addOnesRod"><div class="rod-label">Ones</div><div class="upper-zone" id="addOnesUpper"></div><div class="bar" aria-hidden="true"></div><div class="lower-zone" id="addOnesLower"></div><div class="rod-value" id="addOnesValue">0</div></div>
 </div>
@@ -95,47 +97,47 @@ document.getElementById('countMenu').addEventListener('click',()=>{startCounting
 document.getElementById('addMenu').addEventListener('click',()=>{startAddition();show('addition');document.getElementById('addTitle').focus?.();});
 document.getElementById('countHome').addEventListener('click',()=>show('home'));
 document.getElementById('addHome').addEventListener('click',()=>show('home'));
-let countIndex=0,countQuestions=[1,4,3,2,0,5,8,6,7,9],beadState={tens:{upper:false,lower:0},ones:{upper:false,lower:0}},countChecked=false;
+let countIndex=0,countQuestions=[1,4,3,2,0,5,8,6,7,9],beadState={hundreds:{upper:false,lower:0},tens:{upper:false,lower:0},ones:{upper:false,lower:0}},countChecked=false;
 function makeBead(label,active,onClick){const b=document.createElement('button');b.type='button';b.className='bead'+(active?' active':'');b.setAttribute('aria-label',label);b.setAttribute('aria-pressed',String(active));b.addEventListener('click',onClick);return b;}
 function drawRod(which){
  const state=beadState[which],upper=document.getElementById(which+'Upper'),lower=document.getElementById(which+'Lower');
  if(!upper.firstChild){
   const top=makeBead('',false,()=>{state.upper=!state.upper;updateRod(which);});upper.append(top);
-  for(let i=1;i<=4;i++){const bead=makeBead('',false,()=>{state.lower=(i>4-state.lower)?4-i:5-i;updateRod(which);});bead.dataset.bead=String(i);lower.append(bead);}
+  for(let i=1;i<=4;i++){const bead=makeBead('',false,()=>{state.lower=i<=state.lower?i-1:i;updateRod(which);});bead.dataset.bead=String(i);lower.append(bead);}
  }
  updateRod(which);
 }
 function updateRod(which){
  const state=beadState[which],upper=document.getElementById(which+'Upper').firstChild;
  upper.classList.toggle('active',state.upper);upper.setAttribute('aria-label',which+' rod upper bead, worth 5'+(state.upper?', counted':', not counted'));upper.setAttribute('aria-pressed',String(state.upper));
- [...document.getElementById(which+'Lower').children].forEach((bead,index)=>{const i=index+1,active=i>4-state.lower;bead.style.setProperty('--rest',(135-35*(i-1))+'px');bead.style.setProperty('--move',(35*(i-(5-state.lower)))+'px');bead.classList.toggle('active',active);bead.setAttribute('aria-label',which+' rod lower bead '+i+' of 4, worth 1'+(active?', counted':', not counted'));bead.setAttribute('aria-pressed',String(active));});
+ [...document.getElementById(which+'Lower').children].forEach((bead,index)=>{const i=index+1,active=i<=state.lower;bead.style.setProperty('--rest',(30+35*(i-1))+'px');bead.style.setProperty('--move',(35*(i-1))+'px');bead.classList.toggle('active',active);bead.setAttribute('aria-label',which+' rod lower bead '+i+' of 4, worth 1'+(active?', counted':', not counted'));bead.setAttribute('aria-pressed',String(active));});
  document.getElementById(which+'Value').textContent=String((state.upper?5:0)+state.lower);
 }
-function drawAbacus(){drawRod('tens');drawRod('ones');}
-function abacusValue(){return ((beadState.tens.upper?5:0)+beadState.tens.lower)*10+(beadState.ones.upper?5:0)+beadState.ones.lower;}
-function resetAbacus(){beadState={tens:{upper:false,lower:0},ones:{upper:false,lower:0}};drawAbacus();}
+function drawAbacus(){drawRod('hundreds');drawRod('tens');drawRod('ones');}
+function abacusValue(){return ((beadState.hundreds.upper?5:0)+beadState.hundreds.lower)*100+((beadState.tens.upper?5:0)+beadState.tens.lower)*10+(beadState.ones.upper?5:0)+beadState.ones.lower;}
+function resetAbacus(){beadState={hundreds:{upper:false,lower:0},tens:{upper:false,lower:0},ones:{upper:false,lower:0}};drawAbacus();}
 function startCounting(){countIndex=0;countChecked=false;resetAbacus();renderCount();}
 function renderCount(){countChecked=false;document.getElementById('countProgress').textContent='Question '+(countIndex+1)+' of 10';document.getElementById('countPrompt').textContent='Show '+countQuestions[countIndex]+' on the abacus.';document.getElementById('countFeedback').textContent='';document.getElementById('countFeedback').className='feedback';document.getElementById('checkCount').disabled=false;document.getElementById('nextCount').disabled=true;}
 document.getElementById('checkCount').addEventListener('click',()=>{if(countChecked)return;countChecked=true;const correct=abacusValue()===countQuestions[countIndex];const f=document.getElementById('countFeedback');f.textContent=correct?'Correct!':'Not quite. Try again on the abacus.';f.className='feedback '+(correct?'good':'bad');if(correct){document.getElementById('nextCount').disabled=false;document.getElementById('checkCount').disabled=true;}else{countChecked=false;}});
 document.getElementById('nextCount').addEventListener('click',()=>{if(countIndex>=countQuestions.length-1){document.getElementById('countFeedback').textContent='You finished all 10 counting questions!';document.getElementById('nextCount').disabled=true;document.getElementById('countHome').focus();return;}countIndex++;resetAbacus();renderCount();});
-let additionQuestions=[],addIndex=0,addChecked=false,addBeadState={tens:{upper:false,lower:0},ones:{upper:false,lower:0}};
+let additionQuestions=[],addIndex=0,addChecked=false,addBeadState={hundreds:{upper:false,lower:0},tens:{upper:false,lower:0},ones:{upper:false,lower:0}};
 
 function drawAdditionRod(which){
  const state=addBeadState[which],upper=document.getElementById('add'+which[0].toUpperCase()+which.slice(1)+'Upper'),lower=document.getElementById('add'+which[0].toUpperCase()+which.slice(1)+'Lower');
  if(!upper.firstChild){
   const top=makeBead('',false,()=>{state.upper=!state.upper;updateAdditionRod(which);});upper.append(top);
-  for(let i=1;i<=4;i++){const bead=makeBead('',false,()=>{state.lower=(i>4-state.lower)?4-i:5-i;updateAdditionRod(which);});lower.append(bead);}
+  for(let i=1;i<=4;i++){const bead=makeBead('',false,()=>{state.lower=i<=state.lower?i-1:i;updateAdditionRod(which);});lower.append(bead);}
  }
  updateAdditionRod(which);
 }
 function updateAdditionRod(which){
  const state=addBeadState[which],prefix='add'+which[0].toUpperCase()+which.slice(1),upper=document.getElementById(prefix+'Upper').firstChild;
  upper.classList.toggle('active',state.upper);upper.setAttribute('aria-label',which+' rod upper bead, worth 5'+(state.upper?', counted':', not counted'));upper.setAttribute('aria-pressed',String(state.upper));
- [...document.getElementById(prefix+'Lower').children].forEach((bead,index)=>{const i=index+1,active=i>4-state.lower;bead.style.setProperty('--rest',(135-35*(i-1))+'px');bead.style.setProperty('--move',(35*(i-(5-state.lower)))+'px');bead.classList.toggle('active',active);bead.setAttribute('aria-label',which+' rod lower bead '+i+' of 4, worth 1'+(active?', counted':', not counted'));bead.setAttribute('aria-pressed',String(active));});
+ [...document.getElementById(prefix+'Lower').children].forEach((bead,index)=>{const i=index+1,active=i<=state.lower;bead.style.setProperty('--rest',(30+35*(i-1))+'px');bead.style.setProperty('--move',(35*(i-1))+'px');bead.classList.toggle('active',active);bead.setAttribute('aria-label',which+' rod lower bead '+i+' of 4, worth 1'+(active?', counted':', not counted'));bead.setAttribute('aria-pressed',String(active));});
  document.getElementById(prefix+'Value').textContent=String((state.upper?5:0)+state.lower);
 }
-function drawAdditionAbacus(){drawAdditionRod('tens');drawAdditionRod('ones');}
-function additionAbacusValue(){return ((addBeadState.tens.upper?5:0)+addBeadState.tens.lower)*10+(addBeadState.ones.upper?5:0)+addBeadState.ones.lower;}
+function drawAdditionAbacus(){drawAdditionRod('hundreds');drawAdditionRod('tens');drawAdditionRod('ones');}
+function additionAbacusValue(){return ((addBeadState.hundreds.upper?5:0)+addBeadState.hundreds.lower)*100+((addBeadState.tens.upper?5:0)+addBeadState.tens.lower)*10+(addBeadState.ones.upper?5:0)+addBeadState.ones.lower;}
 function resetAdditionAbacus(){addBeadState={tens:{upper:false,lower:0},ones:{upper:false,lower:0}};drawAdditionAbacus();}
 
 function makeAdditionQuestions(){const list=[];while(list.length<20){const a=Math.floor(Math.random()*10),b=Math.floor(Math.random()*10),key=a+','+b;if(!list.some(q=>q.key===key))list.push({a,b,answer:a+b,key});}return list;}
