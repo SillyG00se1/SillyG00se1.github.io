@@ -102,8 +102,8 @@ function makeBead(label,active,onClick){const b=document.createElement('button')
 function drawRod(which){
  const state=beadState[which],upper=document.getElementById(which+'Upper'),lower=document.getElementById(which+'Lower');
  if(!upper.firstChild){
-  const top=makeBead('',false,()=>{state.upper=!state.upper;updateRod(which);});upper.append(top);
-  for(let i=1;i<=4;i++){const bead=makeBead('',false,()=>{state.lower=i<=state.lower?i-1:i;updateRod(which);});bead.dataset.bead=String(i);lower.append(bead);}
+  const top=makeBead('',false,()=>{beadState[which].upper=!beadState[which].upper;updateRod(which);});upper.append(top);
+  for(let i=1;i<=4;i++){const bead=makeBead('',false,()=>{const current=beadState[which].lower;beadState[which].lower=i<=current?i-1:i;updateRod(which);});bead.dataset.bead=String(i);lower.append(bead);}
  }
  updateRod(which);
 }
@@ -125,8 +125,8 @@ let additionQuestions=[],addIndex=0,addChecked=false,addBeadState={hundreds:{upp
 function drawAdditionRod(which){
  const state=addBeadState[which],upper=document.getElementById('add'+which[0].toUpperCase()+which.slice(1)+'Upper'),lower=document.getElementById('add'+which[0].toUpperCase()+which.slice(1)+'Lower');
  if(!upper.firstChild){
-  const top=makeBead('',false,()=>{state.upper=!state.upper;updateAdditionRod(which);});upper.append(top);
-  for(let i=1;i<=4;i++){const bead=makeBead('',false,()=>{state.lower=i<=state.lower?i-1:i;updateAdditionRod(which);});lower.append(bead);}
+  const top=makeBead('',false,()=>{addBeadState[which].upper=!addBeadState[which].upper;updateAdditionRod(which);});upper.append(top);
+  for(let i=1;i<=4;i++){const bead=makeBead('',false,()=>{const current=addBeadState[which].lower;addBeadState[which].lower=i<=current?i-1:i;updateAdditionRod(which);});lower.append(bead);}
  }
  updateAdditionRod(which);
 }
@@ -138,10 +138,10 @@ function updateAdditionRod(which){
 }
 function drawAdditionAbacus(){drawAdditionRod('hundreds');drawAdditionRod('tens');drawAdditionRod('ones');}
 function additionAbacusValue(){return ((addBeadState.hundreds.upper?5:0)+addBeadState.hundreds.lower)*100+((addBeadState.tens.upper?5:0)+addBeadState.tens.lower)*10+(addBeadState.ones.upper?5:0)+addBeadState.ones.lower;}
-function resetAdditionAbacus(){addBeadState={tens:{upper:false,lower:0},ones:{upper:false,lower:0}};drawAdditionAbacus();}
+function resetAdditionAbacus(){addBeadState={hundreds:{upper:false,lower:0},tens:{upper:false,lower:0},ones:{upper:false,lower:0}};drawAdditionAbacus();}
 
 function makeAdditionQuestions(){const list=[];while(list.length<20){const a=Math.floor(Math.random()*10),b=Math.floor(Math.random()*10),key=a+','+b;if(!list.some(q=>q.key===key))list.push({a,b,answer:a+b,key});}return list;}
-function startAddition(){additionQuestions=makeAdditionQuestions();addIndex=0;addBeadState={tens:{upper:false,lower:0},ones:{upper:false,lower:0}};drawAdditionAbacus();renderAddition();}
+function startAddition(){additionQuestions=makeAdditionQuestions();addIndex=0;addBeadState={hundreds:{upper:false,lower:0},tens:{upper:false,lower:0},ones:{upper:false,lower:0}};drawAdditionAbacus();renderAddition();}
 function renderAddition(){addChecked=false;resetAdditionAbacus();const q=additionQuestions[addIndex];document.getElementById('addProgress').textContent='Question '+(addIndex+1)+' of 20';document.getElementById('sumPrompt').textContent=q.a+' + '+q.b+' = ?';document.getElementById('addFeedback').textContent='';document.getElementById('addFeedback').className='feedback';document.getElementById('checkAdd').disabled=false;document.getElementById('nextAdd').disabled=true;}
 document.getElementById('checkAdd').addEventListener('click',()=>{if(addChecked)return;const correct=additionAbacusValue()===additionQuestions[addIndex].answer;const f=document.getElementById('addFeedback');f.textContent=correct?'Correct!':'Not quite. Adjust the beads and try again.';f.className='feedback '+(correct?'good':'bad');if(correct){addChecked=true;document.getElementById('checkAdd').disabled=true;document.getElementById('nextAdd').disabled=false;}});
 document.getElementById('nextAdd').addEventListener('click',()=>{if(addIndex>=19){document.getElementById('addFeedback').textContent='You finished all 20 addition questions!';document.getElementById('nextAdd').disabled=true;document.getElementById('addHome').focus();return;}addIndex++;renderAddition();document.getElementById('sumPrompt').focus?.();});
