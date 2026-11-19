@@ -22,7 +22,9 @@
 /* Assets are in the GitHub repository's capital-F "Fruit" folder. */
 const FRUIT_SPEED=6, ROT_SPEED=3, SWITCH_LOCKOUT=500, FRUIT_SIZE=150, BOMB_SIZE=160;
 
-const canvas=document.getElementById("gameCanvas"), ctx=canvas.getContext("2d");\nconst nextKQ=document.getElementById("nextKQ");\nconst kqLevel=Math.max(1,Math.min(5,Number(new URLSearchParams(location.search).get("level"))||1));
+const canvas=document.getElementById("gameCanvas"), ctx=canvas.getContext("2d");
+const nextKQ=document.getElementById("nextKQ");
+const kqLevel=Math.max(1,Math.min(5,Number(new URLSearchParams(location.search).get("level"))||1));
 const loading=document.getElementById("loading"), assetStatus=document.getElementById("assetStatus");
 
 const IMAGE_PATHS={
@@ -207,7 +209,8 @@ function handleSpace(event){
   sliceFruit();
 }
 window.addEventListener("keydown",handleSpace,{passive:false});
-nextKQ.addEventListener("click",()=>{window.location.href="Keyboard_Quest.html?level="+kqLevel;});\nwindow.addEventListener("resize",resizeCanvas);
+nextKQ.addEventListener("click",()=>{window.location.href="Keyboard_Quest.html?level="+kqLevel;});
+window.addEventListener("resize",resizeCanvas);
 
 async function init(){
   resizeCanvas();prepareSounds();await loadImages();loading.style.display="none";
