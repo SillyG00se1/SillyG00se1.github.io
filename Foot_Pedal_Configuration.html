@@ -25,6 +25,16 @@
 <h2 style="margin-top:16px">HID report support</h2>
 <div id="collections" class="muted">Connect to inspect the device's input, output, and feature reports.</div>
 </section>
+<section class="card" id="tinyusbCard">
+<h2>Keyboard switch interface (TinyUSB / LOLIN-S2-MINI)</h2>
+<div class="row"><button class="primary" id="keyboardTest">Start keyboard switch test</button><button id="keyboardClear">Clear</button></div>
+<div id="keyboardStatus" class="status" role="status">Start the test, then press the switch connected to the TinyUSB interface. This tests keyboard output; it does not reprogram the interface.</div>
+<div class="grid" style="margin-top:10px">
+<div class="info"><div class="label">Last key detected</div><div class="value" id="keyboardKey">—</div></div>
+<div class="info"><div class="label">Switch test activity</div><div class="value" id="keyboardCount">0 presses</div></div>
+</div>
+<p class="small muted">Current firmware maps GPIO 1 to Space and GPIO 2 to keypad Enter. The browser cannot distinguish this interface from other keyboards or change its firmware assignments.</p>
+</section>
 <section class="card">
 <h2>Pedal input test</h2>
 <div class="row"><button class="primary" id="inputTest" disabled>Start pedal input test</button><button id="clearInput" disabled>Clear captured reports</button><span id="inputCount" class="muted">0 reports captured</span></div>
