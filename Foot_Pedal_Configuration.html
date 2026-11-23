@@ -117,7 +117,7 @@ function waitSerial(test,timeout=2500){
 async function serialCommand(command,test){
  if(!serialWriter)throw new Error("Connect to the switch interface first.");
  const response=waitSerial(test);
- await serialWriter.write(new TextEncoder().encode(command+"\\n"));
+ await serialWriter.write(new TextEncoder().encode(command+"\n"));
  log("SERIAL TX "+command);
  return await response;
 }
