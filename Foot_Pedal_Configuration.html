@@ -33,7 +33,17 @@
 <div class="info"><div class="label">Last key detected</div><div class="value" id="keyboardKey">—</div></div>
 <div class="info"><div class="label">Switch test activity</div><div class="value" id="keyboardCount">0 presses</div></div>
 </div>
-<p class="small muted">Current firmware maps GPIO 1 to Space and GPIO 2 to keypad Enter. The browser cannot distinguish this interface from other keyboards or change its firmware assignments.</p>
+<div class="info" style="margin-top:12px">
+<strong>Reprogram switch outputs</strong>
+<div class="row"><button class="primary" id="serialConnect">Connect to switch interface</button><button id="serialRead" disabled>Read saved settings</button></div>
+<div id="serialStatus" class="status" role="status">Connect the LOLIN-S2-MINI to this computer with USB, then connect here to configure its outputs.</div>
+<div class="grid" style="margin-top:10px">
+<div><label>Switch port 1 / GPIO 1<br><select id="tinyKey1" disabled></select></label><label>Action<br><select id="tinyMode1" disabled><option value="1">Press once</option><option value="2">Hold while pressed</option></select></label></div>
+<div><label>Switch port 2 / GPIO 2<br><select id="tinyKey2" disabled></select></label><label>Action<br><select id="tinyMode2" disabled><option value="1">Press once</option><option value="2">Hold while pressed</option></select></label></div>
+</div>
+<div class="row"><button class="primary" id="serialSave" disabled>Save assignments to interface</button></div>
+</div>
+<p class="small muted">Settings are stored on the board and remain after it is unplugged. The switch test above checks the keyboard output; this serial connection changes the board's firmware settings.</p>
 </section>
 <section class="card">
 <h2>Pedal input test</h2>
@@ -67,14 +77,87 @@
 "use strict";
 const $ = id => document.getElementById(id);
 const HID_KEYS = [
- ["Space",44],["Enter",40],["Delete",76],
+ ["Space",44],["Enter",40],["Delete",76],["Left Ctrl",224],["Left Shift",225],["Left Alt",226],["Left Meta",227],["Right Ctrl",228],["Right Shift",229],["Right Alt",230],["Right Meta",231],
  ["a",4],["b",5],["c",6],["d",7],["e",8],["f",9],["g",10],["h",11],["i",12],["j",13],["k",14],["l",15],["m",16],["n",17],["o",18],["p",19],["q",20],["r",21],["s",22],["t",23],["u",24],["v",25],["w",26],["x",27],["y",28],["z",29],
  ["1",30],["2",31],["3",32],["4",33],["5",34],["6",35],["7",36],["8",37],["9",38],["0",39],
  ["Escape",41],["Backspace",42],["Tab",43],["-",45],["=",46],["[",47],["]",48],["\\",49],[";",51],["'",52],["`",53],[",",54],[".",55],["/",56],["Caps Lock",57],
  ["F1",58],["F2",59],["F3",60],["F4",61],["F5",62],["F6",63],["F7",64],["F8",65],["F9",66],["F10",67],["F11",68],["F12",69],
- ["Print Screen",70],["Scroll Lock",71],["Pause",72],["Insert",73],["Home",74],["Page Up",75],["End",77],["Page Down",78],["Right Arrow",79],["Left Arrow",80],["Down Arrow",81],["Up Arrow",82]
+ ["Print Screen",70],["Scroll Lock",71],["Pause",72],["Insert",73],["Home",74],["Page Up",75],["End",77],["Page Down",78],["Right Arrow",79],["Left Arrow",80],["Down Arrow",81],["Up Arrow",82],["Num Lock",83],["Keypad /",84],["Keypad *",85],["Keypad -",86],["Keypad +",87],["Keypad Enter",88],["Keypad 1",89],["Keypad 2",90],["Keypad 3",91],["Keypad 4",92],["Keypad 5",93],["Keypad 6",94],["Keypad 7",95],["Keypad 8",96],["Keypad 9",97],["Keypad 0",98],["Keypad .",99],["Application/Menu",101]
 ];
 for (const [label, usage] of HID_KEYS) $("key").add(new Option(label, String(usage)));
+for (const id of ["tinyKey1","tinyKey2"]) for (const [label,usage] of HID_KEYS) $(id).add(new Option(label,String(usage)));
+let serialPort=null, serialReader=null, serialWriter=null, serialBuffer="", serialWaiters=[];
+function serialLine(line){
+ line=line.trim(); if(!line)return; log("SERIAL RX "+line);
+ const i=serialWaiters.findIndex(w=>w.test(line));
+ if(i>=0){const w=serialWaiters.splice(i,1)[0];w.resolve(line);}
+}
+async function serialReadLoop(){
+ const decoder=new TextDecoder();
+ try{
+  while(serialPort && serialPort.readable){
+   serialReader=serialPort.readable.getReader();
+   try{
+    while(true){
+     const {value,done}=await serialReader.read(); if(done)break;
+     serialBuffer+=decoder.decode(value,{stream:true});
+     let nl; while((nl=serialBuffer.indexOf("\n"))>=0){const line=serialBuffer.slice(0,nl);serialBuffer=serialBuffer.slice(nl+1);serialLine(line);}
+    }
+   }finally{serialReader.releaseLock();serialReader=null;}
+   break;
+  }
+ }catch(e){$("serialStatus").textContent="Serial connection ended: "+e.message;}
+}
+function waitSerial(test,timeout=2500){
+ return new Promise((resolve,reject)=>{
+  const entry={test,resolve};serialWaiters.push(entry);
+  setTimeout(()=>{const i=serialWaiters.indexOf(entry);if(i>=0){serialWaiters.splice(i,1);reject(new Error("No response from switch interface."));}},timeout);
+ });
+}
+async function serialCommand(command,test){
+ if(!serialWriter)throw new Error("Connect to the switch interface first.");
+ const response=waitSerial(test);
+ await serialWriter.write(new TextEncoder().encode(command+"\\n"));
+ log("SERIAL TX "+command);
+ return await response;
+}
+function setSerialControls(connected){
+ ["tinyKey1","tinyKey2","tinyMode1","tinyMode2","serialRead","serialSave"].forEach(id=>$(id).disabled=!connected);
+ $("serialConnect").textContent=connected?"Switch interface connected":"Connect to switch interface";
+}
+async function readTinySettings(){
+ const line=await serialCommand("GET",s=>s.startsWith("CFG,"));
+ const p=line.split(",");
+ if(p.length!==5)throw new Error("Unrecognized settings reply: "+line);
+ $("tinyKey1").value=p[1];$("tinyMode1").value=p[2];$("tinyKey2").value=p[3];$("tinyMode2").value=p[4];
+ $("serialStatus").textContent="Settings read from the board.";
+}
+$("serialConnect").addEventListener("click",async()=>{
+ if(!("serial" in navigator)){ $("serialStatus").textContent="Web Serial is unavailable. Use current Chrome or Edge on HTTPS.";return;}
+ try{
+  serialPort=await navigator.serial.requestPort({filters:[{usbVendorId:0x303A}]});
+  await serialPort.open({baudRate:115200});
+  serialWriter=serialPort.writable.getWriter();
+  setSerialControls(true); serialReadLoop();
+  $("serialStatus").textContent="Connected. Reading saved assignments…";
+  await new Promise(r=>setTimeout(r,250));
+  await readTinySettings();
+ }catch(e){$("serialStatus").textContent="Connection failed: "+e.message;log("Serial connection error: "+e.message);setSerialControls(false);try{await serialPort?.close();}catch(_){}serialPort=null;serialWriter=null;}
+});
+$("serialRead").addEventListener("click",async()=>{try{await readTinySettings();}catch(e){$("serialStatus").textContent=e.message;}});
+$("serialSave").addEventListener("click",async()=>{
+ try{
+  const configs=[[1,$("tinyKey1").value,$("tinyMode1").value],[2,$("tinyKey2").value,$("tinyMode2").value]];
+  for(const [port,key,mode] of configs){
+   const line=await serialCommand("SET,"+port+","+key+","+mode,s=>s.startsWith("OK,"+port+",")||s.startsWith("ERR,"));
+   if(line.startsWith("ERR,"))throw new Error(line);
+  }
+  await readTinySettings();
+  $("serialStatus").textContent="Both switch assignments were saved to the board.";
+ }catch(e){$("serialStatus").textContent="Could not save settings: "+e.message;log("Serial save error: "+e.message);}
+});
+window.addEventListener("beforeunload",()=>{try{serialReader?.cancel();serialWriter?.releaseLock();serialPort?.close();}catch(_){}});
+
 let device = null, reportId = 0, reportMethod = "output", canWrite = false, modelName = "", inputQueue = [], waiters = [], busy = false, inputTestActive = false, capturedInputCount = 0;
 const IKKEGOL={vendorId:0x1A86,productId:0xE026}, INFINITY={vendorId:0x05F3,productId:0x00FF};
 function deviceType(d=device){if(!d)return "none";if(d.vendorId===IKKEGOL.vendorId&&d.productId===IKKEGOL.productId)return "ikkegol";if(d.vendorId===INFINITY.vendorId&&d.productId===INFINITY.productId)return "infinity";return "other";}
