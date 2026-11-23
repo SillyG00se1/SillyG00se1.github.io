@@ -135,12 +135,12 @@ async function readTinySettings(){
 $("serialConnect").addEventListener("click",async()=>{
  if(!("serial" in navigator)){ $("serialStatus").textContent="Web Serial is unavailable. Use current Chrome or Edge on HTTPS.";return;}
  try{
-  serialPort=await navigator.serial.requestPort({filters:[{usbVendorId:0x303A}]});
+  serialPort=await navigator.serial.requestPort({filters:[{usbVendorId:0x303A,usbProductId:0x80C2}]});
   await serialPort.open({baudRate:115200});
   serialWriter=serialPort.writable.getWriter();
   setSerialControls(true); serialReadLoop();
   $("serialStatus").textContent="Connected. Reading saved assignments…";
-  await new Promise(r=>setTimeout(r,250));
+  await new Promise(r=>setTimeout(r,700));
   await readTinySettings();
  }catch(e){$("serialStatus").textContent="Connection failed: "+e.message;log("Serial connection error: "+e.message);setSerialControls(false);try{await serialPort?.close();}catch(_){}serialPort=null;serialWriter=null;}
 });
