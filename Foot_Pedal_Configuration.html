@@ -70,6 +70,23 @@ const IKKEGOL={vendorId:0x1A86,productId:0xE026}, INFINITY={vendorId:0x05F3,prod
 function deviceType(d=device){if(!d)return "none";if(d.vendorId===IKKEGOL.vendorId&&d.productId===IKKEGOL.productId)return "ikkegol";if(d.vendorId===INFINITY.vendorId&&d.productId===INFINITY.productId)return "infinity";return "other";}
 function pedalCount(d=device){return deviceType(d)==="ikkegol"?2:3;}
 function updatePedalChoices(){const select=$("pedal"),count=pedalCount();const previous=Number(select.value)||1;select.replaceChildren();const labels=deviceType()==="ikkegol"?["Pedal 1 / Left","Pedal 2 / Right"]:["Pedal 1 / Left","Pedal 2 / Center","Pedal 3 / Right"];for(let n=1;n<=count;n++)select.add(new Option(labels[n-1],String(n)));select.value=String(Math.min(previous,count));}
+let keyboardTestActive=false,keyboardPressCount=0,keyboardLastKey="";
+function keyboardKeyName(event){if(event.code==="Space")return "Space";if(event.code==="Enter"||event.code==="NumpadEnter")return "Enter";return event.key;}
+function keyboardSwitchDown(event){
+ if(!keyboardTestActive)return;
+ if(event.code==="Space"||event.code==="Enter"||event.code==="NumpadEnter"){
+  keyboardLastKey=event.code==="Space"?"Space":"Enter";
+  $("keyboardKey").textContent=keyboardLastKey;
+  $("keyboardStatus").textContent="Detected "+keyboardLastKey+" keydown. Release the switch to complete the press.";
+  if(!event.repeat){keyboardPressCount++;$("keyboardCount").textContent=keyboardPressCount+" presses";}
+ }
+}
+function keyboardSwitchUp(event){
+ if(!keyboardTestActive)return;
+ if(event.code==="Space"||event.code==="Enter"||event.code==="NumpadEnter"){
+  $("keyboardStatus").textContent="Detected "+(event.code==="Space"?"Space":"Enter")+" press and release.";
+ }
+}
 function log(message) {
  const line = "[" + new Date().toLocaleTimeString() + "] " + message;
  $("log").textContent += "\n" + line;
@@ -301,6 +318,15 @@ async function writeAssignment() {
    log("Verification "+(verified?"passed":"not confirmed")+" for pedal "+number+"; requested "+label+".");
  });
 }
+$("keyboardTest").addEventListener("click",()=>{
+ keyboardTestActive=!keyboardTestActive;
+ $("keyboardTest").textContent=keyboardTestActive?"Stop keyboard switch test":"Start keyboard switch test";
+ $("keyboardStatus").textContent=keyboardTestActive?"Test active. Press the switch connected to the TinyUSB interface.":"Test stopped.";
+ if(keyboardTestActive) $("tinyusbCard").tabIndex=0;
+});
+$("keyboardClear").addEventListener("click",()=>{keyboardPressCount=0;keyboardLastKey="";$("keyboardKey").textContent="—";$("keyboardCount").textContent="0 presses";$("keyboardStatus").textContent=keyboardTestActive?"Test active. Press the switch.":"Start the test, then press the switch.";});
+window.addEventListener("keydown",keyboardSwitchDown,true);
+window.addEventListener("keyup",keyboardSwitchUp,true);
 $("connect").addEventListener("click",connect);
 $("disconnect").addEventListener("click",async()=>{
  if(!device) return;
