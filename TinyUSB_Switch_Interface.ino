@@ -28,8 +28,8 @@ struct SwitchConfig {
 };
 
 SwitchConfig config[2] = {
-  { HID_KEY_SPACE, 1 },
-  { HID_KEY_ENTER, 1 }
+  { 0x2C, 1 },
+  { 0x28, 1 }
 };
 
 struct SwitchState {
@@ -124,13 +124,13 @@ void setup() {
   Serial.begin(115200);
   preferences.begin("switchcfg", false);
 
-  config[0].usage = preferences.getUChar("key1", HID_KEY_SPACE);
+  config[0].usage = preferences.getUChar("key1", 0x2C);
   config[0].mode = preferences.getUChar("mode1", 1);
-  config[1].usage = preferences.getUChar("key2", HID_KEY_ENTER);
+  config[1].usage = preferences.getUChar("key2", 0x28);
   config[1].mode = preferences.getUChar("mode2", 1);
 
   for (uint8_t i = 0; i < 2; i++) {
-    if (!validUsage(config[i].usage)) config[i].usage = (i == 0) ? HID_KEY_SPACE : HID_KEY_ENTER;
+    if (!validUsage(config[i].usage)) config[i].usage = (i == 0) ? 0x2C : 0x28;
     if (config[i].mode != 1 && config[i].mode != 2) config[i].mode = 1;
   }
 
